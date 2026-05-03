@@ -1,0 +1,35 @@
+[language-server.tinymist]
+command = "tinymist"
+
+[language-server.tinymist.config]
+exportPdf = "onType"
+outputPath = "$root/target/$dir/$name"
+"preview.background.enabled" = true
+"preview.background.args" = ["--data-plane-host=127.0.0.1:23625", "--invert-colors=never", "--open"]
+
+[[language]]
+name = "typst"
+language-servers = ["tinymist"]
+auto-format = true
+
+# ---------- Java (jdtls) ----------
+[language-server.jdtls]
+command = "jdtls"
+timeout = 120
+
+[language-server.jdtls.config.settings.java.format]
+enabled = true
+
+[language-server.jdtls.config.settings.java.format.settings]
+url = "file:///Users/fabio/.config/helix/java-format.xml"
+profile = "Project"
+
+[[language]]
+name = "java"
+scope = "source.java"
+injection-regex = "java"
+file-types = ["java"]
+roots = ["pom.xml", "build.gradle", "build.gradle.kts", ".git"]
+indent = { tab-width = 4, unit = "    " }
+language-servers = ["jdtls"]
+auto-format = true

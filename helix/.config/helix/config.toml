@@ -1,0 +1,47 @@
+theme = "hex_lavender_dark"
+
+[editor]
+line-number = "absolute"
+text-width = 105
+mouse = false
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+
+
+[editor.soft-wrap]
+enable = true
+max-wrap = 25 # increase value to reduce forced mid-word wrapping
+max-indent-retain = 0
+wrap-indicator = ""  # set wrap-indicator to "" to hide it
+wrap-at-text-width = true
+
+[keys.normal]
+k = "move_char_left"
+l = "move_line_down"
+"ç" = "move_char_right"
+o = "move_line_up"
+
+h = "open_below" # nova linha a baixo do cursor, antigo 'o'
+j = "open_above" # nova linha a cima do cursor, antigo 'O' (shift + o)
+
+f = [":sh ./gradlew spotlessApply > /dev/null 2>&1", ":reload-all"]
+C-g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
+C-f = [":new", ":insert-output yazi", ":buffer-close!", ":redraw"]
+C-r = [":sh ghostty -e fish -c \"cd '$(pwd)'; correr; echo ''; echo 'Pressiona Enter para fechar...'; read\" &"]
+C-t = ":lsp-workspace-command tinymist.startDefaultPreview"
+
+
+[keys.select]
+k = "move_char_left"
+l = "move_line_down"
+"ç" = "move_char_right"
+o = "move_line_up"
+
+[editor.lsp]
+display-inlay-hints = true

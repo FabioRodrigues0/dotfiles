@@ -1,0 +1,4 @@
+# This file contains fish universal variable definitions.
+# VERSION: 3.0
+SETUVAR __fish_initialized:4300
+SETUVAR fish_user_paths:/Users/fabio/\x2elocal/bin\x1e/Applications/Ghostty\x2eapp/Contents/MacOS\x1e/Library/TeX/texbin
