@@ -1,0 +1,34 @@
+gui:
+  # Paleta hex_lavender (do teu tema do Helix)
+  theme:
+    activeBorderColor:
+      - '#8e80de'   # t7 - lavender (igual ao buffer ativo no helix)
+      - bold
+    inactiveBorderColor:
+      - '#61586f'   # t4
+    searchingActiveBorderColor:
+      - '#0affa9'   # highlight_two
+      - bold
+    optionsTextColor:
+      - '#29bbff'   # highlight_three
+    selectedLineBgColor:
+      - '#290019'   # selection
+    selectedRangeBgColor:
+      - '#290019'
+    cherryPickedCommitBgColor:
+      - '#290019'
+    cherryPickedCommitFgColor:
+      - '#8e80de'   # t7
+    markedBaseCommitBgColor:
+      - '#290019'
+    markedBaseCommitFgColor:
+      - '#ff2e5f'   # highlight
+    unstagedChangesColor:
+      - '#ff2e5f'   # highlight (vermelho/rosa)
+    defaultFgColor:
+      - '#bcb6ba'   # t9 - texto principal
+
+  authorColors:
+    '*': '#a0c7cf'  # t11
+
+  nerdFontsVersion: '3'
