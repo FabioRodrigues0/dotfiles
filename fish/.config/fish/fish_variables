@@ -48,4 +48,4 @@ SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3d2b3444
 SETUVAR fish_pager_color_selected_completion:bcb6ba\x1e\x2d\x2dbold
 SETUVAR fish_pager_color_selected_description:878480\x1e\x2d\x2ditalics
 SETUVAR fish_pager_color_selected_prefix:29bbff\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
-SETUVAR fish_user_paths:/home/fabio/\x2elocal/bin\x1e/Users/fabio/\x2elocal/bin\x1e/Applications/Ghostty\x2eapp/Contents/MacOS\x1e/Library/TeX/texbin
+SETUVAR fish_user_paths:/home/fabio/\x2ecargo/bin\x1e/home/fabio/\x2elocal/bin\x1e/Users/fabio/\x2elocal/bin\x1e/Applications/Ghostty\x2eapp/Contents/MacOS\x1e/Library/TeX/texbin
