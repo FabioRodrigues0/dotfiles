@@ -21,7 +21,7 @@ timeout = 120
 enabled = true
 
 [language-server.jdtls.config.settings.java.format.settings]
-url = "file:///Users/fabio/.config/helix/java-format.xml"
+url = "~/.config/helix/java-format.xml"
 profile = "Project"
 
 [[language]]
