@@ -12,6 +12,7 @@ function correr --description "Deteta o projeto e corre-o"
         echo "  pyproject.toml                   →  python -m <módulo>"
         echo "  main.py                          →  python main.py"
         echo "  Makefile                         →  make run"
+        echo "  main.c / *.c (único)             →  gcc + ./a.out"
         return 0
     end
 
@@ -71,6 +72,21 @@ function correr --description "Deteta o projeto e corre-o"
             echo "Makefile detetado em $dir"
             cd "$dir"
             make run
+            return $status
+        end
+
+        # C — main.c ou ficheiro .c único
+        if test -f "$dir/main.c"
+            echo "Ficheiro C detetado em $dir"
+            cd "$dir"
+            gcc -o a.out main.c && ./a.out
+            return $status
+        end
+        set c_files (command find "$dir" -maxdepth 1 -name "*.c" -type f 2>/dev/null)
+        if test (count $c_files) -eq 1
+            echo "Ficheiro C detetado: "(basename $c_files[1])
+            cd "$dir"
+            gcc -o a.out $c_files[1] && ./a.out
             return $status
         end
 

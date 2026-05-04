@@ -39,6 +39,9 @@ BRICKS_VERSION="latest.release"
 SQLITE_VERSION="3.45.1.0"
 BRICKS_JAVA_VERSION="21"
 BRICKS_JAVAFX_VERSION="21.0.5"
+MAVEN_JUNIT_VERSION="5.10.2"
+EXEC_PLUGIN_VERSION="3.3.0"
+SUREFIRE_PLUGIN_VERSION="3.2.5"
 
 # ── Flags globais ─────────────────────────────────────────────────────────────
 NOME_PROJETO=""
@@ -50,6 +53,7 @@ FLAG_JAVAFX_MEDIA=false
 FLAG_JAVAFX_FULL=false
 FLAG_NO_MD=false
 FLAG_BRICKS=false
+FLAG_MAVEN=false
 
 ################################################################################
 # Utilidades
@@ -105,7 +109,8 @@ PARÂMETROS:
                     usa o nome do projeto se omitido
 
 FLAGS OPCIONAIS:
-    --junit             Adicionar JUnit ${JUNIT_VERSION}
+    --junit             Adicionar JUnit (Gradle: ${JUNIT_VERSION} / Maven: ${MAVEN_JUNIT_VERSION})
+    --maven             Criar projeto Maven simples (incompatível com --javafx, --bricks)
     --javafx            Adicionar JavaFX ${JAVAFX_VERSION} base (controls + fxml)
     --javafx-web        Adicionar JavaFX Web (requer --javafx)
     --javafx-media      Adicionar JavaFX Media (requer --javafx)
@@ -125,6 +130,8 @@ EXEMPLOS:
     novo java proj_01 "Projeto 1 - CRUD" --bricks
     novo java proj_02 "Projeto 2 - CRUD + Testes" --bricks --junit
     novo java projeto_fis "Física - Lab" --no-md
+    novo java ex_01 "Exercício 1" --maven
+    novo java ex_02 "Exercício 2 - Testes" --maven --junit
 
 CONFIGURAÇÕES:
     • Java ${JAVA_VERSION} (Bricks usa Java ${BRICKS_JAVA_VERSION})
@@ -176,6 +183,7 @@ parse_arguments() {
                              FLAG_JAVAFX=true
                              ;;
             --bricks)        FLAG_BRICKS=true ;;
+            --maven)         FLAG_MAVEN=true ;;
             --no-md)         FLAG_NO_MD=true ;;
             --help|-h)       show_help; exit 0 ;;
             *)
@@ -1128,20 +1136,270 @@ show_success_message() {
 }
 
 ################################################################################
+# MAVEN — Flow completo
+################################################################################
+
+validate_maven_environment() {
+    if ! command -v mvn &>/dev/null; then
+        print_error "Maven não está instalado!"
+        echo ""
+        echo "Instalar com:"
+        case "$(uname -s)" in
+            Darwin*) echo "  brew install maven   # ou: mise use -g maven@latest" ;;
+            *)       echo "  mise use -g maven@latest" ;;
+        esac
+        exit 1
+    fi
+
+    if [ "$FLAG_BRICKS" = true ] || [ "$FLAG_JAVAFX" = true ] || \
+       [ "$FLAG_JAVAFX_WEB" = true ] || [ "$FLAG_JAVAFX_MEDIA" = true ] || \
+       [ "$FLAG_JAVAFX_FULL" = true ]; then
+        print_error "--maven é incompatível com --bricks e --javafx"
+        exit 1
+    fi
+
+    if [ -d "$NOME_PROJETO" ]; then
+        print_error "Diretório '$NOME_PROJETO' já existe!"
+        exit 1
+    fi
+}
+
+create_maven_structure() {
+    print_header "Criando Estrutura Maven"
+
+    mkdir -p "$NOME_PROJETO"
+    cd "$NOME_PROJETO"
+    mkdir -p src/main/java
+    [ "$FLAG_JUNIT" = true ] && mkdir -p src/test/java
+
+    cat > src/main/java/App.java << 'EOF'
+/**
+ * Classe principal da aplicação.
+ */
+public class App {
+
+    /**
+     * Ponto de entrada da aplicação.
+     *
+     * @param args argumentos da linha de comandos
+     */
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+EOF
+    print_info "App.java criado"
+}
+
+configure_pom_xml() {
+    print_header "Configurando pom.xml"
+
+    cat > pom.xml << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>pt.project</groupId>
+    <artifactId>${NOME_PROJETO}</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>${JAVA_VERSION}</maven.compiler.source>
+        <maven.compiler.target>${JAVA_VERSION}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+EOF
+
+    if [ "$FLAG_JUNIT" = true ]; then
+        cat >> pom.xml << EOF
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${MAVEN_JUNIT_VERSION}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+EOF
+        print_info "JUnit ${MAVEN_JUNIT_VERSION} adicionado"
+    fi
+
+    cat >> pom.xml << EOF
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${EXEC_PLUGIN_VERSION}</version>
+                <configuration>
+                    <mainClass>App</mainClass>
+                </configuration>
+            </plugin>
+EOF
+
+    if [ "$FLAG_JUNIT" = true ]; then
+        cat >> pom.xml << EOF
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${SUREFIRE_PLUGIN_VERSION}</version>
+            </plugin>
+EOF
+    fi
+
+    cat >> pom.xml << 'EOF'
+        </plugins>
+    </build>
+</project>
+EOF
+    print_success "pom.xml criado"
+}
+
+create_maven_gitignore() {
+    local ENTRIES=("target/" ".idea/" ".vscode/" "*.class" "*.log" ".zed/")
+    for entry in "${ENTRIES[@]}"; do
+        if ! grep -q "^${entry}$" .gitignore 2>/dev/null; then
+            echo "$entry" >> .gitignore
+        fi
+    done
+    print_success ".gitignore criado"
+}
+
+create_maven_markdown() {
+    if [ "$FLAG_NO_MD" = true ]; then
+        print_info "Ficheiro .md não criado (--no-md)"
+        return
+    fi
+
+    local DATA_ATUAL
+    DATA_ATUAL=$(date +%d-%m-%Y)
+
+    cat > "${NOME_PROJETO}.md" << EOF
+---
+tags:
+  - contexto/PC
+  - tipo/trabalho_pratico
+  - conceito/java
+  - area/programacao
+data: ${DATA_ATUAL}
+disciplina:
+  - PC
+---
+# ${TITULO}
+
+## Descrição
+
+${TITULO}
+
+## Estrutura do Projeto
+
+- \`src/main/java/App.java\` - Classe principal
+EOF
+
+    [ "$FLAG_JUNIT" = true ] && echo "- \`src/test/java/\` - Testes unitários (JUnit ${MAVEN_JUNIT_VERSION})" >> "${NOME_PROJETO}.md"
+
+    cat >> "${NOME_PROJETO}.md" << EOF
+- \`pom.xml\` - Configuração Maven
+
+## Como executar
+
+\`\`\`bash
+# Compilar e executar
+mvn compile exec:java
+EOF
+
+    [ "$FLAG_JUNIT" = true ] && echo -e "\n# Testes\nmvn test" >> "${NOME_PROJETO}.md"
+
+    cat >> "${NOME_PROJETO}.md" << EOF
+
+# Limpar build
+mvn clean
+\`\`\`
+
+## Dependências
+
+- **Java ${JAVA_VERSION}** - Versão do JDK
+EOF
+
+    [ "$FLAG_JUNIT" = true ] && echo "- **JUnit ${MAVEN_JUNIT_VERSION}** - Testes unitários" >> "${NOME_PROJETO}.md"
+
+    print_success "${NOME_PROJETO}.md criado"
+}
+
+validate_maven_build() {
+    print_header "Validando Projeto Maven"
+    print_info "Executando compilação inicial..."
+    if mvn compile -q; then
+        print_success "Compilação executada com sucesso"
+    else
+        print_warning "Compilação falhou — projeto criado mas pode ter erros"
+        print_info "Execute 'mvn compile' para ver os erros"
+    fi
+}
+
+show_maven_success_message() {
+    local CURRENT_PATH
+    CURRENT_PATH=$(pwd)
+
+    echo ""
+    print_header "PROJETO MAVEN CRIADO COM SUCESSO!"
+    echo ""
+    echo -e "${GREEN}📁 Projeto:${NC}     ${NOME_PROJETO}"
+    echo -e "${GREEN}📍 Localização:${NC} ${CURRENT_PATH}"
+    [ "$FLAG_NO_MD" = false ] && echo -e "${GREEN}📄 Docs:${NC}        ${NOME_PROJETO}.md"
+    echo ""
+    echo -e "${CYAN}🔧 Configurações:${NC}"
+    echo "   • Java ${JAVA_VERSION} | Maven | Classe principal: App.java"
+    [ "$FLAG_JUNIT" = true ] && echo -e "   ${GREEN}✓${NC} JUnit ${MAVEN_JUNIT_VERSION}"
+    echo ""
+    echo -e "${YELLOW}📝 Próximos passos:${NC}"
+    echo ""
+    echo "   1. cd ${NOME_PROJETO}"
+    echo "   2. zed .                   # Abrir no Zed"
+    echo "   3. mvn compile exec:java   # Executar"
+    echo "      (ou: correr)"
+    echo ""
+    echo -e "${BLUE}💡 Comandos úteis:${NC}"
+    echo ""
+    echo "   mvn compile exec:java   # Compilar e executar"
+    [ "$FLAG_JUNIT" = true ] && echo "   mvn test                # Executar testes"
+    echo "   mvn clean               # Limpar build"
+    echo ""
+}
+
+run_maven_flow() {
+    validate_maven_environment
+    create_maven_structure
+    configure_pom_xml
+    create_maven_gitignore
+    create_maven_markdown
+    validate_maven_build
+    show_maven_success_message
+}
+
+################################################################################
 # MAIN
 ################################################################################
 
 main() {
     parse_arguments "$@"
-    validate_environment
-    create_project_structure
-    configure_build_gradle
-    create_config_files
-    create_markdown_file
-    adjust_gitignore
-    cleanup_tests
-    validate_build
-    show_success_message
+    if [ "$FLAG_MAVEN" = true ]; then
+        run_maven_flow
+    else
+        validate_environment
+        create_project_structure
+        configure_build_gradle
+        create_config_files
+        create_markdown_file
+        adjust_gitignore
+        cleanup_tests
+        validate_build
+        show_success_message
+    fi
 }
 
 main "$@"
