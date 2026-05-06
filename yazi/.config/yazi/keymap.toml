@@ -1,0 +1,9 @@
+[[mgr.prepend_keymap]]
+on   = "l"
+run  = "plugin smart-enter"
+desc = "Enter directory or open file in helix"
+
+[[mgr.prepend_keymap]]
+on   = "<Enter>"
+run  = "shell 'hx -- \"$1\"' --block"
+desc = "Open in helix (file or directory as project)"

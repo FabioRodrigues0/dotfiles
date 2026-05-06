@@ -1,0 +1,13 @@
+[opener]
+helix = [
+  { run = 'hx "$@"', desc = "Helix", block = true },
+]
+
+[open]
+rules = [
+  { name = "*/", use = "helix" },
+  { mime = "text/*", use = "helix" },
+  { mime = "application/json", use = "helix" },
+  { mime = "application/toml", use = "helix" },
+  { mime = "application/xml", use = "helix" },
+]
