@@ -2,8 +2,9 @@ theme = "hex_lavender_dark"
 
 [editor]
 line-number = "absolute"
-text-width = 105
+text-width = 130
 mouse = false
+true-color = true
 
 [editor.cursor-shape]
 insert = "bar"
@@ -13,6 +14,8 @@ select = "underline"
 [editor.file-picker]
 hidden = false
 
+[editor.indent-guides]
+render = true
 
 [editor.soft-wrap]
 enable = true
@@ -32,10 +35,13 @@ j = "open_above" # nova linha a cima do cursor, antigo 'O' (shift + o)
 
 f = [":sh ./gradlew spotlessApply > /dev/null 2>&1", ":reload-all"]
 C-g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
-C-f = [":new", ":insert-output yazi", ":buffer-close!", ":redraw"]
+C-f = [":new", ":insert-output fish -c 'yazi --chooser-file /tmp/hx-yazi-chosen'", ":buffer-close!", ":redraw", ":open %sh{cat /tmp/hx-yazi-chosen 2>/dev/null}"]
 C-r = [":sh ghostty -e fish -c \"cd '$(pwd)'; correr; echo ''; echo 'Pressiona Enter para fechar...'; read\" &"]
 C-t = ":lsp-workspace-command tinymist.startDefaultPreview"
 
+
+[keys.normal.space]
+z = ":sh zed %val{filename} &"
 
 [keys.select]
 k = "move_char_left"

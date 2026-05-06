@@ -4,8 +4,8 @@ command = "tinymist"
 [language-server.tinymist.config]
 exportPdf = "onType"
 outputPath = "$root/target/$dir/$name"
-"preview.background.enabled" = true
-"preview.background.args" = ["--data-plane-host=127.0.0.1:23625", "--invert-colors=never", "--open"]
+preview.background.enabled = true
+preview.background.args = ["--data-plane-host=127.0.0.1:23625", "--invert-colors=never", "--open"]
 
 [[language]]
 name = "typst"
