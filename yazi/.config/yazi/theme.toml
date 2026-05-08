@@ -113,7 +113,7 @@ inactive = { fg = "#61586f" }
 
 [filetype]
 rules = [
-  { name = "*/",                    fg = "#a0c7cf" },
+  { url = "*/",                    fg = "#a0c7cf" },
   { mime = "image/*",               fg = "#8e80de" },
   { mime = "video/*",               fg = "#8e80de" },
   { mime = "audio/*",               fg = "#8e80de" },
@@ -122,10 +122,10 @@ rules = [
   { mime = "application/zip",       fg = "#29bbff" },
   { mime = "application/x-tar",     fg = "#29bbff" },
   { mime = "application/gzip",      fg = "#29bbff" },
-  { name = "*.md",                  fg = "#bcb6ba" },
-  { name = "*.toml",                fg = "#9db2b8" },
-  { name = "*.json",                fg = "#9db2b8" },
-  { name = "*.yaml",                fg = "#9db2b8" },
-  { name = "*.yml",                 fg = "#9db2b8" },
-  { name = "*",                     fg = "#bcb6ba" },
+  { mime = "*.md",                  fg = "#bcb6ba" },
+  { mime = "*.toml",                fg = "#9db2b8" },
+  { mime = "*.json",                fg = "#9db2b8" },
+  { mime = "*.yaml",                fg = "#9db2b8" },
+  { mime = "*.yml",                 fg = "#9db2b8" },
+  { url = "*",                     fg = "#bcb6ba" },
 ]

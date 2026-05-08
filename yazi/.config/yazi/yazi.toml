@@ -5,7 +5,7 @@ helix = [
 
 [open]
 rules = [
-  { name = "*/", use = "helix" },
+  { mime = "*/", use = "helix" },
   { mime = "text/*", use = "helix" },
   { mime = "application/json", use = "helix" },
   { mime = "application/toml", use = "helix" },
