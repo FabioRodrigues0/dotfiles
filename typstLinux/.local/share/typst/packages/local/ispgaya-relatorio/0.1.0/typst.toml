@@ -1,0 +1,7 @@
+[package]
+name        = "ispgaya-relatorio"
+version     = "0.1.0"
+entrypoint  = "lib.typ"
+authors     = ["Fábio Rodrigues"]
+description = "Template para relatórios académicos do ISPGAYA (guião 2025)"
+compiler    = "0.11.0"
