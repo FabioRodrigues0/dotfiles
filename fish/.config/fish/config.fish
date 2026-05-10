@@ -11,3 +11,4 @@ if test (uname) = Darwin
     fish_add_path /Applications/Ghostty.app/Contents/MacOS
 end
 alias emacs='emacs-pgtk --init-directory ~/.config/emacs'
+alias doom='~/.config/emacs/bin/doom'
