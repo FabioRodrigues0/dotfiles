@@ -67,3 +67,9 @@
 (package! websocket)
 (package! typst-preview
   :recipe (:host github :repo "havarddj/typst-preview.el"))
+
+;; No teu ~/.doom.d/packages.el
+
+(package! olivetti)            ; Para centralizar o texto como um card
+(package! org-sidebar)         ; Para a hierarquia lateral (Aula -> Ficheiros)
+(package! visual-fill-column)  ; Auxiliar para manter as margens fixas
