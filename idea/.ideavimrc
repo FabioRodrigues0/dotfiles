@@ -1,0 +1,106 @@
+" .ideavimrc is a configuration file for IdeaVim plugin. It uses
+"   the same commands as the original .vimrc configuration.
+" You can find a list of commands here: https://jb.gg/h38q75
+" Find more examples here: https://jb.gg/share-ideavimrc
+
+""" ~/.ideavimrc
+
+""" Opções gerais
+set scrolloff=8
+set number
+set relativenumber
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+set showcmd
+set showmode
+set clipboard=unnamedplus,ideaput
+set ideajoin
+set ideamarks
+
+""" Timeout para keybinds
+set timeout
+set timeoutlen=500
+
+""" Remapeamento KLÇO (igual ao Emacs e Helix)
+" Movimento
+nnoremap k h
+nnoremap l j
+nnoremap ç l
+nnoremap o k
+vnoremap k h
+vnoremap l j
+vnoremap ç l
+vnoremap o k
+
+nnoremap h o
+nnoremap j O
+
+""" Leader key
+let mapleader = <space>
+
+""" Ações do IntelliJ via <Action>
+" Ficheiros e projeto
+map <leader>ff <Action>(SearchEverywhere)
+map <leader>fr <Action>(RecentFiles)
+map <leader>fp <Action>(FindInPath)
+
+" Code
+map <leader>cr <Action>(RenameElement)
+map <leader>ca <Action>(ShowIntentionActions)
+map <leader>cd <Action>(GotoDeclaration)
+map <leader>ci <Action>(GotoImplementation)
+map <leader>cu <Action>(FindUsages)
+map <leader>ce <Action>(ShowErrorDescription)
+map gcc <Action>(CommentByLineComment)
+vmap gc <Action>(CommentByLineComment)
+
+" Refactor
+map <leader>rm <Action>(ExtractMethod)
+map <leader>rv <Action>(IntroduceVariable)
+
+" Build/Run (equivalente ao C-r do Helix)
+map <leader>rr <Action>(Run)
+map <leader>rb <Action>(Build)
+map <leader>rd <Action>(Debug)
+
+" Git (equivalente ao C-g do Helix)
+map <leader>gg <Action>(ActivateVersionControlToolWindow)
+map <leader>gc <Action>(CheckinProject)
+
+" Janelas
+map <leader>wv <Action>(SplitVertically)
+map <leader>ws <Action>(SplitHorizontally)
+map <leader>wc <Action>(CloseContent)
+map <C-h> <Action>(PreviousTab)
+map <C-l> <Action>(NextTab)
+
+""" Plugins IdeaVim (descomenta se instalares)
+set surround
+" set commentary
+" set argtextobj
+" set easymotion
+
+" Don't use Ex mode, use Q for formatting.
+map Q gq
+
+" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
+Plug 'machakann/vim-highlightedyank'
+Plug 'vim-scripts/argtextobj.vim'
+set which-key
+
+" Commentary plugin
+Plug 'tpope/vim-commentary'
+
+
+"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+"" Map \r to the Reformat Code action
+"map \r <Action>(ReformatCode)
+
+"" Map <leader>d to start debug
+"map <leader>d <Action>(Debug)
+"" Map \b to toggle the breakpoint on the current line
+"map \b <Action>(ToggleLineBreakpoint)
+
+
