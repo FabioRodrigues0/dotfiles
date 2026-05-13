@@ -58,18 +58,11 @@
 ;;(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
 ;; and `package-pinned-packages`. Most users will not need or want to do this.
-(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-(package-initialize)
 
-(package! helix)
 (package! typst-ts-mode
   :recipe (:host codeberg :repo "meow_king/typst-ts-mode"))
 (package! websocket)
 (package! typst-preview
   :recipe (:host github :repo "havarddj/typst-preview.el"))
-
-;; No teu ~/.doom.d/packages.el
-
-(package! olivetti)            ; Para centralizar o texto como um card
-(package! org-sidebar)         ; Para a hierarquia lateral (Aula -> Ficheiros)
-(package! visual-fill-column)  ; Auxiliar para manter as margens fixas
+(package! org-modern)
+(package! org-super-agenda)
