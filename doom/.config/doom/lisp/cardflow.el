@@ -10,6 +10,8 @@
   (defvar meu/org-card-window nil)
   (defvar meu/org-current-marker nil)
   (defvar meu/org-current-pos nil)
+  (defvar meu/org-sidebar-needs-render nil)
+  (defvar meu/org-cardflow-save-guards-installed nil)
 
   ;; -----------------------------
   ;; Sidebar mode
@@ -17,15 +19,120 @@
 
   (defvar meu/org-sidebar-mode-map (make-sparse-keymap))
 
-  (define-derived-mode meu/org-sidebar-mode special-mode "OrgSidebar"
+  (defun meu/org-cardflow-virtual-buffer-p (&optional buffer)
+    "Retorna non-nil se BUFFER for um buffer virtual do Cardflow."
+    (member (buffer-name (or buffer (current-buffer)))
+            (list meu/org-sidebar-buffer meu/org-card-buffer)))
+
+  (defun meu/org-cardflow-refuse-virtual-save (&rest _args)
+    "Impede que buffers virtuais do Cardflow sejam gravados em disco."
+    (user-error "Buffer virtual do Cardflow: guarda saindo do card, não com :save nesta janela"))
+
+  (defun meu/org-cardflow-save-guard (orig &rest args)
+    "Bloqueia ORIG se o buffer atual for virtual do Cardflow."
+    (if (meu/org-cardflow-virtual-buffer-p)
+        (meu/org-cardflow-refuse-virtual-save)
+      (apply orig args)))
+
+  (unless meu/org-cardflow-save-guards-installed
+    (advice-add 'save-buffer :around #'meu/org-cardflow-save-guard)
+    (advice-add 'write-file :around #'meu/org-cardflow-save-guard)
+    (advice-add 'write-region :around #'meu/org-cardflow-save-guard)
+    (setq meu/org-cardflow-save-guards-installed t))
+
+  (define-derived-mode meu/org-sidebar-mode org-mode "OrgSidebar"
     "Sidebar virtual para navegar headings Org."
     (setq buffer-read-only t)
+    (setq-local buffer-file-name nil)
+    (setq-local buffer-offer-save nil)
+    (add-hook 'before-save-hook #'meu/org-cardflow-refuse-virtual-save nil t)
+    (add-hook 'write-contents-functions #'meu/org-cardflow-refuse-virtual-save nil t)
+    (add-hook 'write-file-functions #'meu/org-cardflow-refuse-virtual-save nil t)
+    (add-hook 'write-region-annotate-functions
+              #'meu/org-cardflow-refuse-virtual-save
+              nil
+              t)
     (setq-local cursor-type nil)
     (setq-local truncate-lines nil)
     (setq-local word-wrap t)
     (display-line-numbers-mode -1)
+    (when (bound-and-true-p org-indent-mode)
+      (org-indent-mode -1))
     (visual-line-mode 1)
     (evil-normalize-keymaps))
+
+  (defun meu/org-cardflow-enable-org-rendering ()
+    "Ativa a renderização base do Org no buffer atual."
+    (unless (derived-mode-p 'org-mode)
+      (org-mode))
+    (font-lock-mode 1)
+    (when (bound-and-true-p flycheck-mode)
+      (flycheck-mode -1))
+    (when (bound-and-true-p flymake-mode)
+      (flymake-mode -1))
+    (when (fboundp 'org-modern-mode)
+      (org-modern-mode 1))
+    (when (fboundp 'org-fold-hide-drawer-all)
+      (org-fold-hide-drawer-all))
+    (unless (bound-and-true-p meu/org-cardflow-fontified)
+      (setq-local meu/org-cardflow-fontified t)
+      (font-lock-flush (point-min) (point-max))
+      (font-lock-ensure (point-min) (point-max)))
+    (when (fboundp 'meu/org-typst-preview-buffer)
+      (condition-case err
+          (let ((meu/org-typst-preview-silent-errors
+                 (string= (buffer-name) meu/org-sidebar-buffer)))
+            (meu/org-typst-preview-buffer))
+        (error
+         (message "Cardflow Typst preview ignorado: %s" err)))))
+
+  (defun meu/org-sidebar-indent-prefix (level &optional content)
+    "Retorna indentação visual para LEVEL.
+CONTENT indica que a linha é conteúdo do node, não heading."
+    (let ((parts nil))
+      (dotimes (_ (max 0 (if content level (1- level))))
+        (push (propertize "│   " 'face 'font-lock-comment-face) parts))
+      (concat
+       (apply #'concat (nreverse parts))
+       (cond
+        (content "")
+        ((> level 1)
+         (propertize "├── " 'face 'font-lock-comment-face))
+        (t "")))))
+
+  (defun meu/org-sidebar-apply-content-indent (start end prefix)
+    "Aplica PREFIX visual no início e wraps de cada linha entre START e END."
+    (let ((inhibit-read-only t))
+      (save-excursion
+        (goto-char start)
+        (while (< (point) end)
+          (let* ((line-beg (line-beginning-position))
+                 (line-end (line-end-position))
+                 (prefix-ov (make-overlay line-beg line-beg nil t t))
+                 (wrap-ov (make-overlay line-beg (min (1+ line-end) end) nil t t)))
+            (overlay-put prefix-ov 'meu/org-sidebar-indent t)
+            (overlay-put prefix-ov 'priority 1000)
+            (overlay-put prefix-ov 'before-string prefix)
+            (overlay-put wrap-ov 'meu/org-sidebar-indent t)
+            (overlay-put wrap-ov 'priority 999)
+            (overlay-put wrap-ov 'wrap-prefix prefix))
+          (forward-line 1)))))
+
+  (defun meu/org-sidebar-refresh-content-indent ()
+    "Reaplica indentação visual do conteúdo da sidebar."
+    (let ((inhibit-read-only t))
+      (remove-overlays (point-min) (point-max) 'meu/org-sidebar-indent t)
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (let ((prefix (get-text-property (line-beginning-position)
+                                           'meu/org-content-prefix)))
+            (when prefix
+              (meu/org-sidebar-apply-content-indent
+               (line-beginning-position)
+               (min (1+ (line-end-position)) (point-max))
+               prefix)))
+          (forward-line 1)))))
 
   ;; -----------------------------
   ;; Bounds do node
@@ -84,14 +191,10 @@
               (while (and xs (string-empty-p (string-trim (car xs))))
                 (setq xs (cdr xs)))
               (reverse xs)))
-           (max-lines 3)
-           (shown-lines (seq-take clean-lines max-lines))
-           (has-more (> (length clean-lines) max-lines)))
+           (shown-lines clean-lines))
       (if (null shown-lines)
           ""
-        (concat
-         (string-join shown-lines "\n")
-         (when has-more "\n…")))))
+        (string-join shown-lines "\n"))))
 
   ;; -----------------------------
   ;; Card editável
@@ -108,21 +211,20 @@
           (org-back-to-heading t)
           (setq bounds (meu/org-node-full-bounds))))
 
-      (when (get-buffer meu/org-card-buffer)
-        (kill-buffer meu/org-card-buffer))
-
-      (with-current-buffer source
-        (clone-indirect-buffer meu/org-card-buffer nil))
+      (unless (and (buffer-live-p (get-buffer meu/org-card-buffer))
+                   (eq (buffer-base-buffer (get-buffer meu/org-card-buffer)) source))
+        (when (get-buffer meu/org-card-buffer)
+          (kill-buffer meu/org-card-buffer))
+        (with-current-buffer source
+          (clone-indirect-buffer meu/org-card-buffer nil)))
 
       (with-current-buffer meu/org-card-buffer
+        (setq-local meu/org-cardflow-fontified nil)
         (setq buffer-read-only nil)
         (widen)
         (narrow-to-region (car bounds) (cdr bounds))
         (goto-char (point-min))
-        (org-mode)
-
-        (when (fboundp 'org-fold-hide-drawer-all)
-          (org-fold-hide-drawer-all)))
+        (meu/org-cardflow-enable-org-rendering))
 
       (when (window-live-p meu/org-card-window)
         (with-selected-window meu/org-card-window
@@ -134,8 +236,13 @@
 
   (defun meu/org-render-sidebar ()
     "Renderiza headings + preview virtual."
-    (let ((source (or meu/org-source-buffer (current-buffer)))
+    (let ((source (if (not (meu/org-cardflow-virtual-buffer-p))
+                      (current-buffer)
+                    meu/org-source-buffer))
           (buf (get-buffer-create meu/org-sidebar-buffer)))
+      (unless (and source (buffer-live-p source)
+                   (not (meu/org-cardflow-virtual-buffer-p source)))
+        (user-error "Abre o Cardflow a partir do ficheiro Org fonte, não de um buffer virtual"))
       (setq meu/org-source-buffer source)
 
       (with-current-buffer buf
@@ -149,16 +256,18 @@
              (let* ((level (org-outline-level))
                     (title (org-get-heading t t t t))
                     (snippet (meu/org-node-snippet))
-                    (indent (make-string (* 2 (1- level)) ?\s))
+                    (heading-prefix (meu/org-sidebar-indent-prefix level))
+                    (content-prefix (meu/org-sidebar-indent-prefix level t))
                     (marker (point-marker))
                     (face (intern (format "org-level-%d" (min level 8))))
                     line-start
                     line-end
-                    ov)
+                    snippet-start
+                    snippet-end)
                (with-current-buffer buf
                  (setq line-start (point))
 
-                 (insert indent)
+                 (insert heading-prefix)
                  (insert (propertize "● " 'face 'font-lock-keyword-face))
                  (insert (propertize title 'face face))
                  (insert "\n")
@@ -167,27 +276,33 @@
 
                  (put-text-property line-start line-end 'meu/org-marker marker)
                  (put-text-property line-start line-end 'meu/org-level level)
+                 (put-text-property line-start line-end 'meu/org-heading-line t)
 
-                 ;; preview virtual; não aparece no node selecionado
+                 ;; preview real; permite font-lock, links e overlays Typst.
                  (unless (or (string-empty-p snippet)
                              (and meu/org-current-pos
                                   (= (marker-position marker) meu/org-current-pos)))
-                   (setq ov (make-overlay line-end line-end))
-                   (overlay-put
-                    ov
-                    'after-string
-                    (propertize
-                     (concat
-                      (mapconcat
-                       (lambda (line)
-                         (concat indent "  " line))
-                       (split-string snippet "\n")
-                       "\n")
-                      "\n")
-                     'face 'font-lock-comment-face))))))))
+                   (setq snippet-start (point))
+                   (insert snippet)
+                   (insert "\n")
+                   (setq snippet-end (point))
+                   (put-text-property snippet-start snippet-end 'meu/org-marker marker)
+                   (put-text-property snippet-start snippet-end 'meu/org-content-line t)
+                   ;; Indentação visual apenas. Não inserir espaços reais no
+                   ;; conteúdo, porque isso altera blocos Org/Typst.
+                   (put-text-property
+                    snippet-start snippet-end
+                    'meu/org-content-prefix content-prefix)
+                   (put-text-property
+                    snippet-start snippet-end
+                    'meu/org-content-wrap-prefix content-prefix)))))))
 
         (goto-char (point-min))
-        (meu/org-sidebar-mode))
+        (setq-local meu/org-cardflow-fontified nil)
+        (meu/org-sidebar-mode)
+        (let ((meu/org-typst-preview-silent-errors t))
+          (meu/org-cardflow-enable-org-rendering))
+        (meu/org-sidebar-refresh-content-indent))
       buf))
 
   ;; -----------------------------
@@ -198,13 +313,28 @@
     (or (get-text-property (point) 'meu/org-marker)
         (save-excursion
           (beginning-of-line)
-          (get-text-property (point) 'meu/org-marker))))
+          (or (get-text-property (point) 'meu/org-marker)
+              (when (re-search-backward "^.*$" nil t)
+                (while (and (not (bobp))
+                            (not (get-text-property (point) 'meu/org-heading-line)))
+                  (forward-line -1))
+                (get-text-property (point) 'meu/org-marker)))))))
 
   (defun meu/org-sidebar-current-level ()
-    (or (get-text-property (point) 'meu/org-level)
-        (save-excursion
-          (beginning-of-line)
-          (get-text-property (point) 'meu/org-level))))
+    (save-excursion
+      (beginning-of-line)
+      (unless (get-text-property (point) 'meu/org-heading-line)
+        (while (and (not (bobp))
+                    (not (get-text-property (point) 'meu/org-heading-line)))
+          (forward-line -1)))
+      (get-text-property (point) 'meu/org-level)))
+
+  (defun meu/org-sidebar-line-level ()
+    "Retorna level apenas se a linha atual for uma linha navegável."
+    (save-excursion
+      (beginning-of-line)
+      (when (get-text-property (point) 'meu/org-heading-line)
+        (get-text-property (point) 'meu/org-level))))
 
   (defun meu/org-sidebar-goto-marker (marker)
     "Move cursor da sidebar para a linha correspondente ao MARKER ou posição."
@@ -217,8 +347,10 @@
         (goto-char (point-min))
         (let ((found nil))
           (while (and (not found) (not (eobp)))
-            (let ((m (meu/org-sidebar-current-marker)))
-              (when (and m (= (marker-position m) target-pos))
+            (let ((m (get-text-property (point) 'meu/org-marker)))
+              (when (and (get-text-property (point) 'meu/org-heading-line)
+                         m
+                         (= (marker-position m) target-pos))
                 (setq found t)))
             (unless found
               (forward-line 1)))))))
@@ -233,10 +365,15 @@
 
         (meu/org-show-card-at-marker marker)
 
-        (with-selected-window meu/org-sidebar-window
-          (meu/org-render-sidebar)
-          (switch-to-buffer meu/org-sidebar-buffer)
-          (meu/org-sidebar-goto-marker meu/org-current-pos)))))
+        (when (and meu/org-sidebar-needs-render
+                   (window-live-p meu/org-sidebar-window))
+          (with-selected-window meu/org-sidebar-window
+            (meu/org-render-sidebar)
+            (switch-to-buffer meu/org-sidebar-buffer)
+            (setq meu/org-sidebar-needs-render nil)))
+        (when (window-live-p meu/org-sidebar-window)
+          (with-selected-window meu/org-sidebar-window
+            (meu/org-sidebar-goto-marker meu/org-current-pos))))))
 
   ;; -----------------------------
   ;; Navegação semântica
@@ -251,7 +388,7 @@
         (while (and (not found)
                     (= 0 (forward-line 1))
                     (not (eobp)))
-          (let ((l (meu/org-sidebar-current-level)))
+          (let ((l (meu/org-sidebar-line-level)))
             (cond
              ((null l) nil)
              ((= l level) (setq found (point)))
@@ -267,9 +404,8 @@
           found)
       (save-excursion
         (while (and (not found)
-                    (= 0 (forward-line -1))
-                    (not (bobp)))
-          (let ((l (meu/org-sidebar-current-level)))
+                    (= 0 (forward-line -1)))
+          (let ((l (meu/org-sidebar-line-level)))
             (cond
              ((null l) nil)
              ((= l level) (setq found (point)))
@@ -285,12 +421,18 @@
            target)
       (save-excursion
         (forward-line 1)
-        (let ((l (meu/org-sidebar-current-level)))
-          (when (and l (= l (1+ level)))
-            (setq target (point)))))
+        (while (and (not target) (not (eobp)))
+          (let ((l (meu/org-sidebar-line-level)))
+            (cond
+             ((null l) nil)
+             ((= l (1+ level)) (setq target (point)))
+             ((<= l level) (setq target 'stop))))
+          (unless target
+            (forward-line 1))))
       (when target
-        (goto-char target)
-        (meu/org-sidebar-sync))))
+        (unless (eq target 'stop)
+          (goto-char target)
+          (meu/org-sidebar-sync)))))
 
   (defun meu/org-sidebar-parent ()
     "Volta para o pai."
@@ -299,9 +441,8 @@
           found)
       (save-excursion
         (while (and (not found)
-                    (= 0 (forward-line -1))
-                    (not (bobp)))
-          (let ((l (meu/org-sidebar-current-level)))
+                    (= 0 (forward-line -1)))
+          (let ((l (meu/org-sidebar-line-level)))
             (when (and l (< l level))
               (setq found (point))))))
       (when found
@@ -324,7 +465,8 @@
     "Guarda, atualiza sidebar e volta ao node editado."
     (interactive)
     (when (and (window-live-p meu/org-sidebar-window)
-               (buffer-live-p meu/org-source-buffer))
+               (buffer-live-p meu/org-source-buffer)
+               (not (meu/org-cardflow-virtual-buffer-p meu/org-source-buffer)))
       (with-current-buffer meu/org-source-buffer
         (save-buffer))
 
@@ -494,4 +636,4 @@
     (lambda ()
       (interactive)
       (when (string= (buffer-name) meu/org-card-buffer)
-        (meu/org-sidebar-return)))))
+        (meu/org-sidebar-return))))

@@ -17,6 +17,9 @@
 (defvar meu/org-typst-preview-dir
   (expand-file-name "org-typst-preview/" temporary-file-directory))
 
+(defvar-local meu/org-typst-preview-silent-errors nil
+  "Se non-nil, ignora erros individuais de preview Typst neste buffer.")
+
 (defun meu/org-typst-clear-previews ()
   "Remove todos os previews Typst do buffer atual."
   (interactive)
@@ -60,6 +63,8 @@ DISPLAY indica se é fórmula display."
     (overlay-put ov 'meu/org-typst-display display-spec)
     (overlay-put ov 'meu/org-typst-display-math display)
     (overlay-put ov 'display display-spec)
+    (when display
+      (overlay-put ov 'after-string "\n"))
     (overlay-put ov 'evaporate t)))
 
 
@@ -78,34 +83,51 @@ DISPLAY indica se é fórmula display."
      (t
       (cons v nil)))))
 
+(defun meu/org-typst--previewable-fragment-p (body)
+  "Retorna non-nil se BODY parece ser um fragmento Typst isolado."
+  (and body
+       (> (length body) 0)
+       (not (string-match-p ":PROPERTIES:" body))
+       ;; No Cardflow sidebar o Org parser pode apanhar texto truncado entre
+       ;; dólares soltos e tentar compilá-lo como matemática.
+       (not (and (string= (buffer-name) "*org-sidebar*")
+                 (or (string-match-p "●" body)
+                     (string-match-p "\n" body))))))
+
+(defun meu/org-typst--line-in-table-p (pos)
+  "Retorna non-nil se POS estiver numa linha de tabela Org."
+  (save-excursion
+    (goto-char pos)
+    (beginning-of-line)
+    (looking-at-p "[ \t]*|")))
+
 (defun meu/org-typst-preview-buffer ()
   "Renderiza fragments Typst em fragments matemáticos Org."
   (interactive)
   (unless (derived-mode-p 'org-mode)
     (user-error "Isto é para org-mode"))
 
-  ;; não correr no sidebar virtual
-  (unless (string= (buffer-name) "*org-sidebar*")
-    (meu/org-typst-clear-previews)
+  (meu/org-typst-clear-previews)
 
-    (org-element-map (org-element-parse-buffer) 'latex-fragment
-      (lambda (frag)
-        (let* ((value (org-element-property :value frag))
-               (beg (org-element-property :begin frag))
-               (end (save-excursion
-                      (goto-char (org-element-property :end frag))
-                      (skip-chars-backward " \t\r\n")
-                      (point)))
-               (parsed (meu/org-typst--strip-delimiters value))
-               (body (car parsed))
-               (display (cdr parsed)))
-          (when (and body
-                     (> (length body) 0)
-                     (not (string-match-p ":PROPERTIES:" body)))
+  (org-element-map (org-element-parse-buffer) 'latex-fragment
+    (lambda (frag)
+      (let* ((value (org-element-property :value frag))
+             (beg (org-element-property :begin frag))
+             (end (save-excursion
+                    (goto-char (org-element-property :end frag))
+                    (skip-chars-backward " \t\r\n")
+                    (point)))
+             (parsed (meu/org-typst--strip-delimiters value))
+             (body (car parsed))
+             (display (cdr parsed)))
+        (when (meu/org-typst--previewable-fragment-p body)
+          (unless (meu/org-typst--line-in-table-p beg)
             (condition-case err
                 (meu/org-typst--overlay beg end body display)
               (error
-               (message "Typst preview erro ignorado: %s" err)))))))))
+               (unless meu/org-typst-preview-silent-errors
+                 (message "Typst preview erro ignorado: %s" err)))))))))
+  (meu/org-typst-preview-src-blocks))
 
 
 (defun meu/org-typst-toggle-preview ()
@@ -174,6 +196,87 @@ DISPLAY indica se é fórmula display."
                    (with-current-buffer buf
                      (meu/org-typst-preview-buffer))))
                (current-buffer)))))
+
+(defun meu/org-typst--theme-fg ()
+  "Devolve a cor foreground atual do tema em formato #RRGGBB."
+  (let ((fg (face-attribute 'default :foreground nil t)))
+    (if (and (stringp fg) (string-prefix-p "#" fg))
+        fg
+      "#ffffff")))
+
+(defun meu/org-typst--theme-bg ()
+  "Devolve a cor background atual do tema em formato #RRGGBB."
+  (let ((bg (face-attribute 'default :background nil t)))
+    (if (and (stringp bg) (string-prefix-p "#" bg))
+        bg
+      "#000000")))
+
+(defun meu/org-typst-block-preamble ()
+  "Preamble Typst usado automaticamente em blocos src typst."
+  (let ((fg (meu/org-typst--theme-fg)))
+    (format
+     "#import \"@preview/cetz:0.3.3\"
+#import \"@preview/cetz:0.3.3\": canvas, draw
+#import \"@local/physics-draw:0.1.0\": *
+
+#let theme-fg = rgb(\"%s\")
+
+#set page(width: auto, height: auto, margin: 4pt, fill: none)
+#set text(fill: theme-fg)
+
+"
+     fg)))
+
+(defun meu/org-typst-preview-src-blocks ()
+  "Renderiza blocos src typst como SVG inline."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Isto é para org-mode"))
+
+  (org-element-map (org-element-parse-buffer) 'src-block
+    (lambda (block)
+      (let ((lang (org-element-property :language block)))
+        (when (and lang (string= (downcase lang) "typst"))
+          (let* ((body (org-element-property :value block))
+                 (beg (org-element-property :begin block))
+                 (end (org-element-property :end block)))
+            (condition-case err
+                (let* ((svg (meu/org-typst--compile-src-block-to-svg body))
+                       (display-spec
+                        `(image :type svg
+                          :file ,svg
+                          :ascent center))
+                       (ov (make-overlay beg end)))
+                  (overlay-put ov 'meu/org-typst-preview t)
+                  (overlay-put ov 'meu/org-typst-display display-spec)
+                  (overlay-put ov 'display display-spec)
+                  (overlay-put ov 'after-string "\n")
+                  (overlay-put ov 'evaporate t))
+              (error
+               (unless meu/org-typst-preview-silent-errors
+                 (message "Typst src preview erro ignorado: %s" err))))))))))
+
+(defun meu/org-typst--compile-src-block-to-svg (body)
+  "Compila BODY de um bloco src typst para SVG."
+  (make-directory meu/org-typst-preview-dir t)
+  (let* ((full-body (concat (meu/org-typst-block-preamble) body))
+         (hash (secure-hash 'sha1 full-body))
+         (typ-file (expand-file-name
+                    (concat "src-" hash ".typ")
+                    meu/org-typst-preview-dir))
+         (svg-file (expand-file-name
+                    (concat "src-" hash ".svg")
+                    meu/org-typst-preview-dir)))
+    (unless (file-exists-p svg-file)
+      (with-temp-file typ-file
+        (insert full-body))
+      (let ((exit-code
+             (call-process "typst" nil "*org-typst-preview*" t
+                           "compile" typ-file svg-file)))
+        (unless (= exit-code 0)
+          (with-current-buffer "*org-typst-preview*"
+            (user-error "Erro Typst src block:\n%s" (buffer-string))))))
+    svg-file))
 
 (provide 'org-typst-preview)
 

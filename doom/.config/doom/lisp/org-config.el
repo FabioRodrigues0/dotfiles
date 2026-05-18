@@ -145,3 +145,73 @@
                             :todo "TODO")
 
                            (:discard (:anything t))))))))))))
+
+(defun meu/org-convert-latex-delimiters-to-dollar ()
+  "Converte \\(...\\) para $...$ e \\[...\\] para $$...$$ no buffer Org atual.
+Ignora blocos de código porque usa o parser do Org."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Este comando é para org-mode"))
+
+  (require 'org-element)
+
+  (let (fragments)
+    ;; Recolher fragments primeiro
+    (org-element-map (org-element-parse-buffer) 'latex-fragment
+      (lambda (frag)
+        (let ((value (org-element-property :value frag))
+              (beg (org-element-property :begin frag))
+              (end (save-excursion
+                     (goto-char (org-element-property :end frag))
+                     (skip-chars-backward " \t\r\n")
+                     (point))))
+          (push (list beg end value) fragments))))
+
+    ;; Substituir de trás para a frente para não estragar posições
+    (setq fragments
+          (sort fragments
+                (lambda (a b) (> (car a) (car b)))))
+
+    (save-excursion
+      (dolist (frag fragments)
+        (pcase-let ((`(,beg ,end ,value) frag))
+          (let ((v (string-trim value)))
+            (cond
+             ;; \[ ... \] -> $$ ... $$
+             ((and (string-prefix-p "\\[" v)
+                   (string-suffix-p "\\]" v))
+              (let ((body (string-trim (substring v 2 -2))))
+                (goto-char beg)
+                (delete-region beg end)
+                (insert "$$\n" body "\n$$")))
+
+             ;; \( ... \) -> $ ... $
+             ((and (string-prefix-p "\\(" v)
+                   (string-suffix-p "\\)" v))
+              (let ((body (string-trim (substring v 2 -2))))
+                (goto-char beg)
+                (delete-region beg end)
+                (insert "$" body "$")))))))))
+
+  (message "Conversão de delimitadores concluída."))
+(defun meu/org-normalize-inline-dollar-math ()
+  "Remove espaços internos em fragments inline $ ... $ para ficarem $...$."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Este comando é para org-mode"))
+
+  (save-excursion
+    (goto-char (point-min))
+
+    ;; apanha apenas inline math numa linha, não $$...$$
+    (while (re-search-forward "\\(^\\|[^$]\\)\\$[ \t]+\\([^$\n]+?\\)[ \t]+\\$" nil t)
+      (unless (org-in-src-block-p t)
+        (let ((prefix (match-string 1))
+              (body (string-trim (match-string 2)))
+              (beg (match-beginning 0))
+              (end (match-end 0)))
+          (goto-char beg)
+          (delete-region beg end)
+          (insert prefix "$" body "$"))))))
+
+(message "Inline math normalizado.")
