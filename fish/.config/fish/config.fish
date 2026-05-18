@@ -12,3 +12,10 @@ if test (uname) = Darwin
 end
 alias emacs='emacs-pgtk --init-directory ~/.config/emacs'
 alias doom='~/.config/emacs/bin/doom'
+
+# pnpm
+set -gx PNPM_HOME "/home/fabio/.local/share/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end
