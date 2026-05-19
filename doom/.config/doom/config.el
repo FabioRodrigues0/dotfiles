@@ -9,7 +9,19 @@
 ;;
 (setq doom-font (font-spec :family "JetBrains Mono" :size 16)
       doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 16))
-;;
+
+;; ~/.doom.d/config.el
+(after! company
+  (setq company-idle-delay 0.0          ; sem delay (default 0.2)
+        company-minimum-prefix-length 1 ; 1 letra (default 3)
+        company-tooltip-idle-delay 0.0))
+(custom-set-faces!
+  '(company-tooltip :family "JetBrains Mono" :height 110)
+  '(company-tooltip-selection :background "#44475a")
+  '(company-tooltip-common :weight bold)
+  '(company-tooltip-annotation :slant italic))
+
+
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
@@ -18,6 +30,8 @@
 (setq doom-theme 'hex-lavender-dark)
 (add-to-list 'default-frame-alist '(undecorated . t))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
+(add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
+(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.

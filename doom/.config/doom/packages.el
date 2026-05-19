@@ -66,3 +66,4 @@
   :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! org-modern)
 (package! org-super-agenda)
+(package! pdf-tools)
