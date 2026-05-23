@@ -1167,6 +1167,9 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-mo
   border-right: 1px solid var(--ruler); scroll-behavior: smooth;
 }
 .column:first-child { flex-basis: calc(((100vw - 28px) / 3) * 0.67); }
+.column:nth-child(2), .column:nth-child(3) {
+  flex-basis: calc(((100vw - 28px) / 3) * 1.165);
+}
 .column-title { color: var(--muted); font-size: 11px; margin: 0 0 12px 4px; }
 .node {
   width: 100%%; min-height: 92px; padding: 12px 14px; margin-bottom: 14px;
@@ -1178,7 +1181,6 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-mo
 .node:hover, .node.selected { border-color: var(--highlight); background: var(--selection); }
 .node.path { border-color: var(--base7); }
 .node.child-target { border-color: var(--yellow); }
-.level { color: var(--accent); font-size: 11px; margin-bottom: 6px; }
 .title { font-weight: 700; color: var(--base10); }
 .body { color: var(--muted); margin-top: 8px; white-space: pre-wrap; }
 .typst { max-width: 100%%; vertical-align: middle; }
@@ -1298,7 +1300,7 @@ for (const level of [...levels.keys()].sort((a, b) => a - b)) {
   for (const n of levels.get(level)) {
     const el = document.createElement('div');
     el.className = 'node';
-    el.innerHTML = `<div class=\"level\">h${n.level}</div><div class=\"title\"></div><div class=\"body\"></div>`;
+    el.innerHTML = `<div class=\"title\"></div><div class=\"body\"></div>`;
     el.querySelector('.title').textContent = n.title;
     el.querySelector('.body').innerHTML = n.contentHtml || '';
     el.addEventListener('click', () => showNode(n, el));
