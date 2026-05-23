@@ -88,16 +88,20 @@ Este comando gera um ficheiro HTML temporario:
 /tmp/cardflow-canvas.html
 #+end_src
 
-e abre-o no browser.
+e abre-o dentro do Emacs com =xwidget-webkit= quando o Emacs tiver suporte a
+xwidgets. Se =xwidget-webkit= nao existir, cai para =browse-url-of-file= como
+fallback.
 
-** Porque HTML/browser
+** Porque HTML/xwidget
 
 O canvas visual fica isolado fora dos buffers virtuais do Emacs. Isto evita
 misturar demasiados overlays, propriedades de texto e modos do Org na mesma UI,
 que foi uma das causas provaveis dos bloqueios anteriores.
 
-O Emacs continua a ser a fonte de verdade: o HTML apenas mostra e envia acoes de
-volta ao Emacs.
+O Emacs continua a ser a fonte de verdade: o HTML apenas mostra a arvore e envia
+acoes de volta ao Emacs. A edicao ja nao acontece num painel/textarea dentro do
+HTML; ao carregar em =i=, o Emacs abre o node selecionado num indirect buffer Org
+normal.
 
 ** Layout atual
 
@@ -126,6 +130,31 @@ Os cards mostram o conteudo completo direto do node, nao apenas preview.
 As drawers =:PROPERTIES:= sao removidas da visualizacao no canvas para reduzir
 ruido, mas nao sao apagadas do ficheiro Org.
 
+** Tema e Typst no canvas
+
+O CSS do canvas usa a mesma paleta definida em
+=themes/hex-lavender-dark-theme.el=:
+
+- background =#131410=
+- background alternativo =#0e0e0d=
+- ruler =#1c1f1b=
+- base3 =#404768=
+- base4 =#61586f=
+- base6 =#878480=
+- base7 =#8e80de=
+- base10 =#9db2b8=
+- base11 =#a0c7cf=
+- highlight =#ff2e5f=
+- yellow =#29bbff=
+- green =#0affa9=
+- selection =#290019=
+
+O conteudo dos cards e convertido para HTML escapado antes de entrar no canvas.
+Fragments matematicos Org renderizados via Typst, como =$...$=, =\\(...\\)= e
+=\\[...\\]=, passam a ser compilados para SVG e inseridos como =img=. Blocos
+=#+begin_src typst= tambem sao compilados para SVG usando o mesmo pipeline de
+=org-typst-preview.el=.
+
 * Teclas no cardflow-canvas
 
 As teclas tentam seguir o Cardflow normal:
@@ -136,12 +165,12 @@ As teclas tentam seguir o Cardflow normal:
 - =j= ou seta baixo: ir para o irmao seguinte
 - =c=: criar irmao
 - =n=: criar filho
-- =i=: editar o node selecionado
-- =Ctrl+Enter=: guardar edicao
-- =q=: guardar/sair da edicao quando o foco ja nao esta no campo de texto
+- =i=: editar o node selecionado num buffer Org normal do Emacs
+- =Ctrl+Enter=: guardar edicao e voltar ao canvas
+- =q= em normal mode no buffer de edicao: guardar edicao e voltar ao canvas
 
-Nota: no browser, quando o foco esta dentro do textarea, a tecla =q= escreve a
-letra =q=. Para sair rapidamente, usar =Ctrl+Enter= e mais direto.
+Ao sair da edicao, o ficheiro Org fonte e guardado, o HTML do canvas e
+regenerado, o xwidget e recarregado e o foco volta ao painel do canvas.
 
 * Como criar e editar nodes no canvas
 
@@ -161,13 +190,14 @@ As acoes suportadas atualmente sao:
 - =create-sibling=
 - =create-child=
 - =update=
+- =edit=
 
 Depois de cada acao:
 
 1. o Emacs altera o ficheiro Org real;
 2. guarda o ficheiro;
 3. regenera =/tmp/cardflow-canvas.html=;
-4. o browser recarrega;
+4. o xwidget/browser recarrega quando a acao altera a arvore;
 5. o node criado/editado fica selecionado.
 
 * Cuidados importantes
@@ -225,10 +255,6 @@ Teste manual principal:
 
 - Melhorar visualmente a indicacao de pai, selecionado e primeiro filho.
 - Adicionar ligacoes/linhas discretas entre colunas se for util.
-- Fazer =q= guardar edicao mesmo com foco no textarea, se isso nao atrapalhar a
-  escrita normal.
-- Adicionar botao pequeno no HTML para guardar edicao.
 - Suportar mover subtree para cima/baixo no canvas com as mesmas teclas do
   Cardflow normal.
-- Investigar abrir o canvas numa janela controlada ou app web local mais
-  persistente, em vez de apenas ficheiro temporario.
+- Fazer o canvas atualizar sem reload completo do xwidget.

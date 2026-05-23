@@ -649,6 +649,24 @@ CONTENT indica que a linha é conteúdo do node, não heading."
     (expand-file-name "cardflow-canvas.html" temporary-file-directory))
   (defvar meu/org-cardflow-canvas-server nil)
   (defvar meu/org-cardflow-canvas-port nil)
+  (defvar meu/org-cardflow-canvas-window nil)
+  (defvar meu/org-cardflow-canvas-edit-window nil)
+  (defvar meu/org-cardflow-canvas-edit-buffer "*org-cardflow-canvas-edit*")
+
+  (defvar meu/org-cardflow-canvas-edit-mode-map (make-sparse-keymap))
+  (defvar meu/org-cardflow-canvas-xwidget-mode-map (make-sparse-keymap))
+
+  (define-minor-mode meu/org-cardflow-canvas-edit-mode
+    "Modo local para editar nodes do Cardflow canvas num buffer Org normal."
+    :init-value nil
+    :lighter " CanvasEdit"
+    :keymap meu/org-cardflow-canvas-edit-mode-map)
+
+  (define-minor-mode meu/org-cardflow-canvas-xwidget-mode
+    "Keymap local para controlar o Cardflow canvas em xwidget."
+    :init-value nil
+    :lighter " Canvas"
+    :keymap meu/org-cardflow-canvas-xwidget-mode-map)
 
   (defun meu/org-cardflow-canvas--source-buffer ()
     "Retorna o buffer Org fonte para a view canvas."
@@ -675,6 +693,102 @@ CONTENT indica que a linha é conteúdo do node, não heading."
         ""
         raw))))
 
+  (defun meu/org-cardflow-canvas--html-escape (text)
+    "Escapa TEXT para inserir em HTML."
+    (let ((s (or text "")))
+      (setq s (replace-regexp-in-string "&" "&amp;" s t t))
+      (setq s (replace-regexp-in-string "<" "&lt;" s t t))
+      (setq s (replace-regexp-in-string ">" "&gt;" s t t))
+      (setq s (replace-regexp-in-string "\"" "&quot;" s t t))
+      s))
+
+  (defun meu/org-cardflow-canvas--file-src (file)
+    "Retorna URL file:// simples para FILE."
+    (concat "file://" (replace-regexp-in-string
+                       " "
+                       "%20"
+                       (expand-file-name file)
+                       t
+                       t)))
+
+  (defun meu/org-cardflow-canvas--typst-replacement (kind body display)
+    "Compila BODY Typst e devolve HTML para KIND."
+    (condition-case _err
+        (let* ((svg
+                (cond
+                 ((and (eq kind 'src-block)
+                       (fboundp 'meu/org-typst--compile-src-block-to-svg))
+                  (meu/org-typst--compile-src-block-to-svg body))
+                 ((and (eq kind 'fragment)
+                       (fboundp 'meu/org-typst--compile-to-svg))
+                  (meu/org-typst--compile-to-svg body display))))
+               (class (if (eq kind 'src-block)
+                          "typst-block"
+                        (if display "typst-display" "typst-inline"))))
+          (when svg
+            (format "<img class=\"typst %s\" src=\"%s\" alt=\"%s\">"
+                    class
+                    (meu/org-cardflow-canvas--file-src svg)
+                    (meu/org-cardflow-canvas--html-escape body))))
+      (error nil)))
+
+  (defun meu/org-cardflow-canvas--render-content-html (content)
+    "Renderiza CONTENT para HTML com previews Typst quando possível."
+    (let ((raw (or content "")))
+      (if (and (or (fboundp 'meu/org-typst--compile-to-svg)
+                   (fboundp 'meu/org-typst--compile-src-block-to-svg))
+               (string-match-p "\\$\\|\\\\(\\|\\\\\\[\\|#\\+begin_src[ \t]+typst" raw))
+          (with-temp-buffer
+            (org-mode)
+            (insert raw)
+            (let ((replacements nil))
+              (org-element-map (org-element-parse-buffer) 'latex-fragment
+                (lambda (frag)
+                  (when (fboundp 'meu/org-typst--strip-delimiters)
+                    (let* ((value (org-element-property :value frag))
+                           (beg (org-element-property :begin frag))
+                           (end (save-excursion
+                                  (goto-char (org-element-property :end frag))
+                                  (skip-chars-backward " \t\r\n")
+                                  (point)))
+                           (parsed (meu/org-typst--strip-delimiters value))
+                           (body (car parsed))
+                           (display (cdr parsed))
+                           (html (and (or (not (fboundp 'meu/org-typst--previewable-fragment-p))
+                                          (meu/org-typst--previewable-fragment-p body))
+                                      (meu/org-cardflow-canvas--typst-replacement
+                                       'fragment body display))))
+                      (when html
+                        (push (list beg end html) replacements))))))
+              (org-element-map (org-element-parse-buffer) 'src-block
+                (lambda (block)
+                  (let ((lang (org-element-property :language block)))
+                    (when (and lang (string= (downcase lang) "typst"))
+                      (let* ((body (org-element-property :value block))
+                             (beg (org-element-property :begin block))
+                             (end (org-element-property :end block))
+                             (html (meu/org-cardflow-canvas--typst-replacement
+                                    'src-block body t)))
+                        (when html
+                          (push (list beg end html) replacements)))))))
+              (let ((pos (point-min))
+                    (out nil))
+                (dolist (rep (sort replacements (lambda (a b) (< (car a) (car b)))))
+                  (let ((beg (nth 0 rep))
+                        (end (nth 1 rep))
+                        (html (nth 2 rep)))
+                    (when (>= beg pos)
+                      (push (meu/org-cardflow-canvas--html-escape
+                             (buffer-substring-no-properties pos beg))
+                            out)
+                      (push html out)
+                      (setq pos end))))
+                (push (meu/org-cardflow-canvas--html-escape
+                       (buffer-substring-no-properties pos (point-max)))
+                      out)
+                (apply #'concat (nreverse out)))))
+        (meu/org-cardflow-canvas--html-escape raw))))
+
   (defun meu/org-cardflow-canvas--nodes (source)
     "Extrai nodes de SOURCE para o canvas HTML."
     (let ((nodes nil)
@@ -687,6 +801,7 @@ CONTENT indica que a linha é conteúdo do node, não heading."
                   (id (format "n%d" idx))
                   (title (org-get-heading t t t t))
                   (content (meu/org-cardflow-canvas--node-content))
+                  (content-html (meu/org-cardflow-canvas--render-content-html content))
                   (parent (cdr (assoc (1- level) stack))))
              (setq stack (assq-delete-all level stack))
              (push (cons level id) stack)
@@ -695,6 +810,7 @@ CONTENT indica que a linha é conteúdo do node, não heading."
                      (level . ,level)
                      (title . ,title)
                      (content . ,content)
+                     (contentHtml . ,content-html)
                      (pos . ,(point)))
                    nodes)
              (setq idx (1+ idx))))))
@@ -719,6 +835,15 @@ CONTENT indica que a linha é conteúdo do node, não heading."
       (goto-char found)
       (org-back-to-heading t)))
 
+  (defun meu/org-cardflow-canvas--marker-for-id (id)
+    "Retorna um marker para o node ID no Org fonte do canvas."
+    (with-current-buffer (meu/org-cardflow-canvas--source-buffer)
+      (save-excursion
+        (save-restriction
+          (widen)
+          (meu/org-cardflow-canvas--goto-node-id id)
+          (copy-marker (point))))))
+
   (defun meu/org-cardflow-canvas--id-at-pos (nodes pos)
     "Retorna o id em NODES cuja posição é POS."
     (catch 'found
@@ -734,6 +859,132 @@ CONTENT indica que a linha é conteúdo do node, não heading."
       (insert (meu/org-cardflow-canvas--html
                nodes
                meu/org-cardflow-canvas-port))))
+
+  (defun meu/org-cardflow-canvas--file-url ()
+    "Retorna o URL file:// do HTML temporário do canvas."
+    (concat "file://" (expand-file-name meu/org-cardflow-canvas-file)))
+
+  (defun meu/org-cardflow-canvas--reload ()
+    "Recarrega o canvas se estiver aberto em xwidget."
+    (when (and (window-live-p meu/org-cardflow-canvas-window)
+               (fboundp 'xwidget-webkit-reload))
+      (with-selected-window meu/org-cardflow-canvas-window
+        (when (derived-mode-p 'xwidget-webkit-mode)
+          (xwidget-webkit-reload)))))
+
+  (defun meu/org-cardflow-canvas--focus-xwidget ()
+    "Seleciona a janela do canvas xwidget."
+    (when (window-live-p meu/org-cardflow-canvas-window)
+      (select-window meu/org-cardflow-canvas-window)
+      (when (fboundp 'evil-normal-state)
+        (evil-normal-state))))
+
+  (defun meu/org-cardflow-canvas--activate-xwidget ()
+    "Ativa keymap e foco no buffer xwidget do canvas."
+    (setq meu/org-cardflow-canvas-window (selected-window))
+    (meu/org-cardflow-canvas-xwidget-mode 1)
+    (setq-local cursor-type nil)
+    (meu/org-cardflow-canvas--focus-xwidget)
+    (run-at-time 0.15 nil #'meu/org-cardflow-canvas--focus-xwidget))
+
+  (defun meu/org-cardflow-canvas--eval-js (script)
+    "Executa SCRIPT no xwidget do canvas."
+    (unless (fboundp 'xwidget-webkit-execute-script)
+      (user-error "xwidget-webkit não está disponível"))
+    (let ((xwidget (xwidget-webkit-current-session)))
+      (unless xwidget
+        (user-error "Canvas xwidget não encontrado"))
+      (xwidget-webkit-execute-script xwidget script)))
+
+  (defun meu/org-cardflow-canvas-js-parent ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "moveSelection('parent');"))
+
+  (defun meu/org-cardflow-canvas-js-child ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "moveSelection('child');"))
+
+  (defun meu/org-cardflow-canvas-js-prev ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "moveSelection('prev');"))
+
+  (defun meu/org-cardflow-canvas-js-next ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "moveSelection('next');"))
+
+  (defun meu/org-cardflow-canvas-js-create-sibling ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "postAction('create-sibling');"))
+
+  (defun meu/org-cardflow-canvas-js-create-child ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "postAction('create-child');"))
+
+  (defun meu/org-cardflow-canvas-js-edit ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "beginEdit();"))
+
+  (defun meu/org-cardflow-canvas--open-browser ()
+    "Abre o canvas dentro do Emacs quando xwidget estiver disponível."
+    (let ((url (meu/org-cardflow-canvas--file-url)))
+      (if (fboundp 'xwidget-webkit-browse-url)
+          (progn
+            (require 'xwidget)
+            (xwidget-webkit-browse-url url)
+            (meu/org-cardflow-canvas--activate-xwidget))
+        (browse-url-of-file meu/org-cardflow-canvas-file))))
+
+  (defun meu/org-cardflow-canvas-finish-edit ()
+    "Guarda a edição do canvas, recarrega a view e volta ao painel."
+    (interactive)
+    (unless meu/org-cardflow-canvas-edit-mode
+      (user-error "Este buffer não é uma edição do Cardflow canvas"))
+    (let ((source (meu/org-cardflow-canvas--source-buffer))
+          (edit-window (selected-window)))
+      (with-current-buffer source
+        (save-buffer))
+      (meu/org-cardflow-canvas--rewrite-file
+       (meu/org-cardflow-canvas--nodes source))
+      (meu/org-cardflow-canvas--reload)
+      (when (window-live-p edit-window)
+        (quit-window t edit-window))
+      (meu/org-cardflow-canvas--focus-xwidget)))
+
+  (defun meu/org-cardflow-canvas--open-edit-buffer (id)
+    "Abre ID num indirect buffer Org normal para edição."
+    (let* ((marker (meu/org-cardflow-canvas--marker-for-id id))
+           (source (marker-buffer marker))
+           (pos (marker-position marker))
+           bounds)
+      (with-current-buffer source
+        (save-excursion
+          (goto-char pos)
+          (org-back-to-heading t)
+          (setq bounds (meu/org-node-full-bounds))))
+      (unless (and (buffer-live-p (get-buffer meu/org-cardflow-canvas-edit-buffer))
+                   (eq (buffer-base-buffer (get-buffer meu/org-cardflow-canvas-edit-buffer))
+                       source))
+        (when (get-buffer meu/org-cardflow-canvas-edit-buffer)
+          (kill-buffer meu/org-cardflow-canvas-edit-buffer))
+        (with-current-buffer source
+          (clone-indirect-buffer meu/org-cardflow-canvas-edit-buffer nil)))
+      (with-current-buffer meu/org-cardflow-canvas-edit-buffer
+        (setq-local meu/org-cardflow-fontified nil)
+        (setq buffer-read-only nil)
+        (widen)
+        (narrow-to-region (car bounds) (cdr bounds))
+        (goto-char (point-min))
+        (meu/org-cardflow-enable-org-rendering)
+        (meu/org-cardflow-canvas-edit-mode 1))
+      (setq meu/org-cardflow-canvas-edit-window
+            (display-buffer meu/org-cardflow-canvas-edit-buffer
+                            '((display-buffer-pop-up-window)
+                              (side . right)
+                              (window-width . 0.38))))
+      (select-window meu/org-cardflow-canvas-edit-window)
+      (goto-char (point-min))
+      (when (fboundp 'evil-insert-state)
+        (evil-insert-state))))
 
   (defun meu/org-cardflow-canvas--response (status type body)
     "Cria resposta HTTP simples."
@@ -807,6 +1058,9 @@ CONTENT indica que a linha é conteúdo do node, não heading."
                id
                (alist-get 'title payload)
                (alist-get 'content payload))))
+       ((string= action "edit")
+        (meu/org-cardflow-canvas--open-edit-buffer id)
+        (setq marker (meu/org-cardflow-canvas--marker-for-id id)))
        (t
         (user-error "Ação desconhecida: %s" action)))
       (setq nodes (meu/org-cardflow-canvas--nodes
@@ -883,63 +1137,64 @@ CONTENT indica que a linha é conteúdo do node, não heading."
 <title>Cardflow Canvas</title>
 <style>
 :root {
-  --bg: #0d0d0b;
-  --panel: #17151b;
-  --card: #242129;
-  --card2: #2e2936;
-  --line: #6f5f8f;
-  --fg: #d8d0df;
-  --muted: #948b9f;
-  --accent: #c9b6ff;
+  --bg: #131410;
+  --bg-alt: #0e0e0d;
+  --ruler: #1c1f1b;
+  --base3: #404768;
+  --base4: #61586f;
+  --base6: #878480;
+  --base7: #8e80de;
+  --base8: #7b89a3;
+  --base10: #9db2b8;
+  --base11: #a0c7cf;
+  --highlight: #ff2e5f;
+  --cyan: #a0c7cf;
+  --yellow: #29bbff;
+  --green: #0affa9;
+  --selection: #290019;
+  --selection-fg: #958e9a;
+  --fg: var(--base4);
+  --muted: var(--base6);
+  --accent: var(--base7);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow: hidden; }
-#app { display: grid; grid-template-columns: 1fr 380px; height: 100vh; }
+#app { height: 100vh; }
 #canvasWrap { position: relative; overflow-x: auto; overflow-y: hidden; }
 #canvas { display: flex; gap: 8px; height: 100vh; min-width: max-content; padding: 0 6px; }
 .column {
-  flex: 0 0 330px; height: 100vh; overflow-y: auto; padding: 36px 2px 44px;
-  border-right: 1px solid #211d27; scroll-behavior: smooth;
+  flex: 0 0 calc((100vw - 28px) / 3); height: 100vh; overflow-y: auto; padding: 36px 2px 44px;
+  border-right: 1px solid var(--ruler); scroll-behavior: smooth;
 }
 .column-title { color: var(--muted); font-size: 11px; margin: 0 0 12px 4px; }
 .node {
   width: 100%%; min-height: 92px; padding: 12px 14px; margin-bottom: 14px;
-  border: 1px solid #3b3346; border-left: 4px solid var(--accent);
-  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px solid var(--base3); border-left: 4px solid var(--accent);
+  background: linear-gradient(180deg, var(--bg-alt), var(--ruler));
   border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.28);
   cursor: pointer; white-space: normal;
 }
-.node:hover, .node.selected { border-color: var(--accent); background: #332d3d; }
-.node.path { border-color: #81709f; }
-.node.child-target { border-color: #8b7ac1; }
+.node:hover, .node.selected { border-color: var(--highlight); background: var(--selection); }
+.node.path { border-color: var(--base7); }
+.node.child-target { border-color: var(--yellow); }
 .level { color: var(--accent); font-size: 11px; margin-bottom: 6px; }
-.title { font-weight: 700; color: #f1edf6; }
+.title { font-weight: 700; color: var(--base10); }
 .body { color: var(--muted); margin-top: 8px; white-space: pre-wrap; }
-#side { border-left: 1px solid #2c2733; background: var(--panel); padding: 18px; overflow: auto; }
-#side h1 { font-size: 18px; margin: 0 0 8px; }
-#side .meta { color: var(--muted); margin-bottom: 14px; }
-#content { white-space: pre-wrap; color: #cfc7d8; }
-#editTitle, #editContent {
-  width: 100%%; background: #211d28; color: var(--fg); border: 1px solid #4b4058;
-  border-radius: 6px; padding: 9px 10px; font: inherit;
+.typst { max-width: 100%%; vertical-align: middle; }
+.typst-inline { display: inline-block; max-height: 1.8em; }
+.typst-display, .typst-block { display: block; margin: 8px 0; }
+#hud {
+  position: fixed; top: 10px; right: 12px; z-index: 10; max-width: min(420px, 46vw);
+  padding: 7px 10px; border: 1px solid var(--base3); border-radius: 6px;
+  background: rgba(14, 14, 13, .94); color: var(--muted); font-size: 12px;
 }
-#editTitle { margin-bottom: 10px; font-weight: 700; }
-#editContent { min-height: 58vh; resize: vertical; white-space: pre-wrap; }
-#toolbar { position: sticky; top: 0; background: var(--panel); padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #2c2733; }
-button { background: #2d2735; color: var(--fg); border: 1px solid #4b4058; border-radius: 6px; padding: 7px 10px; cursor: pointer; }
+#hud strong { color: var(--fg); }
 </style>
 </head>
 <body>
 <div id=\"app\">
   <div id=\"canvasWrap\"><div id=\"canvas\"></div></div>
-  <aside id=\"side\">
-    <div id=\"toolbar\"><button id=\"fit\">Ir para selecionado</button></div>
-    <h1>Seleciona um node</h1>
-    <input id=\"editTitle\" hidden>
-    <div class=\"meta\">Tree canvas experimental</div>
-    <div id=\"content\"></div>
-    <textarea id=\"editContent\" hidden></textarea>
-  </aside>
+  <div id=\"hud\"><strong>Cardflow</strong> <span id=\"hudText\">Seleciona um node</span></div>
 </div>
 <script>
 const apiBase = 'http://127.0.0.1:%s';
@@ -958,7 +1213,6 @@ const wrap = document.getElementById('canvasWrap');
 const nodeEls = new Map();
 const columnEls = new Map();
 let selected = null;
-let editing = false;
 function centerNode(n) {
   const el = nodeEls.get(n.id);
   const column = columnEls.get(n.level);
@@ -982,7 +1236,6 @@ function ancestors(n) {
   return result;
 }
 function showNode(n, el) {
-  if (editing) return;
   document.querySelectorAll('.node').forEach(x => x.classList.remove('selected', 'path', 'child-target'));
   selected = n;
   const target = el || nodeEls.get(n.id);
@@ -990,48 +1243,37 @@ function showNode(n, el) {
   for (const parent of ancestors(n)) nodeEls.get(parent.id)?.classList.add('path');
   const firstChild = (children.get(n.id) || [])[0];
   if (firstChild) nodeEls.get(firstChild.id)?.classList.add('child-target');
-  document.querySelector('#side h1').textContent = n.title;
-  document.querySelector('#side .meta').textContent = `h${n.level} • ${n.id}`;
-  document.querySelector('#content').textContent = n.content || '';
+  document.getElementById('hudText').textContent = `h${n.level} · ${n.title}`;
   centerNode(n);
   for (const parent of ancestors(n)) centerNode(parent);
   if (firstChild) centerNode(firstChild);
   centerColumn(n.level);
 }
 function beginEdit() {
-  if (!selected || editing) return;
-  editing = true;
-  document.querySelector('#side h1').hidden = true;
-  document.querySelector('#content').hidden = true;
-  const title = document.getElementById('editTitle');
-  const content = document.getElementById('editContent');
-  title.hidden = false;
-  content.hidden = false;
-  title.value = selected.title || '';
-  content.value = selected.content || '';
-  content.focus();
+  postAction('edit');
 }
 async function postAction(action, extra = {}) {
-  if (!selected) return;
-  const response = await fetch(apiBase + '/action', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, id: selected.id, ...extra })
-  });
-  const data = await response.json();
-  if (!data.ok) {
-    alert(data.error || 'Erro no Cardflow canvas');
+  if (!selected && nodes[0]) showNode(nodes[0]);
+  if (!selected) {
+    alert('Nenhum node selecionado');
     return;
   }
-  if (data.selected) localStorage.setItem('cardflowCanvasSelected', data.selected);
-  location.reload();
-}
-function saveEdit() {
-  if (!editing || !selected) return;
-  postAction('update', {
-    title: document.getElementById('editTitle').value,
-    content: document.getElementById('editContent').value
-  });
+  try {
+    const response = await fetch(apiBase + '/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, id: selected.id, ...extra })
+    });
+    const data = await response.json();
+    if (!data.ok) {
+      alert(data.error || 'Erro no Cardflow canvas');
+      return;
+    }
+    if (data.selected) localStorage.setItem('cardflowCanvasSelected', data.selected);
+    if (action !== 'edit') location.reload();
+  } catch (err) {
+    alert('Erro ao contactar Emacs: ' + err);
+  }
 }
 for (const level of [...levels.keys()].sort((a, b) => a - b)) {
   const column = document.createElement('section');
@@ -1044,7 +1286,7 @@ for (const level of [...levels.keys()].sort((a, b) => a - b)) {
     el.className = 'node';
     el.innerHTML = `<div class=\"level\">h${n.level}</div><div class=\"title\"></div><div class=\"body\"></div>`;
     el.querySelector('.title').textContent = n.title;
-    el.querySelector('.body').textContent = n.content || '';
+    el.querySelector('.body').innerHTML = n.contentHtml || '';
     el.addEventListener('click', () => showNode(n, el));
     nodeEls.set(n.id, el);
     column.appendChild(el);
@@ -1064,17 +1306,6 @@ function moveSelection(direction) {
   if (next) showNode(next);
 }
 window.addEventListener('keydown', e => {
-  if (editing) {
-    if ((e.key === 'Enter' && (e.ctrlKey || e.metaKey)) || (e.key === 'q' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))) {
-      saveEdit();
-      e.preventDefault();
-    }
-    if (e.key === 'Escape') {
-      document.activeElement.blur();
-      e.preventDefault();
-    }
-    return;
-  }
   if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
   const keys = {
     ArrowLeft: 'parent',
@@ -1101,13 +1332,15 @@ window.addEventListener('keydown', e => {
     e.preventDefault();
     return;
   }
+  if (e.key === 'Enter') {
+    if (selected) showNode(selected);
+    e.preventDefault();
+    return;
+  }
   const direction = keys[e.key];
   if (!direction) return;
   moveSelection(direction);
   e.preventDefault();
-});
-document.getElementById('fit').addEventListener('click', () => {
-  if (selected) showNode(selected);
 });
 const remembered = localStorage.getItem('cardflowCanvasSelected');
 const initial = remembered ? byId.get(remembered) : nodes[0];
@@ -1128,7 +1361,7 @@ if (initial) showNode(initial, nodeEls.get(initial.id));
       (setq meu/org-cardflow-canvas-source source)
       (with-temp-file meu/org-cardflow-canvas-file
         (insert (meu/org-cardflow-canvas--html nodes port)))
-      (browse-url-of-file meu/org-cardflow-canvas-file)))
+      (meu/org-cardflow-canvas--open-browser)))
 
   (defalias 'cardflow-canvas #'meu/org-cardflow-canvas)
 
@@ -1147,6 +1380,25 @@ if (initial) showNode(initial, nodeEls.get(initial.id));
     (kbd "n")       #'meu/org-insert-child
     (kbd "S-<up>")   #'meu/org-move-subtree-up
     (kbd "S-<down>") #'meu/org-move-subtree-down)
+
+  (evil-define-key '(normal insert) meu/org-cardflow-canvas-edit-mode-map
+    (kbd "C-<return>") #'meu/org-cardflow-canvas-finish-edit)
+
+  (evil-define-key 'normal meu/org-cardflow-canvas-edit-mode-map
+    (kbd "q") #'meu/org-cardflow-canvas-finish-edit)
+
+  (evil-define-key 'normal meu/org-cardflow-canvas-xwidget-mode-map
+    (kbd "<left>")  #'meu/org-cardflow-canvas-js-parent
+    (kbd "h")       #'meu/org-cardflow-canvas-js-parent
+    (kbd "<right>") #'meu/org-cardflow-canvas-js-child
+    (kbd "l")       #'meu/org-cardflow-canvas-js-child
+    (kbd "<up>")    #'meu/org-cardflow-canvas-js-prev
+    (kbd "k")       #'meu/org-cardflow-canvas-js-prev
+    (kbd "<down>")  #'meu/org-cardflow-canvas-js-next
+    (kbd "j")       #'meu/org-cardflow-canvas-js-next
+    (kbd "c")       #'meu/org-cardflow-canvas-js-create-sibling
+    (kbd "n")       #'meu/org-cardflow-canvas-js-create-child
+    (kbd "i")       #'meu/org-cardflow-canvas-js-edit)
 
   (evil-define-key 'normal org-mode-map
     (kbd "q")
