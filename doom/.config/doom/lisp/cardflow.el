@@ -1166,6 +1166,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-mo
   flex: 0 0 calc((100vw - 28px) / 3); height: 100vh; overflow-y: auto; padding: 36px 2px 44px;
   border-right: 1px solid var(--ruler); scroll-behavior: smooth;
 }
+.column:first-child { flex-basis: calc(((100vw - 28px) / 3) * 0.67); }
 .column-title { color: var(--muted); font-size: 11px; margin: 0 0 12px 4px; }
 .node {
   width: 100%%; min-height: 92px; padding: 12px 14px; margin-bottom: 14px;
@@ -1197,6 +1198,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-mo
   <div id=\"hud\"><strong>Cardflow</strong> <span id=\"hudText\">Seleciona um node</span></div>
 </div>
 <script>
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const apiBase = 'http://127.0.0.1:%s';
 const nodes = %s;
 const byId = new Map(nodes.map(n => [n.id, n]));
@@ -1213,18 +1215,18 @@ const wrap = document.getElementById('canvasWrap');
 const nodeEls = new Map();
 const columnEls = new Map();
 let selected = null;
-function centerNode(n) {
+function centerNode(n, behavior = 'smooth') {
   const el = nodeEls.get(n.id);
   const column = columnEls.get(n.level);
   if (!el || !column) return;
   const top = el.offsetTop - column.offsetTop - (column.clientHeight / 2) + (el.offsetHeight / 2);
-  column.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  column.scrollTo({ top: Math.max(0, top), behavior });
 }
-function centerColumn(level) {
+function centerColumn(level, behavior = 'smooth') {
   const column = columnEls.get(level);
   if (!column) return;
   const left = column.offsetLeft - (wrap.clientWidth / 2) + (column.clientWidth / 2);
-  wrap.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+  wrap.scrollTo({ left: Math.max(0, left), behavior });
 }
 function ancestors(n) {
   const result = [];
@@ -1235,7 +1237,8 @@ function ancestors(n) {
   }
   return result;
 }
-function showNode(n, el) {
+function showNode(n, el, options = {}) {
+  const behavior = options.instant ? 'auto' : 'smooth';
   document.querySelectorAll('.node').forEach(x => x.classList.remove('selected', 'path', 'child-target'));
   selected = n;
   const target = el || nodeEls.get(n.id);
@@ -1244,10 +1247,18 @@ function showNode(n, el) {
   const firstChild = (children.get(n.id) || [])[0];
   if (firstChild) nodeEls.get(firstChild.id)?.classList.add('child-target');
   document.getElementById('hudText').textContent = `h${n.level} · ${n.title}`;
-  centerNode(n);
-  for (const parent of ancestors(n)) centerNode(parent);
-  if (firstChild) centerNode(firstChild);
-  centerColumn(n.level);
+  centerNode(n, behavior);
+  for (const parent of ancestors(n)) centerNode(parent, behavior);
+  if (firstChild) centerNode(firstChild, behavior);
+  centerColumn(n.level, behavior);
+}
+function settleSelection(n) {
+  if (!n) return;
+  showNode(n, nodeEls.get(n.id), { instant: true });
+  requestAnimationFrame(() => showNode(n, nodeEls.get(n.id), { instant: true }));
+  for (const delay of [80, 220, 500]) {
+    setTimeout(() => showNode(n, nodeEls.get(n.id), { instant: true }), delay);
+  }
 }
 function beginEdit() {
   postAction('edit');
@@ -1269,7 +1280,10 @@ async function postAction(action, extra = {}) {
       alert(data.error || 'Erro no Cardflow canvas');
       return;
     }
-    if (data.selected) localStorage.setItem('cardflowCanvasSelected', data.selected);
+    if (data.selected) {
+      localStorage.setItem('cardflowCanvasSelected', data.selected);
+      localStorage.setItem('cardflowCanvasSettle', '1');
+    }
     if (action !== 'edit') location.reload();
   } catch (err) {
     alert('Erro ao contactar Emacs: ' + err);
@@ -1288,6 +1302,11 @@ for (const level of [...levels.keys()].sort((a, b) => a - b)) {
     el.querySelector('.title').textContent = n.title;
     el.querySelector('.body').innerHTML = n.contentHtml || '';
     el.addEventListener('click', () => showNode(n, el));
+    el.querySelectorAll('img').forEach(img => {
+      img.addEventListener('load', () => {
+        if (selected && selected.id === n.id) settleSelection(n);
+      });
+    });
     nodeEls.set(n.id, el);
     column.appendChild(el);
   }
@@ -1344,7 +1363,12 @@ window.addEventListener('keydown', e => {
 });
 const remembered = localStorage.getItem('cardflowCanvasSelected');
 const initial = remembered ? byId.get(remembered) : nodes[0];
-if (initial) showNode(initial, nodeEls.get(initial.id));
+const shouldSettle = localStorage.getItem('cardflowCanvasSettle') === '1';
+localStorage.removeItem('cardflowCanvasSettle');
+if (initial) {
+  if (shouldSettle) settleSelection(initial);
+  else showNode(initial, nodeEls.get(initial.id));
+}
 </script>
 </body>
 </html>"
