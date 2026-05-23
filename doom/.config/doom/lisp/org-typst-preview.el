@@ -26,22 +26,26 @@
   (remove-overlays (point-min) (point-max) 'meu/org-typst-preview t))
 
 (defun meu/org-typst--make-doc (body _display)
-  "Cria documento Typst mínimo para BODY com fundo transparente e texto branco."
+  "Cria documento Typst mínimo para BODY com fundo transparente."
   (concat
    "#set page(width: auto, height: auto, margin: 0pt, fill: none)\n"
-   "#set text(size: 14pt, fill: white)\n"
+   (format "#set text(size: 14pt, fill: rgb(\"%s\"))\n"
+           (meu/org-typst--theme-fg))
    "$ " body " $"))
 
 (defun meu/org-typst--compile-to-svg (body display)
   "Compila BODY como Typst para SVG.
 DISPLAY indica se veio de math display ou inline."
   (make-directory meu/org-typst-preview-dir t)
-  (let* ((hash (secure-hash 'sha1 (concat body (if display ":display" ":inline"))))
+  (let* ((doc (meu/org-typst--make-doc body display))
+         (hash (secure-hash 'sha1
+                            (concat doc
+                                    (if display ":display:theme-v1" ":inline:theme-v1"))))
          (typ-file (expand-file-name (concat hash ".typ") meu/org-typst-preview-dir))
          (svg-file (expand-file-name (concat hash ".svg") meu/org-typst-preview-dir)))
     (unless (file-exists-p svg-file)
       (with-temp-file typ-file
-        (insert (meu/org-typst--make-doc body display)))
+        (insert doc))
       (let ((exit-code
              (call-process "typst" nil "*org-typst-preview*" t
                            "compile" typ-file svg-file)))
@@ -101,6 +105,16 @@ DISPLAY indica se é fórmula display."
     (beginning-of-line)
     (looking-at-p "[ \t]*|")))
 
+(defun meu/org-typst--fallback-overlay (beg end label)
+  "Esconde região BEG END com um fallback discreto LABEL."
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'meu/org-typst-preview t)
+    (overlay-put ov 'display
+                 (propertize label
+                             'face
+                             'font-lock-comment-face))
+    (overlay-put ov 'evaporate t)))
+
 (defun meu/org-typst-preview-buffer ()
   "Renderiza fragments Typst em fragments matemáticos Org."
   (interactive)
@@ -121,13 +135,17 @@ DISPLAY indica se é fórmula display."
              (body (car parsed))
              (display (cdr parsed)))
         (when (meu/org-typst--previewable-fragment-p body)
-          (unless (meu/org-typst--line-in-table-p beg)
+          (unless (and (string= (buffer-name) "*org-sidebar*")
+                       (meu/org-typst--line-in-table-p beg))
             (condition-case err
                 (meu/org-typst--overlay beg end body display)
               (error
-               (unless meu/org-typst-preview-silent-errors
-                 (message "Typst preview erro ignorado: %s" err)))))))))
-  (meu/org-typst-preview-src-blocks))
+               (if (and meu/org-typst-preview-silent-errors
+                        (string= (buffer-name) "*org-sidebar*"))
+                   (meu/org-typst--fallback-overlay beg end "[Typst]")
+                 (unless meu/org-typst-preview-silent-errors
+                   (message "Typst preview erro ignorado: %s" err)))))))))
+  (meu/org-typst-preview-src-blocks)))
 
 
 (defun meu/org-typst-toggle-preview ()
@@ -253,8 +271,11 @@ DISPLAY indica se é fórmula display."
                   (overlay-put ov 'after-string "\n")
                   (overlay-put ov 'evaporate t))
               (error
-               (unless meu/org-typst-preview-silent-errors
-                 (message "Typst src preview erro ignorado: %s" err))))))))))
+               (if (and meu/org-typst-preview-silent-errors
+                        (string= (buffer-name) "*org-sidebar*"))
+                   (meu/org-typst--fallback-overlay beg end "[bloco Typst]")
+                 (unless meu/org-typst-preview-silent-errors
+                   (message "Typst src preview erro ignorado: %s" err)))))))))))
 
 (defun meu/org-typst--compile-src-block-to-svg (body)
   "Compila BODY de um bloco src typst para SVG."

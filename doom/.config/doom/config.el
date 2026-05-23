@@ -37,10 +37,28 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-(setq shell-file-name (executable-find "bash"))
+(defvar fabio/fish-shell
+  (or (executable-find "fish") "/usr/bin/fish"))
 
-(setq-default vterm-shell "/usr/bin/fish")
-(setq-default explicit-shell-file-name "/usr/bin/fish")
+(setq shell-file-name fabio/fish-shell
+      shell-command-switch "-c")
+(setq-default shell-file-name fabio/fish-shell
+              explicit-shell-file-name fabio/fish-shell
+              vterm-shell fabio/fish-shell)
+(setenv "SHELL" fabio/fish-shell)
+
+(after! compile
+  (add-to-list 'compilation-environment (concat "SHELL=" fabio/fish-shell)))
+
+;; Com `:tools (lsp +eglot)`, o módulo Java do Doom não ativa LSP sozinho.
+;; Arrancar o jdtls em ficheiros Java dá diagnósticos como imports em falta.
+(after! eglot
+  (setq eglot-connect-timeout 120)
+  (add-to-list 'eglot-server-programs
+               '((java-mode java-ts-mode) . ("jdtls"))))
+
+(add-hook 'java-mode-local-vars-hook #'lsp! 'append)
+(add-hook 'java-ts-mode-local-vars-hook #'lsp! 'append)
 
 ;; Remapeamento KLÇO em vez de HJKL
 (map! :n "k" #'evil-backward-char
