@@ -1,0 +1,234 @@
+#+title: Cardflow - notas de implementacao
+#+author: Fabio
+
+* Objetivo
+
+Estas notas descrevem as alteracoes recentes no Cardflow para ser mais facil
+retomar o trabalho noutro computador.
+
+O objetivo principal foi manter o Cardflow normal estavel e ir adicionando
+melhorias visuais de forma incremental. Algumas tentativas anteriores de mexer
+diretamente na UI em Emacs Lisp causaram bloqueios ou ecra preto ao abrir o
+Cardflow, por isso a parte experimental nova ficou isolada no comando
+=cardflow-canvas=.
+
+* Problemas que motivaram as alteracoes
+
+- O sidebar tinha muito ruido visual: realce laranja em texto normal, linhas de
+  spellcheck/diagnostico e renders de Typst com cor pouco integrada.
+- O Cardflow normal precisava continuar utilizavel em Linux e macOS.
+- O canvas pretendido era mais parecido com o plugin do Obsidian: colunas por
+  nivel, scroll por coluna, selecao de nodes e informacao completa dentro de
+  cada card.
+- O canvas nao devia substituir ainda o Cardflow normal; deve servir para testar
+  uma UI alternativa.
+
+* Alteracoes no Cardflow normal
+
+** Spellcheck e diagnosticos no sidebar
+
+Foi adicionada a funcao =meu/org-sidebar-disable-diagnostics= em
+=cardflow.el=.
+
+Ela desativa/removo overlays de:
+
+- =flycheck=
+- =flymake=
+- =flyspell=
+- =spell-fu=
+- =jinx=
+- =langtool=
+- =writegood=
+
+Isto e aplicado apenas ao buffer virtual =*org-sidebar*=. A ideia e evitar as
+linhas vermelhas/rosa no Cardflow, sem desativar spellcheck no ficheiro Org
+real.
+
+** Realce laranja falso de LaTeX
+
+No sidebar foi definido:
+
+#+begin_src elisp
+(setq-local org-highlight-latex-and-related nil)
+#+end_src
+
+Isto evita que o Org interprete pedacos de texto normal como se estivessem
+dentro de blocos =$...$= ou =$$...$$=.
+
+* Alteracoes no Typst preview
+
+No ficheiro =org-typst-preview.el= foram feitos ajustes para reduzir ruido no
+Cardflow:
+
+- Typst inline usa a cor normal do tema em vez de branco fixo.
+- Erros silenciosos no sidebar mostram fallback curto, por exemplo =[Typst]= ou
+  =[bloco Typst]=.
+- O bloqueio de Typst dentro de tabelas foi limitado ao sidebar virtual, para
+  nao impedir renders em outros buffers.
+- O hash do cache passou a incluir variacao de tema, para evitar SVG antigo com
+  cor errada.
+
+* Comando experimental: cardflow-canvas
+
+Foi criado o comando:
+
+#+begin_src elisp
+M-x cardflow-canvas
+#+end_src
+
+Alias:
+
+#+begin_src elisp
+M-x meu/org-cardflow-canvas
+#+end_src
+
+Este comando gera um ficheiro HTML temporario:
+
+#+begin_src text
+/tmp/cardflow-canvas.html
+#+end_src
+
+e abre-o no browser.
+
+** Porque HTML/browser
+
+O canvas visual fica isolado fora dos buffers virtuais do Emacs. Isto evita
+misturar demasiados overlays, propriedades de texto e modos do Org na mesma UI,
+que foi uma das causas provaveis dos bloqueios anteriores.
+
+O Emacs continua a ser a fonte de verdade: o HTML apenas mostra e envia acoes de
+volta ao Emacs.
+
+** Layout atual
+
+O canvas usa colunas por nivel:
+
+- =h1= numa coluna
+- =h2= noutra coluna
+- =h3= noutra coluna
+- etc.
+
+Cada coluna tem scroll vertical proprio. Os cards ficam empilhados no fluxo
+normal do browser, nao com posicoes absolutas. Isto evita que cards grandes
+passem por cima de outros.
+
+Ao selecionar um card:
+
+- o card selecionado e centrado na sua coluna;
+- os pais/ancestrais sao centrados nas colunas anteriores;
+- o primeiro filho e centrado na coluna seguinte;
+- a coluna do selecionado e trazida para o centro horizontal.
+
+** Conteudo dos cards
+
+Os cards mostram o conteudo completo direto do node, nao apenas preview.
+
+As drawers =:PROPERTIES:= sao removidas da visualizacao no canvas para reduzir
+ruido, mas nao sao apagadas do ficheiro Org.
+
+* Teclas no cardflow-canvas
+
+As teclas tentam seguir o Cardflow normal:
+
+- =h= ou seta esquerda: ir para o pai
+- =l= ou seta direita: ir para o primeiro filho
+- =k= ou seta cima: ir para o irmao anterior
+- =j= ou seta baixo: ir para o irmao seguinte
+- =c=: criar irmao
+- =n=: criar filho
+- =i=: editar o node selecionado
+- =Ctrl+Enter=: guardar edicao
+- =q=: guardar/sair da edicao quando o foco ja nao esta no campo de texto
+
+Nota: no browser, quando o foco esta dentro do textarea, a tecla =q= escreve a
+letra =q=. Para sair rapidamente, usar =Ctrl+Enter= e mais direto.
+
+* Como criar e editar nodes no canvas
+
+O HTML e estatico, por isso foi criado um pequeno servidor local dentro do Emacs
+para receber acoes do browser.
+
+O servidor escuta em:
+
+#+begin_src text
+127.0.0.1:<porta-aleatoria>
+#+end_src
+
+A porta e gerada quando =cardflow-canvas= arranca.
+
+As acoes suportadas atualmente sao:
+
+- =create-sibling=
+- =create-child=
+- =update=
+
+Depois de cada acao:
+
+1. o Emacs altera o ficheiro Org real;
+2. guarda o ficheiro;
+3. regenera =/tmp/cardflow-canvas.html=;
+4. o browser recarrega;
+5. o node criado/editado fica selecionado.
+
+* Cuidados importantes
+
+** Nao aplicar grandes refactors de uma vez
+
+Alteracoes grandes no Cardflow ja causaram freeze/ecra preto. Continuar com
+passos pequenos:
+
+1. alterar uma coisa;
+2. validar load em batch;
+3. abrir o Cardflow;
+4. testar no ficheiro real;
+5. so depois continuar.
+
+** Nao mexer nos ficheiros das aulas sem querer
+
+As alteracoes de UI devem ficar em:
+
+#+begin_src text
+.config/doom/lisp/cardflow.el
+.config/doom/lisp/org-typst-preview.el
+#+end_src
+
+Evitar comandos destrutivos que possam alterar os ficheiros Org das aulas.
+
+** O canvas ainda e experimental
+
+O Cardflow normal continua a ser a UI principal. O canvas serve para testar a
+ideia de uma UI mais visual.
+
+* Validacoes usadas
+
+Load simples do Cardflow:
+
+#+begin_src sh
+emacs --batch -Q --eval "(progn (require 'org) (defmacro after! (&rest body) (cons 'progn (cdr body))) (defmacro map! (&rest _body) nil) (defun evil-normalize-keymaps () nil) (defmacro evil-define-key (&rest _body) nil) (load-file \".config/doom/lisp/cardflow.el\"))"
+#+end_src
+
+Verificar whitespace do diff:
+
+#+begin_src sh
+git diff --check
+#+end_src
+
+Teste manual principal:
+
+1. abrir um ficheiro Org de aulas;
+2. correr =M-x cardflow-canvas=;
+3. testar navegacao com =h/j/k/l=;
+4. testar =c=, =n= e =i=;
+5. confirmar que o ficheiro Org real ficou correto.
+
+* Proximos passos possiveis
+
+- Melhorar visualmente a indicacao de pai, selecionado e primeiro filho.
+- Adicionar ligacoes/linhas discretas entre colunas se for util.
+- Fazer =q= guardar edicao mesmo com foco no textarea, se isso nao atrapalhar a
+  escrita normal.
+- Adicionar botao pequeno no HTML para guardar edicao.
+- Suportar mover subtree para cima/baixo no canvas com as mesmas teclas do
+  Cardflow normal.
+- Investigar abrir o canvas numa janela controlada ou app web local mais
+  persistente, em vez de apenas ficheiro temporario.
