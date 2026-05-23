@@ -1169,8 +1169,8 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 ui-mo
 .column-title { color: var(--muted); font-size: 11px; margin: 0 0 12px 4px; }
 .node {
   width: 100%%; min-height: 92px; padding: 12px 14px; margin-bottom: 14px;
-  border: 1px solid var(--base3); border-left: 4px solid var(--accent);
-  background: linear-gradient(180deg, var(--bg-alt), var(--ruler));
+  border: 1px solid var(--base3);
+  background: var(--bg-alt);
   border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.28);
   cursor: pointer; white-space: normal;
 }
