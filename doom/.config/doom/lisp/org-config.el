@@ -21,10 +21,10 @@
   (map! :leader
         :desc "Org Capture"
         "x" #'org-capture)
-  (setq org-agenda-files '("~/org/inbox.org"
-                           "~/org/tarefas.org"
-                           "~/org/habitos.org"
-                           "~/org/agenda.org"))
+  (setq org-agenda-files '("~/Documents/into_sparta_life/00_jornal/inbox.org"
+                           "~/Documents/into_sparta_life/00_jornal/tarefas.org"
+                           "~/Documents/into_sparta_life/00_jornal/habitos.org"
+                           "~/Documents/into_sparta_life/00_jornal/agenda.org"))
 
   ;; Estados de uma tarefa
   (setq org-todo-keywords
