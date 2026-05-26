@@ -21,6 +21,10 @@
   '(company-tooltip-common :weight bold)
   '(company-tooltip-annotation :slant italic))
 
+;; Teclado PT-Mac: Option para caracteres especiais ({ } [ ] etc.), Command como Meta
+(when (eq system-type 'darwin)
+  (setq mac-option-modifier nil)
+  (setq mac-command-modifier 'meta))
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -86,7 +90,9 @@
 
 (after! typst-ts-mode
   (unless (treesit-language-available-p 'typst)
-    (typst-ts-utils-install-current-grammar)))
+    (if (fboundp 'typst-ts-utils-install-current-grammar)
+        (typst-ts-utils-install-current-grammar)
+      (treesit-install-language-grammar 'typst))))
 
 (add-hook 'typst-ts-mode-hook #'eglot-ensure)
 

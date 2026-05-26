@@ -9,8 +9,10 @@ end
 if test (uname) = Darwin
     fish_add_path /Library/TeX/texbin
     fish_add_path /Applications/Ghostty.app/Contents/MacOS
+else
+    alias emacs='emacs-pgtk --init-directory ~/.config/emacs'
 end
-alias emacs='emacs-pgtk --init-directory ~/.config/emacs'
+
 alias doom='~/.config/emacs/bin/doom'
 
 # pnpm

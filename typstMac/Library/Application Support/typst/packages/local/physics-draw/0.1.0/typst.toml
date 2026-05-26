@@ -1,0 +1,7 @@
+[package]
+name = "physics-draw"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Fábio Rodrigues"]
+license = "MIT"
+description = "Helpers CeTZ para diagramas de forças em Física."
