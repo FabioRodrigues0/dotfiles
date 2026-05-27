@@ -67,3 +67,4 @@
 (package! org-modern)
 (package! org-super-agenda)
 (package! pdf-tools)
+(package! colorful-mode)

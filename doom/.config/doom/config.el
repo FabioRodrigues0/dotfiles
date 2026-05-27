@@ -32,6 +32,15 @@
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 (add-to-list 'custom-theme-load-path (expand-file-name "themes/" doom-user-dir))
 (setq doom-theme 'hex-lavender-dark)
+
+;; Mostra cores (hex, rgb, nomes) como quadradinho colorido ao lado do código.
+(use-package! colorful-mode
+  :hook ((prog-mode . colorful-mode)
+         (text-mode . colorful-mode))
+  :config
+  (setq colorful-use-prefix t          ; quadradinho em vez de pintar o texto
+        colorful-prefix-string "■ "    ; o quadradinho
+        colorful-prefix-alignment 'left))
 (add-to-list 'default-frame-alist '(undecorated . t))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
@@ -64,6 +73,85 @@
 (add-hook 'java-mode-local-vars-hook #'lsp! 'append)
 (add-hook 'java-ts-mode-local-vars-hook #'lsp! 'append)
 
+(require 'cl-lib)
+
+(defun fabio/gradle-project-root ()
+  "Return the current Gradle project root."
+  (or (locate-dominating-file default-directory "settings.gradle")
+      (locate-dominating-file default-directory "settings.gradle.kts")
+      (locate-dominating-file default-directory "build.gradle")
+      (locate-dominating-file default-directory "build.gradle.kts")))
+
+(defun fabio/gradle-command (root)
+  "Return the Gradle command to use for ROOT."
+  (let ((wrapper (expand-file-name "gradlew" root)))
+    (cond ((file-exists-p wrapper) wrapper)
+          ((executable-find "gradle") "gradle")
+          (t (user-error "Não encontrei gradlew no projeto nem gradle no PATH")))))
+
+(defun fabio/spotless-project-root ()
+  "Return the current Gradle project root when it appears to use Spotless."
+  (when-let* ((root (fabio/gradle-project-root))
+              (build-file (cl-find-if #'file-exists-p
+                                      (mapcar (lambda (file)
+                                                (expand-file-name file root))
+                                              '("build.gradle" "build.gradle.kts")))))
+    (with-temp-buffer
+      (insert-file-contents build-file nil 0 4096)
+      (when (re-search-forward "\\bspotless\\b" nil t)
+        root))))
+
+(defun fabio/spotless-buffer-p ()
+  "Return non-nil when this buffer should be formatted with Spotless."
+  (and buffer-file-name
+       (memq major-mode '(java-mode java-ts-mode kotlin-mode kotlin-ts-mode))
+       (fabio/spotless-project-root)))
+
+(defun fabio/spotless-apply (&optional no-save)
+  "Format the current Gradle project with Spotless and reload this buffer."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Este buffer não está associado a um ficheiro"))
+  (let ((root (or (fabio/spotless-project-root)
+                  (user-error "Não encontrei Spotless neste projeto Gradle")))
+        (file buffer-file-name))
+    (unless no-save
+      (save-buffer))
+    (let ((default-directory root))
+      (unless (zerop (call-process (fabio/gradle-command root) nil "*spotlessApply*" t "spotlessApply"))
+        (pop-to-buffer "*spotlessApply*")
+        (user-error "spotlessApply falhou")))
+    (when (and (buffer-file-name)
+               (file-equal-p buffer-file-name file))
+      (revert-buffer :ignore-auto :noconfirm :preserve-modes))
+    (message "Formatado com Spotless")))
+
+(defun fabio/spotless-apply-after-save ()
+  "Run Spotless after saving Java/Kotlin files in Spotless Gradle projects."
+  (when (fabio/spotless-buffer-p)
+    (let ((inhibit-message t))
+      (fabio/spotless-apply :no-save))))
+
+(defun fabio/format-buffer-a (orig-fn &rest args)
+  "Use Spotless instead of Doom's default formatter in Spotless projects."
+  (if (fabio/spotless-buffer-p)
+      (fabio/spotless-apply)
+    (apply orig-fn args)))
+
+(defun fabio/use-spotless-formatting-h ()
+  "Use the project's Spotless configuration for Java/Kotlin formatting."
+  (when (fabio/spotless-project-root)
+    (setq-local +format-with nil)
+    (add-hook 'after-save-hook #'fabio/spotless-apply-after-save nil t)))
+
+(after! apheleia
+  (advice-add #'+format/buffer :around #'fabio/format-buffer-a))
+
+(add-hook 'java-mode-hook #'fabio/use-spotless-formatting-h)
+(add-hook 'java-ts-mode-hook #'fabio/use-spotless-formatting-h)
+(add-hook 'kotlin-mode-hook #'fabio/use-spotless-formatting-h)
+(add-hook 'kotlin-ts-mode-hook #'fabio/use-spotless-formatting-h)
+
 ;; Remapeamento KLÇO em vez de HJKL
 (map! :n "k" #'evil-backward-char
       :n "l" #'evil-next-line
@@ -79,6 +167,17 @@
       :v "l" #'evil-next-line
       :v "ç" #'evil-forward-char
       :v "o" #'evil-previous-line)
+
+;; Correr `doom sync' direto do Emacs (sem ir ao terminal).
+(defun fabio/doom-sync ()
+  "Corre `doom sync' num buffer assíncrono."
+  (interactive)
+  (let* ((default-directory doom-emacs-dir)
+         (doom-bin (expand-file-name "bin/doom" doom-emacs-dir)))
+    (async-shell-command (format "%s sync" (shell-quote-argument doom-bin))
+                         "*doom sync*")))
+
+(map! :leader :desc "doom sync" "h r s" #'fabio/doom-sync)
 
 ;; Tinymist via eglot para Typst
 (after! eglot
