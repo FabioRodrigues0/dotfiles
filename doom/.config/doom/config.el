@@ -208,6 +208,26 @@
   (typst-preview-executable "tinymist") ; path to tinymist binary (relative or absolute)
   (typst-preview-partial-rendering t)   ; enable partial rendering
   :config
+  (defun fabio/typst-preview-xwidget-split-right (orig browser hostname)
+    "Abre o typst-preview xwidget à direita em macOS, mantendo o Typst à esquerda."
+    (if (and (eq system-type 'darwin)
+             (string= browser "xwidget"))
+        (let* ((source-window (selected-window))
+               (preview-window
+                (or (window-in-direction 'right source-window)
+                    (split-window source-window nil 'right))))
+          (select-window preview-window)
+          (funcall orig browser hostname)
+          (when (and (window-live-p source-window)
+                     (window-live-p preview-window))
+            (balance-windows-area)
+            (select-window source-window)))
+      (funcall orig browser hostname)))
+
+  (advice-add 'typst-preview--connect-browser
+              :around
+              #'fabio/typst-preview-xwidget-split-right)
+
   (map! :map typst-ts-mode-map
         :n "SPC p t" #'typst-preview-mode
         :n "SPC p r" (lambda ()
