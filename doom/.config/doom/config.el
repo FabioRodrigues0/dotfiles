@@ -203,7 +203,7 @@
   :init
   (setq typst-preview-autostart t) ; start preview automatically when typst-preview-mode is activated
   :custom
-  (typst-preview-browser "default") 	; this is the default option; other options are `eaf-browser' or `xwidget'.
+  (typst-preview-browser (if (eq system-type 'darwin) "xwidget" "default"))
   (typst-preview-invert-colors "never")	; invert colors depending on system theme
   (typst-preview-executable "tinymist") ; path to tinymist binary (relative or absolute)
   (typst-preview-partial-rendering t)   ; enable partial rendering
