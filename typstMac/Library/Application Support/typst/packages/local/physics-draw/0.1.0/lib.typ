@@ -490,3 +490,309 @@
   }
   draw.content((0.75, 0.16), [$#angle$])
 }
+
+#let trajectory-r-t-example(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.4, x-max: 4.8, y-min: -0.4, y-max: 10, x-label: [$x " (m)"$], y-label: [$y " (m)"$], color: color)
+  draw.line((1, 0), (1.5, 0.25), stroke: graph-color + 1pt)
+  draw.line((1.5, 0.25), (2, 1), stroke: graph-color + 1pt)
+  draw.line((2, 1), (2.5, 2.25), stroke: graph-color + 1pt)
+  draw.line((2.5, 2.25), (3, 4), stroke: graph-color + 1pt)
+  draw.line((3, 4), (3.5, 6.25), stroke: graph-color + 1pt)
+  draw.line((3.5, 6.25), (4, 9), stroke: graph-color + 1pt)
+  for p in ((1, 0), (2, 1), (3, 4), (4, 9)) {
+    draw.circle(p, radius: 0.06, fill: color, stroke: color)
+    draw.line((p.at(0), 0), p, stroke: guide-color + 0.5pt)
+    draw.line((0, p.at(1)), p, stroke: guide-color + 0.5pt)
+    draw.content((p.at(0), -0.35), [$#(p.at(0))$])
+    draw.content((-0.25, p.at(1)), [$#(p.at(1))$])
+  }
+  draw.content((4.25, 9), [$arrow(r)(t)$])
+}
+
+#let displacement-vector-example(color: white, vector-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.4, x-max: 2.4, y-min: -0.4, y-max: 2.6, color: color)
+  draw.line((0, 0), (1, 2.2), stroke: vector-color + 1pt, mark: (end: ">"))
+  draw.line((1, 0), (1, 2.2), stroke: guide-color + 0.6pt)
+  draw.line((0, 2.2), (1, 2.2), stroke: guide-color + 0.6pt)
+  draw.content((1.15, 2.2), [$arrow(r)(2)$])
+  draw.content((1, -0.35), [$1$])
+  draw.content((-0.25, 2.2), [$2.2$])
+}
+
+#let distance-rr2-diagram(color: white, vector-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.5, x-max: 4.5, y-min: -0.5, y-max: 3.5, color: color)
+  let p = (0.8, 0.7)
+  let q = (3.8, 2.7)
+  draw.circle(p, radius: 0.07, fill: color, stroke: color)
+  draw.circle(q, radius: 0.07, fill: color, stroke: color)
+  draw.line(p, q, stroke: vector-color + 1pt)
+  draw.line(p, (q.at(0), p.at(1)), stroke: guide-color + 0.7pt)
+  draw.line((q.at(0), p.at(1)), q, stroke: guide-color + 0.7pt)
+  draw.content((0.55, 0.35), [$P(p,q)$])
+  draw.content((3.95, 2.85), [$X(x,y)$])
+  draw.content((2.2, 0.42), [$x - p$])
+  draw.content((4.1, 1.65), [$y - q$])
+  draw.content((2.15, 2.0), [$d(P,X)$])
+}
+
+#let distance-rrn-diagram(color: white, vector-color: blue) = {
+  draw.line((-0.2, 0), (4.8, 0), stroke: color, mark: (end: ">"))
+  draw.line((0, -0.2), (0, 2.8), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (-1.2, -1.0), stroke: color, mark: (end: ">"))
+  draw.content((5.05, 0), [$x_1$])
+  draw.content((0, 3.05), [$x_2$])
+  draw.content((-1.45, -1.2), [$x_n$])
+  draw.line((0.8, 0.6), (3.6, 2.15), stroke: vector-color + 1pt)
+  draw.circle((0.8, 0.6), radius: 0.07, fill: color, stroke: color)
+  draw.circle((3.6, 2.15), radius: 0.07, fill: color, stroke: color)
+  draw.content((0.45, 0.35), [$P$])
+  draw.content((3.85, 2.25), [$X$])
+  draw.content((2.25, 1.55), [$sqrt(sum_(i=1)^n (x_i - p_i)^2)$])
+}
+
+#let scalar-surface-sketch(color: white, graph-color: blue, guide-color: gray) = {
+  draw.line((0, 0), (4.8, 0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (-1.5, -1.0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (0, 3.3), stroke: color, mark: (end: ">"))
+  draw.content((5.05, 0), [$x$])
+  draw.content((-1.75, -1.12), [$y$])
+  draw.content((0, 3.55), [$z$])
+  for i in range(0, 5) {
+    let a = i / 4
+    draw.bezier((0.4 + a * 2.9, -0.15 - a * 0.55), (1.2 + a * 2.2, 0.4 + a * 0.3), (2.5 + a * 1.3, 1.0 + a * 0.55), (3.8 + a * 0.2, 1.25 + a * 0.7), stroke: graph-color + 0.6pt)
+    draw.bezier((0.4 + a * 0.7, -0.15 + a * 1.4), (1.3 + a * 0.8, 0.15 + a * 1.2), (2.5 + a * 0.7, 0.55 + a * 0.95), (3.8 + a * 0.2, 1.25 + a * 0.7), stroke: graph-color + 0.6pt)
+  }
+  draw.line((2.6, 0.35), (2.6, 1.55), stroke: guide-color + 0.7pt)
+  draw.content((2.85, 1.55), [$z = f(x,y)$])
+}
+
+#let derivative-1d-sketch(color: white, graph-color: blue, tangent-color: red) = {
+  axes(x-min: -0.4, x-max: 4.5, y-min: -0.4, y-max: 4.5, x-label: [$x$], y-label: [$y$], color: color)
+  draw.bezier((0.4, 0.3), (1.2, 0.45), (2.1, 2.7), (4.1, 3.8), stroke: graph-color + 1pt)
+  draw.line((1.45, 1.25), (3.45, 3.25), stroke: tangent-color + 1pt)
+  draw.circle((2.35, 2.15), radius: 0.07, fill: color, stroke: color)
+  draw.content((3.6, 3.35), [$f'(x_0)$])
+  draw.content((2.2, -0.35), [$x_0$])
+}
+
+#let partial-derivative-slice(color: white, graph-color: blue, slice-color: red) = {
+  scalar-surface-sketch(color: color, graph-color: graph-color)
+  draw.line((1.0, -0.35), (3.65, 1.9), stroke: slice-color + 1pt)
+  draw.line((2.35, 0.8), (3.15, 1.55), stroke: slice-color + 1pt, mark: (end: ">"))
+  draw.content((3.25, 1.7), [$g'(x)=f_x(x,c)$])
+  draw.content((1.05, -0.65), [$y=c$])
+}
+
+#let basis-ijk-diagram(color: white, vector-color: blue) = {
+  draw.line((0, 0), (3.4, 0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (-1.4, -1.0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (0, 3.2), stroke: color, mark: (end: ">"))
+  draw.content((3.65, 0), [$x$])
+  draw.content((-1.65, -1.15), [$y$])
+  draw.content((0, 3.45), [$z$])
+  draw.line((0, 0), (1.2, 0), stroke: vector-color + 1pt, mark: (end: ">"))
+  draw.line((0, 0), (-0.7, -0.5), stroke: vector-color + 1pt, mark: (end: ">"))
+  draw.line((0, 0), (0, 1.2), stroke: vector-color + 1pt, mark: (end: ">"))
+  draw.content((1.35, 0.2), [$arrow(i)$])
+  draw.content((-1.0, -0.65), [$arrow(j)$])
+  draw.content((0.25, 1.25), [$arrow(k)$])
+}
+
+#let riemann-integral-1d(color: white, graph-color: blue, rect-color: gray) = {
+  axes(x-min: -0.3, x-max: 5.2, y-min: -0.3, y-max: 4.2, x-label: [$x$], y-label: [$f(x)$], color: color)
+  for i in range(0, 5) {
+    let x1 = 0.6 + i * 0.75
+    let x2 = x1 + 0.75
+    let h = 1.0 + 0.35 * i
+    draw.rect((x1, 0), (x2, h), stroke: rect-color + 0.7pt)
+  }
+  draw.bezier((0.4, 0.6), (1.4, 1.2), (2.8, 2.4), (4.6, 3.6), stroke: graph-color + 1pt)
+  draw.content((2.45, -0.38), [$Delta x$])
+}
+
+#let double-integral-grid(color: white, graph-color: blue, grid-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 5.2, y-min: -0.3, y-max: 3.8, color: color)
+  draw.rect((0.7, 0.6), (4.5, 3.0), stroke: graph-color + 1pt)
+  for x in (1.45, 2.2, 2.95, 3.7) {
+    draw.line((x, 0.6), (x, 3.0), stroke: grid-color + 0.6pt)
+  }
+  for y in (1.2, 1.8, 2.4) {
+    draw.line((0.7, y), (4.5, y), stroke: grid-color + 0.6pt)
+  }
+  draw.content((2.6, 1.5), [$R_(i j)$])
+  draw.content((2.1, 0.25), [$Delta x$])
+  draw.content((4.85, 1.45), [$Delta y$])
+}
+
+#let area-element-diagram(color: white, graph-color: blue) = {
+  plane-axes(x-min: -0.3, x-max: 4.8, y-min: -0.3, y-max: 3.6, color: color)
+  draw.rect((1.3, 1.0), (2.8, 2.0), stroke: graph-color + 1pt)
+  draw.content((2.05, 1.5), [$d A$])
+  draw.content((2.05, 0.68), [$d x$])
+  draw.content((3.12, 1.5), [$d y$])
+}
+
+#let rectangle-region-abcd(color: white, graph-color: blue) = {
+  plane-axes(x-min: -0.3, x-max: 5.2, y-min: -0.3, y-max: 3.8, color: color)
+  draw.rect((1.0, 0.8), (4.2, 3.0), stroke: graph-color + 1pt)
+  draw.content((1.0, 0.35), [$a$])
+  draw.content((4.2, 0.35), [$b$])
+  draw.content((0.55, 0.8), [$c$])
+  draw.content((0.55, 3.0), [$d$])
+  draw.content((2.6, 1.9), [$R=[a,b] times [c,d]$])
+}
+
+#let vertical-region-diagram(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 4.0, color: color)
+  draw.bezier((0.8, 0.7), (1.7, 0.9), (3.2, 0.7), (4.2, 1.1), stroke: graph-color + 1pt)
+  draw.bezier((0.8, 2.4), (1.7, 3.4), (3.2, 3.1), (4.2, 2.6), stroke: graph-color + 1pt)
+  draw.line((0.8, 0.7), (0.8, 2.4), stroke: graph-color + 1pt)
+  draw.line((4.2, 1.1), (4.2, 2.6), stroke: graph-color + 1pt)
+  draw.line((2.6, 0.85), (2.6, 3.05), stroke: guide-color + 0.8pt, mark: (end: ">"))
+  draw.content((2.85, 3.1), [$g_2(x)$])
+  draw.content((2.85, 0.8), [$g_1(x)$])
+}
+
+#let vertical-region-diagram-1(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 4.8, y-min: -0.3, y-max: 3.4, color: color)
+  let top = ((1.0, 2.45), (1.35, 2.85), (1.8, 2.7), (2.25, 2.35), (2.7, 2.4), (3.05, 2.75))
+  let bottom = ((1.0, 1.35), (1.35, 1.75), (1.8, 1.6), (2.25, 1.25), (2.7, 1.3), (3.05, 1.65))
+  for i in range(0, top.len() - 1) {
+    draw.line(top.at(i), top.at(i + 1), stroke: graph-color + 1pt)
+    draw.line(bottom.at(i), bottom.at(i + 1), stroke: graph-color + 1pt)
+  }
+  draw.line((1.28, 1.45), (1.58, 2.65), stroke: guide-color + 0.45pt)
+  draw.line((1.65, 1.55), (2.0, 2.55), stroke: guide-color + 0.45pt)
+  draw.line((2.05, 1.38), (2.42, 2.35), stroke: guide-color + 0.45pt)
+  draw.line((1.0, 0), (1.0, 2.7), stroke: guide-color + 0.7pt)
+  draw.line((3.05, 0), (3.05, 2.95), stroke: guide-color + 0.7pt)
+  draw.content((1.25, -0.35), [$a$])
+  draw.content((3.05, -0.35), [$b$])
+  draw.content((1.85, 1.95), [$B$])
+  draw.content((3.3, 2.7), [$g_2(x)$])
+  draw.content((3.3, 1.45), [$g_1(x)$])
+}
+
+#let vertical-region-diagram-2(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 4.8, y-min: -0.3, y-max: 3.8, color: color)
+  let left = ((1.45, 2.9), (1.05, 2.72), (0.85, 2.35), (0.75, 1.95), (0.82, 1.55), (1.05, 1.2), (1.45, 1.02))
+  let top = ((1.45, 2.9), (1.95, 3.05), (2.45, 2.98), (2.9, 2.78))
+  let bottom = ((1.45, 1.02), (1.95, 0.82), (2.45, 0.9), (2.9, 1.12))
+  for i in range(0, left.len() - 1) {
+    draw.line(left.at(i), left.at(i + 1), stroke: graph-color + 1pt)
+  }
+  for i in range(0, top.len() - 1) {
+    draw.line(top.at(i), top.at(i + 1), stroke: graph-color + 1pt)
+    draw.line(bottom.at(i), bottom.at(i + 1), stroke: graph-color + 1pt)
+  }
+  draw.line((2.9, 1.12), (2.9, 2.78), stroke: graph-color + 1pt)
+  draw.line((1.05, 1.35), (1.45, 2.65), stroke: guide-color + 0.45pt)
+  draw.line((1.45, 1.05), (1.95, 2.9), stroke: guide-color + 0.45pt)
+  draw.line((1.95, 0.92), (2.45, 2.85), stroke: guide-color + 0.45pt)
+  draw.line((2.42, 0.98), (2.75, 2.65), stroke: guide-color + 0.45pt)
+  draw.line((1.25, 0), (1.25, 3.15), stroke: guide-color + 0.7pt)
+  draw.line((2.9, 0), (2.9, 3.15), stroke: guide-color + 0.7pt)
+  draw.content((1.25, -0.35), [$a$])
+  draw.content((2.9, -0.35), [$b$])
+  draw.content((1.8, 1.85), [$B$])
+  draw.content((3.18, 2.8), [$y = g_2(x)$])
+  draw.content((3.18, 1.1), [$y = g_1(x)$])
+}
+
+#let vertical-region-diagram-3(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 4.8, y-min: -0.3, y-max: 3.7, color: color)
+  let top = ((1.0, 1.7), (1.35, 1.55), (1.65, 2.2), (2.05, 2.55), (2.45, 2.4), (2.95, 2.0), (3.25, 2.05))
+  let bottom = ((1.0, 1.45), (1.35, 1.05), (1.8, 0.9), (2.3, 0.9), (2.75, 1.05), (3.25, 1.35))
+  for i in range(0, top.len() - 1) {
+    draw.line(top.at(i), top.at(i + 1), stroke: graph-color + 1pt)
+  }
+  for i in range(0, bottom.len() - 1) {
+    draw.line(bottom.at(i), bottom.at(i + 1), stroke: graph-color + 1pt)
+  }
+  draw.line((1.0, 1.45), (1.0, 1.7), stroke: graph-color + 1pt)
+  draw.line((3.25, 1.35), (3.25, 2.05), stroke: graph-color + 1pt)
+  draw.line((1.15, 1.4), (1.55, 1.95), stroke: guide-color + 0.45pt)
+  draw.line((1.55, 1.05), (2.0, 2.35), stroke: guide-color + 0.45pt)
+  draw.line((2.0, 0.95), (2.45, 2.45), stroke: guide-color + 0.45pt)
+  draw.line((2.45, 1.0), (2.9, 2.15), stroke: guide-color + 0.45pt)
+  draw.line((1.0, 0), (1.0, 2.25), stroke: guide-color + 0.7pt)
+  draw.line((3.25, 0), (3.25, 2.35), stroke: guide-color + 0.7pt)
+  draw.content((1.0, -0.35), [$a$])
+  draw.content((3.25, -0.35), [$b$])
+  draw.content((2.05, 1.55), [$B$])
+  draw.content((3.55, 2.1), [$g_2(x)$])
+  draw.content((3.55, 1.25), [$g_1(x)$])
+}
+
+#let horizontal-region-diagram(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 4.0, color: color)
+  draw.bezier((1.1, 0.7), (0.7, 1.4), (0.9, 2.6), (1.4, 3.3), stroke: graph-color + 1pt)
+  draw.bezier((3.7, 0.7), (4.6, 1.5), (4.3, 2.7), (3.5, 3.3), stroke: graph-color + 1pt)
+  draw.line((1.1, 0.7), (3.7, 0.7), stroke: graph-color + 1pt)
+  draw.line((1.4, 3.3), (3.5, 3.3), stroke: graph-color + 1pt)
+  draw.line((1.0, 2.0), (4.15, 2.0), stroke: guide-color + 0.8pt, mark: (end: ">"))
+  draw.content((0.55, 2.0), [$h_1(y)$])
+  draw.content((4.35, 2.0), [$h_2(y)$])
+}
+
+#let horizontal-region-diagram-1(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 3.8, color: color)
+  draw.bezier((1.1, 0.8), (0.95, 1.35), (1.3, 2.15), (1.2, 2.95), stroke: graph-color + 1pt)
+  draw.bezier((2.6, 0.8), (2.75, 1.45), (2.45, 2.25), (2.65, 2.95), stroke: graph-color + 1pt)
+  draw.line((1.2, 2.95), (2.65, 2.95), stroke: graph-color + 1pt)
+  draw.line((1.1, 0.8), (2.6, 0.8), stroke: graph-color + 1pt)
+  draw.line((0, 1.65), (2.55, 1.65), stroke: guide-color + 0.7pt)
+  draw.content((1.75, 1.65), [$B$])
+  draw.content((2.95, 2.85), [$x = h_1(y)$])
+  draw.content((2.95, 0.95), [$x = h_2(y)$])
+}
+
+#let horizontal-region-diagram-2(color: white, graph-color: blue, guide-color: gray) = {
+  plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 3.8, color: color)
+  draw.line((1.1, 0.75), (3.65, 0.75), stroke: graph-color + 1pt)
+  draw.bezier((1.1, 0.75), (0.8, 1.7), (1.45, 2.95), (2.25, 3.1), stroke: graph-color + 1pt)
+  draw.bezier((3.65, 0.75), (4.2, 1.7), (3.3, 2.85), (2.25, 3.1), stroke: graph-color + 1pt)
+  draw.line((0, 0.75), (3.65, 0.75), stroke: guide-color + 0.7pt)
+  draw.line((0, 2.2), (3.55, 2.2), stroke: guide-color + 0.7pt)
+  draw.content((-0.28, 0.75), [$c$])
+  draw.content((-0.28, 2.2), [$d$])
+  draw.content((2.15, 1.65), [$B$])
+  draw.content((3.85, 2.75), [$x = h_1(y)$])
+  draw.content((3.85, 0.95), [$x = h_2(y)$])
+}
+
+#let three-tension-forces(color: white) = {
+  force-arrow((0, 0), (0, -1.6), [$arrow(T)_1$], (0.25, -1.35), color: color)
+  force-arrow((0, 0), (-1.7, 1.0), [$arrow(T)_2$], (-2.0, 1.15), color: color)
+  force-arrow((0, 0), (1.7, 1.0), [$arrow(T)_3$], (1.9, 1.15), color: color)
+  draw.arc((0, 0), radius: 0.65, start: 0deg, delta: 60deg, stroke: color)
+  draw.content((0.75, 0.35), [$60 degree$])
+}
+
+#let local-maximum-sketch(color: white, graph-color: blue, guide-color: gray) = {
+  draw.line((0, 0), (4.5, 0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (-1.2, -0.8), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (0, 3.0), stroke: color, mark: (end: ">"))
+  draw.content((4.75, 0), [$x$])
+  draw.content((-1.45, -0.95), [$y$])
+  draw.content((0, 3.25), [$z$])
+  draw.bezier((0.8, 0.45), (1.5, 2.2), (2.3, 2.75), (3.2, 0.45), stroke: graph-color + 1pt)
+  draw.bezier((0.9, 0.3), (1.8, -0.1), (2.8, -0.1), (3.8, 0.3), stroke: guide-color + 0.7pt)
+  draw.circle((2.25, 2.15), radius: 0.07, fill: color, stroke: color)
+  draw.content((2.45, 2.25), [$"max"$])
+  draw.content((2.25, -0.35), [$"disco"$])
+}
+
+#let local-minimum-sketch(color: white, graph-color: blue, guide-color: gray) = {
+  draw.line((0, 0), (4.5, 0), stroke: color, mark: (end: ">"))
+  draw.line((0, 0), (-1.2, -0.8), stroke: color, mark: (end: ">"))
+  draw.line((0, -1.1), (0, 3.0), stroke: color, mark: (end: ">"))
+  draw.content((4.75, 0), [$x$])
+  draw.content((-1.45, -0.95), [$y$])
+  draw.content((0, 3.25), [$z$])
+  draw.bezier((0.8, 2.25), (1.5, 0.55), (2.3, 0.25), (3.2, 2.25), stroke: graph-color + 1pt)
+  draw.bezier((0.9, 0.3), (1.8, -0.1), (2.8, -0.1), (3.8, 0.3), stroke: guide-color + 0.7pt)
+  draw.circle((2.1, 0.75), radius: 0.07, fill: color, stroke: color)
+  draw.content((2.35, 0.75), [$"min"$])
+  draw.content((2.25, -0.35), [$"disco"$])
+}
