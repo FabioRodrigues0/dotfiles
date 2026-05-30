@@ -671,12 +671,16 @@ CONTENT indica que a linha é conteúdo do node, não heading."
   (defun meu/org-cardflow-canvas--source-buffer ()
     "Retorna o buffer Org fonte para a view canvas."
     (cond
+     ((and (bound-and-true-p meu/org-cardflow-canvas-edit-mode)
+           (buffer-base-buffer))
+      (buffer-base-buffer))
+     ((and (derived-mode-p 'org-mode)
+           (not (meu/org-cardflow-virtual-buffer-p))
+           (not (bound-and-true-p meu/org-cardflow-canvas-edit-mode)))
+      (current-buffer))
      ((and meu/org-cardflow-canvas-source
            (buffer-live-p meu/org-cardflow-canvas-source))
       meu/org-cardflow-canvas-source)
-     ((and (derived-mode-p 'org-mode)
-           (not (meu/org-cardflow-virtual-buffer-p)))
-      (current-buffer))
      ((and meu/org-source-buffer
            (buffer-live-p meu/org-source-buffer))
       meu/org-source-buffer)
