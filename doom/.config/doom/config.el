@@ -66,9 +66,11 @@
 ;; Com `:tools (lsp +eglot)`, o módulo Java do Doom não ativa LSP sozinho.
 ;; Arrancar o jdtls em ficheiros Java dá diagnósticos como imports em falta.
 (after! eglot
-  (setq eglot-connect-timeout 120)
+  (setq eglot-connect-timeout 120
+        eglot-max-file-watches 50000)
   (add-to-list 'eglot-server-programs
-               '((java-mode java-ts-mode) . ("jdtls"))))
+               '((java-mode java-ts-mode) .
+                 ("jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"))))
 
 (add-hook 'java-mode-local-vars-hook #'lsp! 'append)
 (add-hook 'java-ts-mode-local-vars-hook #'lsp! 'append)
