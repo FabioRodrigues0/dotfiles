@@ -24,7 +24,13 @@
 ;; Teclado PT-Mac: Option para caracteres especiais ({ } [ ] etc.), Command como Meta
 (when (eq system-type 'darwin)
   (setq mac-option-modifier nil)
-  (setq mac-command-modifier 'meta))
+  (setq mac-command-modifier 'meta)
+  ;; BSD ls, usado por defeito no macOS, nao suporta --dired.
+  (setq dired-use-ls-dired nil))
+
+(after! dired
+  (when (eq system-type 'darwin)
+    (setq dired-use-ls-dired nil)))
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -34,13 +40,16 @@
 (setq doom-theme 'hex-lavender-dark)
 
 ;; Mostra cores (hex, rgb, nomes) como quadradinho colorido ao lado do código.
-(use-package! colorful-mode
-  :hook ((prog-mode . colorful-mode)
-         (text-mode . colorful-mode))
-  :config
-  (setq colorful-use-prefix t          ; quadradinho em vez de pintar o texto
-        colorful-prefix-string "■ "    ; o quadradinho
-        colorful-prefix-alignment 'left))
+;; Fica fora de org/text-mode porque pode quebrar fontification em previews Org.
+(defun fabio/maybe-enable-colorful-mode ()
+  "Enable colorful-mode only when the package is available."
+  (when (require 'colorful-mode nil t)
+    (setq colorful-use-prefix t
+          colorful-prefix-string "■ "
+          colorful-prefix-alignment 'left)
+    (colorful-mode 1)))
+
+(add-hook 'prog-mode-hook #'fabio/maybe-enable-colorful-mode)
 (add-to-list 'default-frame-alist '(undecorated . t))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
