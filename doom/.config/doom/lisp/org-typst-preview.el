@@ -20,6 +20,18 @@
 (defvar-local meu/org-typst-preview-silent-errors nil
   "Se non-nil, ignora erros individuais de preview Typst neste buffer.")
 
+(defun meu/org-typst--buffer-output ()
+  "Retorna e limpa o output do buffer de compilação Typst."
+  (with-current-buffer (get-buffer-create "*org-typst-preview*")
+    (prog1 (string-trim (buffer-string))
+      (erase-buffer))))
+
+(defun meu/org-typst--delete-file-if-exists (file)
+  "Remove FILE se existir, ignorando erros."
+  (when (and file (file-exists-p file))
+    (ignore-errors
+      (delete-file file))))
+
 (defun meu/org-typst-clear-previews ()
   "Remove todos os previews Typst do buffer atual."
   (interactive)
@@ -46,12 +58,14 @@ DISPLAY indica se veio de math display ou inline."
     (unless (file-exists-p svg-file)
       (with-temp-file typ-file
         (insert doc))
+      (meu/org-typst--buffer-output)
       (let ((exit-code
              (call-process "typst" nil "*org-typst-preview*" t
                            "compile" typ-file svg-file)))
         (unless (= exit-code 0)
-          (with-current-buffer "*org-typst-preview*"
-            (user-error "Erro Typst:\n%s" (buffer-string))))))
+          (meu/org-typst--delete-file-if-exists svg-file)
+          (user-error "Erro Typst:\n%s"
+                      (meu/org-typst--buffer-output)))))
     svg-file))
 
 (defun meu/org-typst--overlay (beg end body display)
@@ -182,15 +196,20 @@ DISPLAY indica se é fórmula display."
                 (string-trim (substring raw 2 -2)))
                ((string-match-p "\\`\\$" raw)
                 (string-trim (substring raw 1 -1)))
-               (t raw)))
-             (new-display
-              `(image :type svg
-                :file ,(meu/org-typst--compile-to-svg body display)
-                :ascent center)))
-
-        (overlay-put ov 'display new-display)
-        (overlay-put ov 'meu/org-typst-display new-display)
-        (overlay-put ov 'meu/org-typst-open nil)))))
+               (t raw))))
+        (condition-case err
+            (let ((new-display
+                   `(image :type svg
+                     :file ,(meu/org-typst--compile-to-svg body display)
+                     :ascent center)))
+              (overlay-put ov 'display new-display)
+              (overlay-put ov 'meu/org-typst-display new-display)
+              (overlay-put ov 'meu/org-typst-open nil))
+          (error
+           (overlay-put ov 'display nil)
+           (overlay-put ov 'meu/org-typst-open t)
+           (message "Typst preview mantém fonte por erro: %s"
+                    (error-message-string err))))))))
 
 (defun meu/org-typst-preview-post-command ()
   "Abrir preview no cursor e fechar previews fora do cursor."
@@ -291,12 +310,14 @@ DISPLAY indica se é fórmula display."
     (unless (file-exists-p svg-file)
       (with-temp-file typ-file
         (insert full-body))
+      (meu/org-typst--buffer-output)
       (let ((exit-code
              (call-process "typst" nil "*org-typst-preview*" t
                            "compile" typ-file svg-file)))
         (unless (= exit-code 0)
-          (with-current-buffer "*org-typst-preview*"
-            (user-error "Erro Typst src block:\n%s" (buffer-string))))))
+          (meu/org-typst--delete-file-if-exists svg-file)
+          (user-error "Erro Typst src block:\n%s"
+                      (meu/org-typst--buffer-output)))))
     svg-file))
 
 (provide 'org-typst-preview)

@@ -642,6 +642,136 @@
   draw.content((2.6, 1.9), [$R=[a,b] times [c,d]$])
 }
 
+#let draw-polyline(points, stroke) = {
+  for i in range(0, points.len() - 1) {
+    draw.line(points.at(i), points.at(i + 1), stroke: stroke)
+  }
+}
+
+#let fubini-vertical-region(
+  top: (),
+  bottom: (),
+  left: none,
+  right: none,
+  hatch: (),
+  a-x: auto,
+  b-x: auto,
+  label-pos: none,
+  top-label-pos: none,
+  bottom-label-pos: none,
+  x-min: -0.3,
+  x-max: 4.8,
+  y-min: -0.3,
+  y-max: 3.8,
+  a-label: [$a$],
+  b-label: [$b$],
+  region-label: [$B$],
+  top-label: [$g_2(x)$],
+  bottom-label: [$g_1(x)$],
+  color: white,
+  graph-color: blue,
+  guide-color: gray,
+) = {
+  let left-side = if left == none { (bottom.at(0), top.at(0)) } else { left }
+  let right-side = if right == none { (bottom.at(bottom.len() - 1), top.at(top.len() - 1)) } else { right }
+  let ax = if a-x == auto { left-side.at(0).at(0) } else { a-x }
+  let bx = if b-x == auto { right-side.at(0).at(0) } else { b-x }
+
+  plane-axes(x-min: x-min, x-max: x-max, y-min: y-min, y-max: y-max, color: color)
+  draw-polyline(top, graph-color + 1pt)
+  draw-polyline(bottom, graph-color + 1pt)
+  draw-polyline(left-side, graph-color + 1pt)
+  draw-polyline(right-side, graph-color + 1pt)
+
+  for segment in hatch {
+    draw.line(segment.at(0), segment.at(1), stroke: guide-color + 0.45pt)
+  }
+
+  draw.line((ax, 0), (ax, y-max - 0.65), stroke: guide-color + 0.7pt)
+  draw.line((bx, 0), (bx, y-max - 0.65), stroke: guide-color + 0.7pt)
+  draw.content((ax, -0.35), a-label)
+  draw.content((bx, -0.35), b-label)
+  if label-pos != none {
+    draw.content(label-pos, region-label)
+  }
+  if top-label-pos != none {
+    draw.content(top-label-pos, top-label)
+  }
+  if bottom-label-pos != none {
+    draw.content(bottom-label-pos, bottom-label)
+  }
+}
+
+#let fubini-horizontal-region(
+  left: (),
+  right: (),
+  top: none,
+  bottom: none,
+  hatch: (),
+  c-y: auto,
+  d-y: auto,
+  label-pos: none,
+  left-label-pos: none,
+  right-label-pos: none,
+  x-min: -0.3,
+  x-max: 5.0,
+  y-min: -0.3,
+  y-max: 3.8,
+  c-label: [$c$],
+  d-label: [$d$],
+  region-label: [$B$],
+  left-label: [$x = h_1(y)$],
+  right-label: [$x = h_2(y)$],
+  color: white,
+  graph-color: blue,
+  guide-color: gray,
+) = {
+  let top-side = if top == false { () } else if top == none { (left.at(left.len() - 1), right.at(0)) } else { top }
+  let bottom-side = if bottom == false { () } else if bottom == none { (left.at(0), right.at(right.len() - 1)) } else { bottom }
+  let cy = if c-y == auto {
+    if bottom-side.len() > 0 { bottom-side.at(0).at(1) } else { none }
+  } else {
+    c-y
+  }
+  let dy = if d-y == auto {
+    if top-side.len() > 0 { top-side.at(0).at(1) } else { none }
+  } else {
+    d-y
+  }
+
+  plane-axes(x-min: x-min, x-max: x-max, y-min: y-min, y-max: y-max, color: color)
+  draw-polyline(left, graph-color + 1pt)
+  draw-polyline(right, graph-color + 1pt)
+  if top-side.len() > 0 {
+    draw-polyline(top-side, graph-color + 1pt)
+  }
+  if bottom-side.len() > 0 {
+    draw-polyline(bottom-side, graph-color + 1pt)
+  }
+
+  for segment in hatch {
+    draw.line(segment.at(0), segment.at(1), stroke: guide-color + 0.45pt)
+  }
+
+  if cy != none {
+    draw.line((0, cy), (x-max - 1.15, cy), stroke: guide-color + 0.7pt)
+    draw.content((-0.28, cy), c-label)
+  }
+  if dy != none {
+    draw.line((0, dy), (x-max - 1.15, dy), stroke: guide-color + 0.7pt)
+    draw.content((-0.28, dy), d-label)
+  }
+  if label-pos != none {
+    draw.content(label-pos, region-label)
+  }
+  if left-label-pos != none {
+    draw.content(left-label-pos, left-label)
+  }
+  if right-label-pos != none {
+    draw.content(right-label-pos, right-label)
+  }
+}
+
 #let vertical-region-diagram(color: white, graph-color: blue, guide-color: gray) = {
   plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 4.0, color: color)
   draw.bezier((0.8, 0.7), (1.7, 0.9), (3.2, 0.7), (4.2, 1.1), stroke: graph-color + 1pt)
@@ -737,28 +867,53 @@
 
 #let horizontal-region-diagram-1(color: white, graph-color: blue, guide-color: gray) = {
   plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 3.8, color: color)
-  draw.bezier((1.1, 0.8), (0.95, 1.35), (1.3, 2.15), (1.2, 2.95), stroke: graph-color + 1pt)
-  draw.bezier((2.6, 0.8), (2.75, 1.45), (2.45, 2.25), (2.65, 2.95), stroke: graph-color + 1pt)
-  draw.line((1.2, 2.95), (2.65, 2.95), stroke: graph-color + 1pt)
-  draw.line((1.1, 0.8), (2.6, 0.8), stroke: graph-color + 1pt)
-  draw.line((0, 1.65), (2.55, 1.65), stroke: guide-color + 0.7pt)
-  draw.content((1.75, 1.65), [$B$])
-  draw.content((2.95, 2.85), [$x = h_1(y)$])
-  draw.content((2.95, 0.95), [$x = h_2(y)$])
+  let left = ((1.35, 0.75), (1.12, 1.15), (1.32, 1.55), (1.08, 1.95), (1.28, 2.35), (1.12, 2.75), (1.38, 3.1))
+  let right = ((3.15, 0.75), (2.92, 1.15), (3.12, 1.55), (2.88, 1.95), (3.08, 2.35), (2.92, 2.75), (3.18, 3.1))
+  let top = ((1.38, 3.1), (1.85, 3.25), (2.45, 3.25), (3.18, 3.1))
+  let bottom = ((1.35, 0.75), (1.9, 0.62), (2.45, 0.62), (3.15, 0.75))
+  for i in range(0, left.len() - 1) {
+    draw.line(left.at(i), left.at(i + 1), stroke: graph-color + 1pt)
+    draw.line(right.at(i), right.at(i + 1), stroke: graph-color + 1pt)
+  }
+  for i in range(0, top.len() - 1) {
+    draw.line(top.at(i), top.at(i + 1), stroke: graph-color + 1pt)
+    draw.line(bottom.at(i), bottom.at(i + 1), stroke: graph-color + 1pt)
+  }
+  draw.line((1.55, 0.9), (2.0, 2.95), stroke: guide-color + 0.45pt)
+  draw.line((2.0, 0.72), (2.45, 3.05), stroke: guide-color + 0.45pt)
+  draw.line((2.45, 0.75), (2.9, 2.9), stroke: guide-color + 0.45pt)
+  draw.line((0, 1.9), (3.05, 1.9), stroke: guide-color + 0.7pt)
+  draw.content((2.05, 1.9), [$B$])
+  draw.content((3.45, 2.75), [$x = h_1(y)$])
+  draw.content((3.45, 1.1), [$x = h_2(y)$])
 }
 
 #let horizontal-region-diagram-2(color: white, graph-color: blue, guide-color: gray) = {
   plane-axes(x-min: -0.3, x-max: 5.0, y-min: -0.3, y-max: 3.8, color: color)
-  draw.line((1.1, 0.75), (3.65, 0.75), stroke: graph-color + 1pt)
-  draw.bezier((1.1, 0.75), (0.8, 1.7), (1.45, 2.95), (2.25, 3.1), stroke: graph-color + 1pt)
-  draw.bezier((3.65, 0.75), (4.2, 1.7), (3.3, 2.85), (2.25, 3.1), stroke: graph-color + 1pt)
-  draw.line((0, 0.75), (3.65, 0.75), stroke: guide-color + 0.7pt)
-  draw.line((0, 2.2), (3.55, 2.2), stroke: guide-color + 0.7pt)
-  draw.content((-0.28, 0.75), [$c$])
-  draw.content((-0.28, 2.2), [$d$])
-  draw.content((2.15, 1.65), [$B$])
+  let left = ((1.45, 0.85), (1.05, 1.25), (0.92, 1.8), (1.05, 2.35), (1.55, 2.95))
+  let top = ((1.55, 2.95), (2.05, 3.15), (2.7, 3.15), (3.25, 2.95))
+  let right = ((3.25, 2.95), (3.75, 2.35), (3.88, 1.8), (3.75, 1.25), (3.35, 0.85))
+  let bottom = ((1.45, 0.85), (2.0, 0.72), (2.75, 0.72), (3.35, 0.85))
+  for i in range(0, left.len() - 1) {
+    draw.line(left.at(i), left.at(i + 1), stroke: graph-color + 1pt)
+    draw.line(right.at(i), right.at(i + 1), stroke: graph-color + 1pt)
+  }
+  for i in range(0, top.len() - 1) {
+    draw.line(top.at(i), top.at(i + 1), stroke: graph-color + 1pt)
+  }
+  for i in range(0, bottom.len() - 1) {
+    draw.line(bottom.at(i), bottom.at(i + 1), stroke: graph-color + 1pt)
+  }
+  draw.line((1.45, 0.95), (1.95, 2.75), stroke: guide-color + 0.45pt)
+  draw.line((2.0, 0.78), (2.55, 3.0), stroke: guide-color + 0.45pt)
+  draw.line((2.55, 0.78), (3.15, 2.85), stroke: guide-color + 0.45pt)
+  draw.line((0, 0.85), (3.35, 0.85), stroke: guide-color + 0.7pt)
+  draw.line((0, 2.95), (3.25, 2.95), stroke: guide-color + 0.7pt)
+  draw.content((-0.28, 0.85), [$c$])
+  draw.content((-0.28, 2.95), [$d$])
+  draw.content((2.45, 1.75), [$B$])
   draw.content((3.85, 2.75), [$x = h_1(y)$])
-  draw.content((3.85, 0.95), [$x = h_2(y)$])
+  draw.content((3.85, 1.0), [$x = h_2(y)$])
 }
 
 #let three-tension-forces(color: white) = {
