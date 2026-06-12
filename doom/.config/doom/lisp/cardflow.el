@@ -787,6 +787,66 @@ CONTENT indica que a linha é conteúdo do node, não heading."
         (setq meu/org-current-pos (marker-position new-marker))
         (meu/org-refresh-sidebar-and-jump new-marker))))
 
+  (defun meu/org-cardflow--fallback-marker-before-delete ()
+    "Retorna marker para onde saltar depois de apagar a subtree atual."
+    (let ((level (org-outline-level))
+          prev next parent)
+      (save-excursion
+        (while (and (not prev)
+                    (= 0 (forward-line -1)))
+          (when (looking-at org-heading-regexp)
+            (let ((l (org-outline-level)))
+              (cond
+               ((= l level) (setq prev (copy-marker (point))))
+               ((< l level) (setq parent (or parent (copy-marker (point))))))))))
+      (save-excursion
+        (org-end-of-subtree t t)
+        (while (and (not next)
+                    (re-search-forward org-heading-regexp nil t))
+          (beginning-of-line)
+          (let ((l (org-outline-level)))
+            (cond
+             ((= l level) (setq next (copy-marker (point))))
+             ((< l level) (setq next 'stop))
+             (t (forward-line 1))))))
+      (or prev (and (markerp next) next) parent)))
+
+  (defun meu/org-delete-current-subtree-at-marker (marker)
+    "Apaga a subtree de MARKER e retorna marker de fallback."
+    (let (fallback)
+      (with-current-buffer (marker-buffer marker)
+        (save-restriction
+          (widen)
+          (goto-char (marker-position marker))
+          (org-back-to-heading t)
+          (setq fallback (meu/org-cardflow--fallback-marker-before-delete))
+          (let ((beg (point))
+                (end (save-excursion
+                       (org-end-of-subtree t t)
+                       (point))))
+            (delete-region beg end)
+            (when (and (not (bobp))
+                       (looking-at-p "\n"))
+              (delete-char 1)))
+          (save-buffer)))
+      fallback))
+
+  (defun meu/org-sidebar-delete-node ()
+    "Apaga o node selecionado no Cardflow normal."
+    (interactive)
+    (let ((marker (meu/org-sidebar-current-marker)))
+      (unless marker
+        (user-error "Nenhum node selecionado"))
+      (when (y-or-n-p "Apagar este node e todos os filhos? ")
+        (let ((fallback (meu/org-delete-current-subtree-at-marker marker)))
+          (setq meu/org-current-marker fallback)
+          (setq meu/org-current-pos (and fallback (marker-position fallback)))
+          (if fallback
+              (meu/org-refresh-sidebar-and-jump fallback)
+            (with-selected-window meu/org-sidebar-window
+              (meu/org-render-sidebar)
+              (switch-to-buffer meu/org-sidebar-buffer)))))))
+
   ;; -----------------------------
   ;; Canvas experimental
   ;; -----------------------------
@@ -1075,6 +1135,10 @@ CONTENT indica que a linha é conteúdo do node, não heading."
     (interactive)
     (meu/org-cardflow-canvas--eval-js "beginEdit();"))
 
+  (defun meu/org-cardflow-canvas-js-delete ()
+    (interactive)
+    (meu/org-cardflow-canvas--eval-js "deleteSelected();"))
+
   (defun meu/org-cardflow-canvas--open-browser ()
     "Abre o canvas dentro do Emacs quando xwidget estiver disponível."
     (let ((url (meu/org-cardflow-canvas--file-url)))
@@ -1193,6 +1257,11 @@ CONTENT indica que a linha é conteúdo do node, não heading."
           (save-buffer)))
       marker))
 
+  (defun meu/org-cardflow-canvas--delete-node (id)
+    "Apaga ID e devolve marker para a seleção seguinte."
+    (let ((marker (meu/org-cardflow-canvas--marker-for-id id)))
+      (meu/org-delete-current-subtree-at-marker marker)))
+
   (defun meu/org-cardflow-canvas--handle-action (payload)
     "Executa ação recebida do canvas e devolve payload JSON."
     (let* ((action (alist-get 'action payload))
@@ -1212,6 +1281,8 @@ CONTENT indica que a linha é conteúdo do node, não heading."
        ((string= action "edit")
         (meu/org-cardflow-canvas--open-edit-buffer id)
         (setq marker (meu/org-cardflow-canvas--marker-for-id id)))
+       ((string= action "delete")
+        (setq marker (meu/org-cardflow-canvas--delete-node id)))
        (t
         (user-error "Ação desconhecida: %s" action)))
       (setq nodes (meu/org-cardflow-canvas--nodes
@@ -1223,7 +1294,7 @@ CONTENT indica que a linha é conteúdo do node, não heading."
                   (marker-position marker))))
       (meu/org-cardflow-canvas--rewrite-file nodes)
       `((ok . t)
-        (selected . ,(or selected id)))))
+        (selected . ,(or selected :json-false)))))
 
   (defun meu/org-cardflow-canvas--server-filter (proc chunk)
     "Processa requisições HTTP simples de PROC."
@@ -1416,6 +1487,12 @@ function settleSelection(n) {
 function beginEdit() {
   postAction('edit');
 }
+function deleteSelected() {
+  if (!selected) return;
+  if (confirm(`Apagar \"${selected.title}\" e todos os filhos?`)) {
+    postAction('delete');
+  }
+}
 async function postAction(action, extra = {}) {
   if (!selected && nodes[0]) showNode(nodes[0]);
   if (!selected) {
@@ -1436,6 +1513,9 @@ async function postAction(action, extra = {}) {
     if (data.selected) {
       localStorage.setItem('cardflowCanvasSelected', data.selected);
       localStorage.setItem('cardflowCanvasSettle', '1');
+    } else {
+      localStorage.removeItem('cardflowCanvasSelected');
+      localStorage.removeItem('cardflowCanvasSettle');
     }
     if (action !== 'edit') location.reload();
   } catch (err) {
@@ -1504,6 +1584,11 @@ window.addEventListener('keydown', e => {
     e.preventDefault();
     return;
   }
+  if (e.key === 'd') {
+    deleteSelected();
+    e.preventDefault();
+    return;
+  }
   if (e.key === 'Enter') {
     if (selected) showNode(selected);
     e.preventDefault();
@@ -1515,7 +1600,7 @@ window.addEventListener('keydown', e => {
   e.preventDefault();
 });
 const remembered = localStorage.getItem('cardflowCanvasSelected');
-const initial = remembered ? byId.get(remembered) : nodes[0];
+const initial = (remembered && byId.get(remembered)) || nodes[0];
 const shouldSettle = localStorage.getItem('cardflowCanvasSettle') === '1';
 localStorage.removeItem('cardflowCanvasSettle');
 if (initial) {
@@ -1553,6 +1638,7 @@ if (initial) {
     (kbd "<left>")  #'meu/org-sidebar-parent
     (kbd "RET")     #'meu/org-sidebar-sync
     (kbd "i")       #'meu/org-sidebar-edit
+    (kbd "d")       #'meu/org-sidebar-delete-node
     (kbd "c")       #'meu/org-insert-sibling
     (kbd "n")       #'meu/org-insert-child
     (kbd "m")       #'meu/org-cardflow-reparent-marked-to-current
@@ -1580,7 +1666,8 @@ if (initial) {
     (kbd "j")       #'meu/org-cardflow-canvas-js-next
     (kbd "c")       #'meu/org-cardflow-canvas-js-create-sibling
     (kbd "n")       #'meu/org-cardflow-canvas-js-create-child
-    (kbd "i")       #'meu/org-cardflow-canvas-js-edit)
+    (kbd "i")       #'meu/org-cardflow-canvas-js-edit
+    (kbd "d")       #'meu/org-cardflow-canvas-js-delete)
 
   (evil-define-key 'normal org-mode-map
     (kbd "q")

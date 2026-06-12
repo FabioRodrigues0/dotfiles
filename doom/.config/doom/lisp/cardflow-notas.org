@@ -166,11 +166,26 @@ As teclas tentam seguir o Cardflow normal:
 - =c=: criar irmao
 - =n=: criar filho
 - =i=: editar o node selecionado num buffer Org normal do Emacs
+- =d=: apagar o node selecionado e todos os filhos, com confirmacao
 - =Ctrl+Enter=: guardar edicao e voltar ao canvas
 - =q= em normal mode no buffer de edicao: guardar edicao e voltar ao canvas
 
 Ao sair da edicao, o ficheiro Org fonte e guardado, o HTML do canvas e
 regenerado, o xwidget e recarregado e o foco volta ao painel do canvas.
+
+* Teclas no Cardflow normal
+
+- seta esquerda: ir para o pai
+- seta direita: ir para o primeiro filho
+- seta cima: ir para o irmao anterior
+- seta baixo: ir para o irmao seguinte
+- =RET=: sincronizar/abrir o node selecionado no painel de edicao
+- =i=: editar node
+- =d=: apagar o node selecionado e todos os filhos, com confirmacao
+- =c=: criar irmao
+- =n=: criar filho
+- =Shift+seta cima=: mover subtree para cima
+- =Shift+seta baixo=: mover subtree para baixo
 
 * Como criar e editar nodes no canvas
 
@@ -258,3 +273,32 @@ Teste manual principal:
 - Suportar mover subtree para cima/baixo no canvas com as mesmas teclas do
   Cardflow normal.
 - Fazer o canvas atualizar sem reload completo do xwidget.
+
+** Plano para merge e split de cards
+
+Merge deve ser uma operacao de estrutura Org, nao apenas concatenacao visual.
+Proposta conservadora:
+
+1. Selecionar o card base.
+2. Com uma tecla dedicada, por exemplo =m=, escolher o card adjacente a juntar:
+   irmao anterior/proximo por omissao, ou pai/filho se for pedido depois.
+3. Preservar o titulo do primeiro card e juntar o titulo do segundo ao conteudo,
+   por exemplo como primeira linha em negrito ou como subheading convertido para
+   texto, para nao perder informacao.
+4. Mover filhos do segundo card para baixo do card resultante, mantendo a ordem.
+5. Apagar a heading vazia do segundo card.
+
+Split deve partir do buffer de edicao, porque precisa de uma posicao no texto:
+
+1. Entrar em edicao com =i=.
+2. Posicionar o cursor no ponto onde o card deve ser dividido.
+3. Usar uma tecla dedicada, por exemplo =s=.
+4. O texto antes do cursor fica no card atual.
+5. O texto depois do cursor vira um novo irmao logo a seguir, com titulo pedido
+   por minibuffer ou derivado da primeira linha nao vazia.
+6. Filhos existentes ficam inicialmente no card original; depois podem ser
+   movidos com comandos de mover subtree se necessario.
+
+Antes de implementar, decidir se =m= deve juntar sempre com o proximo irmao ou
+se deve abrir uma escolha curta. Para evitar perda acidental, ambas as operacoes
+devem pedir confirmacao e guardar o ficheiro imediatamente depois.
