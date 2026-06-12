@@ -1,0 +1,156 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+{
+  "helix_mode": true,
+  "vim_mode": true,
+  "base_keymap": "Emacs",
+  "use_key_equivalents": true,
+  "restore_on_startup": "launchpad",
+  "cli_default_open_behavior": "existing_window",
+  "diagnostics": {
+    "inline": {
+      "enabled": true,
+    },
+  },
+  "horizontal_scroll_margin": 2.0,
+  "vertical_scroll_margin": 2.0,
+  "outline_panel": {
+    "dock": "right",
+  },
+  "collaboration_panel": {
+    "dock": "right",
+  },
+  "git_panel": {
+    "dock": "left",
+    "tree_view": true,
+  },
+  "autosave": "on_focus_change",
+  "preferred_line_length": 130,
+  "edit_predictions": {
+    "mode": "subtle",
+    "provider": "copilot",
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "inline_assistant_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6-latest",
+      "enable_thinking": false,
+    },
+    "model_parameters": [],
+  },
+  "buffer_line_height": "comfortable",
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 16.0,
+  "buffer_font_features": {
+    "calt": false,
+  },
+  "terminal": {
+    "dock": "right",
+    "shell": "system",
+    "font_size": 14.0,
+  },
+  "project_panel": {
+    "hide_root": true,
+    "indent_size": 18.0,
+    "dock": "right",
+  },
+  "agent_servers": {
+    "gemini": {
+      "type": "registry",
+    },
+    "claude-acp": {
+      "type": "registry",
+    },
+  },
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "icon_theme": "Bearded Icon Theme",
+  "ui_font_size": 14,
+  "theme": {
+    "mode": "dark",
+    "light": "Gruvbox Light Soft",
+    "dark": "Hex Lavender Dark",
+  },
+  "lsp": {
+    "jdtls": {
+      "settings": {
+        "initialization_options": {
+          "bundles": [],
+          "workspaceFolders": [],
+          "settings": {
+            "java": {
+              "home": "/var/home/fabio/.local/share/mise/installs/java/temurin-25.0.2+10.0.LTS",
+              "errors": {
+                "incompleteClasspath": {
+                  "severity": "warning",
+                },
+              },
+              "configuration": {
+                "updateBuildConfiguration": "automatic",
+                "maven": {
+                  "userSettings": null,
+                },
+              },
+              "import": {
+                "gradle": {
+                  "enabled": true,
+                },
+                "maven": {
+                  "enabled": true,
+                },
+                "exclusions": [
+                  "**/node_modules/**",
+                  "**/.metadata/**",
+                  "**/archetype-resources/**",
+                  "**/META-INF/maven/**",
+                  "/**/test/**",
+                ],
+              },
+              "referencesCodeLens": {
+                "enabled": false,
+              },
+              "signatureHelp": {
+                "enabled": false,
+              },
+              "implementationCodeLens": "all",
+              "format": {
+                "enabled": true,
+              },
+              "saveActions": {
+                "organizeImports": false,
+              },
+              "contentProvider": {
+                "preferred": null,
+              },
+              "autobuild": {
+                "enabled": false,
+              },
+              "completion": {
+                "favoriteStaticMembers": [
+                  "org.junit.Assert.*",
+                  "org.junit.Assume.*",
+                  "org.junit.jupiter.api.Assertions.*",
+                  "org.junit.jupiter.api.Assumptions.*",
+                  "org.junit.jupiter.api.DynamicContainer.*",
+                  "org.junit.jupiter.api.DynamicTest.*",
+                ],
+                "importOrder": ["java", "javax", "com", "org"],
+              },
+            },
+          },
+        },
+      },
+    },
+    "tinymist": {
+      "settings": {
+        "exportPdf": "onType",
+        "outputPath": "$root/$name",
+      },
+    },
+  },
+}

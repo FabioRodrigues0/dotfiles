@@ -13,6 +13,7 @@
   (defvar meu/org-current-pos nil)
   (defvar meu/org-sidebar-needs-render nil)
   (defvar meu/org-cardflow-save-guards-installed nil)
+  (defvar meu/org-cardflow-marked-marker nil)
 
   ;; -----------------------------
   ;; Sidebar mode
@@ -224,6 +225,14 @@ CONTENT indica que a linha é conteúdo do node, não heading."
   ;; Card editável
   ;; -----------------------------
 
+  (defvar meu/org-card-mode-map (make-sparse-keymap))
+
+  (define-minor-mode meu/org-card-mode
+    "Keymap local para editar o card atual do Cardflow."
+    :init-value nil
+    :lighter " Cardflow"
+    :keymap meu/org-card-mode-map)
+
   (defun meu/org-show-card-at-marker (marker)
     "Mostra node atual no buffer direito como indirect buffer editável."
     (let ((source (marker-buffer marker))
@@ -248,7 +257,8 @@ CONTENT indica que a linha é conteúdo do node, não heading."
         (widen)
         (narrow-to-region (car bounds) (cdr bounds))
         (goto-char (point-min))
-        (meu/org-cardflow-enable-org-rendering))
+        (meu/org-cardflow-enable-org-rendering)
+        (meu/org-card-mode 1))
 
       (when (window-live-p meu/org-card-window)
         (with-selected-window meu/org-card-window
@@ -502,6 +512,143 @@ CONTENT indica que a linha é conteúdo do node, não heading."
         (meu/org-sidebar-sync))
 
       (select-window meu/org-sidebar-window)))
+
+  (defun meu/org-cardflow--adjust-subtree-level (text new-level)
+    "Retorna TEXT com a primeira subtree ajustada para NEW-LEVEL."
+    (with-temp-buffer
+      (insert text)
+      (goto-char (point-min))
+      (unless (looking-at "^\\(\\*+\\)\\(?: \\|$\\)")
+        (user-error "Texto sem heading Org"))
+      (let* ((old-level (length (match-string 1)))
+             (delta (- new-level old-level)))
+        (when (< (+ old-level delta) 1)
+          (user-error "Movimento criaria heading sem nível válido"))
+        (goto-char (point-min))
+        (while (re-search-forward "^\\(\\*+\\)\\(.*\\)$" nil t)
+          (let* ((stars (match-string 1))
+                 (rest (match-string 2))
+                 (level (+ (length stars) delta)))
+            (when (< level 1)
+              (user-error "Movimento criaria heading sem nível válido"))
+            (replace-match (concat (make-string level ?*) rest) t t))))
+      (buffer-string)))
+
+  (defun meu/org-cardflow--subtree-bounds-at (pos)
+    "Retorna bounds da subtree em POS no buffer atual."
+    (save-excursion
+      (goto-char pos)
+      (org-back-to-heading t)
+      (cons (point)
+            (save-excursion
+              (org-end-of-subtree t t)
+              (point)))))
+
+  (defun meu/org-cardflow-reparent-marked-to-current ()
+    "Marca um node; no segundo uso move o marcado como filho do node atual."
+    (interactive)
+    (let ((current (meu/org-sidebar-current-marker)))
+      (unless current
+        (user-error "Nenhum node selecionado"))
+      (if (not (and meu/org-cardflow-marked-marker
+                    (marker-buffer meu/org-cardflow-marked-marker)
+                    (buffer-live-p (marker-buffer meu/org-cardflow-marked-marker))))
+          (progn
+            (setq meu/org-cardflow-marked-marker (copy-marker current))
+            (message "Cardflow: node marcado; navega para o novo pai e prime m outra vez"))
+        (let ((marked meu/org-cardflow-marked-marker)
+              new-marker)
+          (when (not (eq (marker-buffer marked) (marker-buffer current)))
+            (user-error "O node marcado pertence a outro buffer"))
+          (when (= (marker-position marked) (marker-position current))
+            (setq meu/org-cardflow-marked-marker nil)
+            (user-error "Seleciona outro node para ser o pai"))
+          (with-current-buffer (marker-buffer current)
+            (save-restriction
+              (widen)
+              (let* ((marked-bounds (meu/org-cardflow--subtree-bounds-at
+                                     (marker-position marked)))
+                     (marked-start (car marked-bounds))
+                     (marked-end (cdr marked-bounds))
+                     (target-pos (marker-position current)))
+                (when (and (>= target-pos marked-start)
+                           (< target-pos marked-end))
+                  (user-error "Não posso mover um node para dentro da sua própria subtree"))
+                (let* ((old-text (buffer-substring-no-properties marked-start marked-end))
+                       (target-level (save-excursion
+                                       (goto-char target-pos)
+                                       (org-back-to-heading t)
+                                       (org-outline-level)))
+                       (new-text (meu/org-cardflow--adjust-subtree-level
+                                  old-text
+                                  (1+ target-level))))
+                  (delete-region marked-start marked-end)
+                  (goto-char (marker-position current))
+                  (org-back-to-heading t)
+                  (org-end-of-subtree t t)
+                  (unless (bolp)
+                    (insert "\n"))
+                  (unless (looking-at-p "\n")
+                    (insert "\n"))
+                  (let ((start (point)))
+                    (insert new-text)
+                    (unless (bolp)
+                      (insert "\n"))
+                    (setq new-marker (copy-marker start))))))
+            (save-buffer))
+          (setq meu/org-cardflow-marked-marker nil)
+          (setq meu/org-current-marker new-marker)
+          (setq meu/org-current-pos (marker-position new-marker))
+          (meu/org-refresh-sidebar-and-jump new-marker)))))
+
+  (defun meu/org-cardflow-split-node-at-point ()
+    "Divide o node editado no cursor, criando um irmão com título temporário."
+    (interactive)
+    (unless (string= (buffer-name) meu/org-card-buffer)
+      (user-error "Esta ação só funciona no buffer editável do Cardflow"))
+    (let* ((edit-buffer (current-buffer))
+           (source (or (buffer-base-buffer edit-buffer) edit-buffer))
+           (split-pos (point))
+           new-marker)
+      (with-current-buffer source
+        (save-restriction
+          (widen)
+          (save-excursion
+            (goto-char split-pos)
+            (org-back-to-heading t)
+            (let* ((heading-start (point))
+                   (level (org-outline-level))
+                   (content-bounds (meu/org-node-content-bounds))
+                   (content-start (car content-bounds))
+                   (content-end (cdr content-bounds)))
+              (when (or (< split-pos content-start)
+                        (> split-pos content-end))
+                (user-error "Coloca o cursor no conteúdo do node para dividir"))
+              (let ((tail (buffer-substring-no-properties split-pos content-end)))
+                (delete-region split-pos content-end)
+                (goto-char split-pos)
+                (delete-horizontal-space)
+                (save-excursion
+                  (goto-char heading-start)
+                  (org-end-of-subtree t t)
+                  (unless (bolp)
+                    (insert "\n"))
+                  (unless (looking-at-p "\n")
+                    (insert "\n"))
+                  (let ((start (point)))
+                    (insert (make-string level ?*) " Sem titulo\n")
+                    (setq new-marker (copy-marker start))
+                    (insert ":PROPERTIES:\n:END:\n")
+                    (unless (string-empty-p (string-trim tail))
+                      (insert "\n")
+                      (insert (string-trim-left tail))
+                      (unless (bolp)
+                        (insert "\n"))))))))
+          (save-buffer)))
+      (setq meu/org-current-marker new-marker)
+      (setq meu/org-current-pos (marker-position new-marker))
+      (meu/org-refresh-sidebar-and-jump new-marker)
+      (meu/org-sidebar-edit)))
 
   ;; -----------------------------
   ;; Layout
@@ -1408,8 +1555,13 @@ if (initial) {
     (kbd "i")       #'meu/org-sidebar-edit
     (kbd "c")       #'meu/org-insert-sibling
     (kbd "n")       #'meu/org-insert-child
+    (kbd "m")       #'meu/org-cardflow-reparent-marked-to-current
     (kbd "S-<up>")   #'meu/org-move-subtree-up
     (kbd "S-<down>") #'meu/org-move-subtree-down)
+
+  (evil-define-key 'normal meu/org-card-mode-map
+    (kbd "q") #'meu/org-sidebar-return
+    (kbd "s") #'meu/org-cardflow-split-node-at-point)
 
   (evil-define-key '(normal insert) meu/org-cardflow-canvas-edit-mode-map
     (kbd "C-<return>") #'meu/org-cardflow-canvas-finish-edit)
@@ -1432,7 +1584,7 @@ if (initial) {
 
   (evil-define-key 'normal org-mode-map
     (kbd "q")
-    (lambda ()
-      (interactive)
-      (when (string= (buffer-name) meu/org-card-buffer)
-        (meu/org-sidebar-return))))
+      (lambda ()
+        (interactive)
+        (when (string= (buffer-name) meu/org-card-buffer)
+          (meu/org-sidebar-return))))

@@ -1,0 +1,60 @@
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-`": null,
+      "space a": "agent::Toggle",
+      "space b b": "buffer_search::Deploy",
+      "space b d": "pane::CloseActiveItem",
+      "space b n": "pane::ActivateNextItem",
+      "space b p": "pane::ActivatePreviousItem",
+      "space f f": "file_finder::Toggle",
+      "space f s": "workspace::Save",
+      "space g g": "git_panel::ToggleFocus",
+      "space h r s": "workspace::Reload",
+      "space j": "terminal_panel::ToggleFocus",
+      "space k": "debug_panel::ToggleFocus",
+      "space p f": "project_panel::ToggleFocus",
+      "space q q": "workspace::CloseWindow",
+      "space s p": "project_symbols::Toggle",
+      "space s s": "outline_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "k": ["workspace::SendKeystrokes", "h"],
+      "l": ["workspace::SendKeystrokes", "j"],
+      "ç": ["workspace::SendKeystrokes", "l"],
+      "o": ["workspace::SendKeystrokes", "k"],
+      "h": ["workspace::SendKeystrokes", "o"],
+      "j": ["workspace::SendKeystrokes", "shift-o"],
+      "space c a": "editor::ToggleCodeActions",
+      "space c d": "editor::GoToDefinition",
+      "space c r": "editor::FindAllReferences",
+      "f": "editor::Format",
+      "space p t": "command_palette::Toggle",
+      "space w h": "pane::SplitLeft",
+      "space w j": "pane::SplitDown",
+      "space w k": "pane::SplitUp",
+      "space w l": "pane::SplitRight",
+      "space w q": "pane::CloseActiveItem"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == visual",
+    "bindings": {
+      "k": ["workspace::SendKeystrokes", "h"],
+      "l": ["workspace::SendKeystrokes", "j"],
+      "ç": ["workspace::SendKeystrokes", "l"],
+      "o": ["workspace::SendKeystrokes", "k"],
+      "f": "editor::FormatSelections"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      "ctrl-g": ["workspace::SendKeystrokes", "escape"]
+    }
+  }
+]

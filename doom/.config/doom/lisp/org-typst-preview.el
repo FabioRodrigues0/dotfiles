@@ -172,30 +172,44 @@ DISPLAY indica se é fórmula display."
                (overlay-get ov 'meu/org-typst-open)
                (not (and (>= (point) (overlay-start ov))
                          (<= (point) (overlay-end ov)))))
-      (let* ((beg (overlay-start ov))
-             (end (overlay-end ov))
-             (raw (buffer-substring-no-properties beg end))
-             (display (overlay-get ov 'meu/org-typst-display-math))
-             (body
-              (cond
-               ((string-match-p "\\`\\$\\$" raw)
-                (string-trim (substring raw 2 -2)))
-               ((string-match-p "\\`\\$" raw)
-                (string-trim (substring raw 1 -1)))
-               (t raw)))
-             (new-display
-              `(image :type svg
-                :file ,(meu/org-typst--compile-to-svg body display)
-                :ascent center)))
-
-        (overlay-put ov 'display new-display)
-        (overlay-put ov 'meu/org-typst-display new-display)
-        (overlay-put ov 'meu/org-typst-open nil)))))
+      (condition-case err
+          (let* ((beg (overlay-start ov))
+                 (end (overlay-end ov))
+                 (raw (buffer-substring-no-properties beg end))
+                 (display (overlay-get ov 'meu/org-typst-display-math))
+                 (body
+                  (cond
+                   ((and (string-prefix-p "$$" raw)
+                         (string-suffix-p "$$" (string-trim-right raw)))
+                    (string-trim (substring raw 2 -2)))
+                   ((and (string-prefix-p "$" raw)
+                         (string-suffix-p "$" (string-trim-right raw)))
+                    (string-trim (substring raw 1 -1)))
+                   (t raw)))
+                 (new-display
+                  `(image :type svg
+                    :file ,(meu/org-typst--compile-to-svg body display)
+                    :ascent center)))
+            (overlay-put ov 'display new-display)
+            (overlay-put ov 'meu/org-typst-display new-display)
+            (overlay-put ov 'meu/org-typst-open nil))
+        (error
+         ;; While editing, fragments are often temporarily invalid. Keep the
+         ;; source visible and avoid dropping into the debugger on each key.
+         (overlay-put ov 'display nil)
+         (overlay-put ov 'meu/org-typst-open nil)
+         (unless meu/org-typst-preview-silent-errors
+           (message "Typst preview edição ignorada: %s" err)))))))
 
 (defun meu/org-typst-preview-post-command ()
   "Abrir preview no cursor e fechar previews fora do cursor."
-  (meu/org-typst-close-open-previews)
-  (meu/org-typst-open-preview-at-point))
+  (condition-case err
+      (progn
+        (meu/org-typst-close-open-previews)
+        (meu/org-typst-open-preview-at-point))
+    (error
+     (unless meu/org-typst-preview-silent-errors
+       (message "Typst preview post-command ignorado: %s" err)))))
 
 
 (add-hook 'org-mode-hook

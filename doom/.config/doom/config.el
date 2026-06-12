@@ -14,7 +14,10 @@
 (after! company
   (setq company-idle-delay 0.0          ; sem delay (default 0.2)
         company-minimum-prefix-length 1 ; 1 letra (default 3)
-        company-tooltip-idle-delay 0.0))
+        company-tooltip-idle-delay 0.0)
+  (global-company-mode 1)
+  (set-company-backend! '(org-mode markdown-mode typst-ts-mode)
+    '(:separate company-capf company-dabbrev company-yasnippet company-files)))
 (custom-set-faces!
   '(company-tooltip :family "JetBrains Mono" :height 110)
   '(company-tooltip-selection :background "#44475a")
@@ -198,6 +201,37 @@
 (add-hook 'typst-ts-mode-hook #'eglot-ensure)
 
 (add-to-list 'auto-mode-alist '("\\.typ\\'" . typst-ts-mode))
+
+(after! typst-ts-mode
+  (setq typst-ts-indent-offset 2)
+
+  (defun fabio/typst-return-dwim (&optional arg)
+    "Insert a Typst newline with predictable indentation.
+Keep `typst-ts-mode' smart list behavior at end of list items, but use
+`newline-and-indent' elsewhere instead of the global RET binding."
+    (interactive "P")
+    (let ((node (and (fboundp 'typst-ts-core-parent-util-type)
+                     (fboundp 'typst-ts-core-get-parent-of-node-at-bol-nonwhite)
+                     (typst-ts-core-parent-util-type
+                      (typst-ts-core-get-parent-of-node-at-bol-nonwhite)
+                      "item" t t))))
+      (if (and (not arg)
+               (bound-and-true-p typst-ts-electric-return)
+               node
+               (eolp)
+               (fboundp 'typst-ts-editing-return))
+          (typst-ts-editing-return)
+        (newline-and-indent))))
+
+  (defun fabio/typst-writing-setup-h ()
+    "Make Typst buffers use two-space editing defaults."
+    (setq-local tab-width 2
+                evil-shift-width 2))
+
+  (add-hook 'typst-ts-mode-hook #'fabio/typst-writing-setup-h)
+  (map! :map typst-ts-mode-map
+        :i "RET" #'fabio/typst-return-dwim
+        :n "RET" #'fabio/typst-return-dwim))
 
 (use-package websocket)
 (use-package! typst-preview

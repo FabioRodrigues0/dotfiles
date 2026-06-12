@@ -69,7 +69,7 @@
    `(font-lock-variable-use-face  ((t (:foreground ,fg))))
    `(font-lock-operator-face      ((t (:foreground ,base8))))
    `(font-lock-number-face        ((t (:foreground ,cyan))))
-   `(font-lock-doc-face           ((t (:foreground ,green :slant italic))))
+   `(font-lock-doc-face           ((t (:foreground ,base3 :slant italic))))
    `(font-lock-preprocessor-face  ((t (:foreground ,base7))))
    `(font-lock-warning-face       ((t (:foreground ,highlight :weight bold))))
    ;; UI
