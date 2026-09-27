@@ -3,6 +3,8 @@
 (load! "lisp/org-config")
 (load! "lisp/cardflow")
 (load! "lisp/org-typst-preview")
+(load! "lisp/python-web")
+(load! "lisp/java-csharp")
 ;;
 (setq user-full-name "Fabio Rodrigues"
       user-mail-address "fabio.rod@outlook.pt")
@@ -86,6 +88,21 @@
 
 (add-hook 'java-mode-local-vars-hook #'lsp! 'append)
 (add-hook 'java-ts-mode-local-vars-hook #'lsp! 'append)
+
+;; C#: dotnet vem do mise e o csharp-ls de `dotnet tool install --global`.
+;; O Emacs de GUI nao herda o PATH do fish, e o csharp-ls precisa de DOTNET_ROOT
+;; para achar o runtime (o mise instala-o em ~/.local/share/mise/dotnet-root,
+;; caminho fixo independente da versao).
+(let ((dotnet-tools (expand-file-name "~/.dotnet/tools")))
+  (setenv "DOTNET_ROOT" (expand-file-name "~/.local/share/mise/dotnet-root"))
+  (setenv "DOTNET_CLI_TELEMETRY_OPTOUT" "1")
+  (add-to-list 'exec-path dotnet-tools)
+  (setenv "PATH" (concat dotnet-tools ":" (getenv "PATH"))))
+
+(after! eglot
+  (add-to-list 'eglot-server-programs
+               `((csharp-mode csharp-ts-mode) .
+                 (,(expand-file-name "~/.dotnet/tools/csharp-ls")))))
 
 (require 'cl-lib)
 

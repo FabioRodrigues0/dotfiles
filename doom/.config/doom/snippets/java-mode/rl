@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: rl
+# key: rl
+# --
+String ${1:linha} = ${2:sc}.nextLine();

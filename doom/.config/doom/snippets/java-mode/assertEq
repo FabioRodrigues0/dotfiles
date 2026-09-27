@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: assertEq
+# key: assertEq
+# --
+assertEquals(${1:esperado}, ${2:atual});

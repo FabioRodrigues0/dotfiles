@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: enum
+# key: enum
+# --
+public enum ${1:`(file-name-base (or buffer-file-name "Nome"))`} {
+    ${2:A, B, C}$0
+}

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: cr
+# key: cr
+# --
+string ${1:linha} = Console.ReadLine() ?? "";

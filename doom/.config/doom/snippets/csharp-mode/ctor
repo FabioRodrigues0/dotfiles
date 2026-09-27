@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: ctor
+# key: ctor
+# --
+public ${1:`(file-name-base (or buffer-file-name "Nome"))`}($2)
+{
+    $0
+}

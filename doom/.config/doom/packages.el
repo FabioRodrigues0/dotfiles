@@ -68,3 +68,7 @@
 (package! org-super-agenda)
 (package! pdf-tools)
 (package! colorful-mode)
+
+;; Python/HTML (ver lisp/python-web.el)
+(package! eldoc-box)
+(package! impatient-mode)

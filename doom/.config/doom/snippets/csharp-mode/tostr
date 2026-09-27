@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: tostr
+# key: tostr
+# --
+public override string ToString() => $"{$1}";$0
