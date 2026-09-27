@@ -8,6 +8,7 @@ function correr --description "Deteta o projeto e corre-o"
         echo "  build.gradle / build.gradle.kts  →  ./gradlew run"
         echo "  pom.xml (Spring Boot)            →  mvn spring-boot:run"
         echo "  pom.xml                          →  mvn compile exec:java"
+        echo "  *.csproj                         →  dotnet run"
         echo "  package.json                     →  pnpm start"
         echo "  pyproject.toml                   →  python -m <módulo>"
         echo "  main.py                          →  python main.py"
@@ -15,6 +16,10 @@ function correr --description "Deteta o projeto e corre-o"
         echo "  main.c / *.c (único)             →  gcc + ./a.out"
         return 0
     end
+
+    # Python: preferir 'python' (mise); fallback para python3
+    set -l py python
+    command -q python; or set py python3
 
     set dir (pwd)
 
@@ -42,6 +47,14 @@ function correr --description "Deteta o projeto e corre-o"
             end
         end
 
+        # .NET (C#)
+        if test (count $dir/*.csproj) -gt 0 2>/dev/null
+            echo "Projeto .NET detetado em $dir"
+            cd "$dir"
+            dotnet run
+            return $status
+        end
+
         # Node
         if test -f "$dir/package.json"
             echo "Projeto Node detetado em $dir"
@@ -55,7 +68,7 @@ function correr --description "Deteta o projeto e corre-o"
             set modulo (string replace -r '/' '.' (basename $dir))
             echo "Projeto Python detetado em $dir"
             cd "$dir"
-            python -m $modulo
+            $py -m $modulo
             return $status
         end
 
@@ -63,7 +76,7 @@ function correr --description "Deteta o projeto e corre-o"
         if test -f "$dir/main.py"
             echo "main.py detetado em $dir"
             cd "$dir"
-            python main.py
+            $py main.py
             return $status
         end
 

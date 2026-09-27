@@ -9,6 +9,8 @@ complete -c novo -f
 
 # Linguagens disponíveis (primeiro argumento)
 complete -c novo -n "test (count (commandline -opc)) -eq 1" -a "java"  -d "Projeto Java com Gradle"
+complete -c novo -n "test (count (commandline -opc)) -eq 1" -a "cs"    -d "Projeto C# (.NET consola)"
+complete -c novo -n "test (count (commandline -opc)) -eq 1" -a "py"    -d "Projeto Python simples"
 complete -c novo -n "test (count (commandline -opc)) -eq 1" -a "typst" -d "Documento / Relatório Typst"
 
 # Flags Java (quando o primeiro arg é "java")
@@ -20,6 +22,17 @@ complete -c novo -n "__fish_seen_subcommand_from java" -l javafx-full -d "Adicio
 complete -c novo -n "__fish_seen_subcommand_from java" -l bricks      -d "Usar Bricks UI (incompatível com --javafx)"
 complete -c novo -n "__fish_seen_subcommand_from java" -l no-md       -d "Não criar ficheiro .md"
 complete -c novo -n "__fish_seen_subcommand_from java" -l help        -d "Mostrar ajuda detalhada"
+
+# Flags C# (quando o primeiro arg é "cs")
+complete -c novo -n "__fish_seen_subcommand_from cs" -l classico -d "class Program + Main (sem top-level statements)"
+complete -c novo -n "__fish_seen_subcommand_from cs" -l disc     -d "Unidade curricular (tags no .md)" -r
+complete -c novo -n "__fish_seen_subcommand_from cs" -l no-md    -d "Não criar ficheiro .md"
+complete -c novo -n "__fish_seen_subcommand_from cs" -l help     -d "Mostrar ajuda detalhada"
+
+# Flags Python (quando o primeiro arg é "py")
+complete -c novo -n "__fish_seen_subcommand_from py" -l disc  -d "Unidade curricular (tags no .md)" -r
+complete -c novo -n "__fish_seen_subcommand_from py" -l no-md -d "Não criar ficheiro .md"
+complete -c novo -n "__fish_seen_subcommand_from py" -l help  -d "Mostrar ajuda detalhada"
 
 # Flags Typst (quando o primeiro arg é "typst")
 complete -c novo -n "__fish_seen_subcommand_from typst" -l academico -d "Template relatório académico (ISPGAYA)"

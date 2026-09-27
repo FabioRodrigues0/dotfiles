@@ -6,6 +6,8 @@
 #
 # Uso:
 #   novo java   <nome> [titulo] [flags]
+#   novo cs     <nome> [titulo] [flags]
+#   novo py     <nome> [titulo] [flags]
 #   novo typst  <nome> [titulo] [flags]
 #   novo --help
 #
@@ -35,6 +37,24 @@ function novo --description "Criar novo projeto de programação"
     switch $lang
         case java
             set -l script "$scripts_dir/novo-java.sh"
+            if not test -f "$script"
+                echo "❌ Script não encontrado: $script"
+                echo "   Corre o instalador: bash install.sh"
+                return 1
+            end
+            bash "$script" $rest
+
+        case cs
+            set -l script "$scripts_dir/novo-cs.sh"
+            if not test -f "$script"
+                echo "❌ Script não encontrado: $script"
+                echo "   Corre o instalador: bash install.sh"
+                return 1
+            end
+            bash "$script" $rest
+
+        case py
+            set -l script "$scripts_dir/novo-py.sh"
             if not test -f "$script"
                 echo "❌ Script não encontrado: $script"
                 echo "   Corre o instalador: bash install.sh"
@@ -75,6 +95,8 @@ function _novo_help
     echo ""
     echo "LINGUAGENS DISPONÍVEIS:"
     echo "   java     Projeto Java com Gradle (padrão) ou Maven (--maven)"
+    echo "   cs       Projeto C# (.NET consola)"
+    echo "   py       Projeto Python simples (main.py)"
     echo "   typst    Documento / Relatório Typst"
     echo ""
     echo "EXEMPLOS:"
@@ -84,6 +106,9 @@ function _novo_help
     echo "   novo java ex_04 \"Exercício 4\" --maven --junit"
     echo "   novo java app_01 \"Calculadora\" --javafx"
     echo "   novo java proj_01 \"CRUD Completo\" --bricks"
+    echo "   novo cs cs_01 \"Exercício 1\""
+    echo "   novo cs cs_02 \"Exercício 2\" --classico"
+    echo "   novo py py_01 \"Exercício 1\""
     echo "   novo typst relatorio_01 \"Relatório 1 - SO\" --academico"
     echo "   novo typst doc_01 \"Documentação API\" --tecnico"
     echo ""
@@ -97,12 +122,23 @@ function _novo_help
     echo "   --bricks         Bricks UI (incompatível com --javafx)"
     echo "   --no-md          Não criar ficheiro .md"
     echo ""
+    echo "FLAGS C#:"
+    echo "   --classico       class Program + Main (em vez de top-level statements)"
+    echo "   --disc \"UC\"      Unidade curricular (tags no .md)"
+    echo "   --no-md          Não criar ficheiro .md"
+    echo ""
+    echo "FLAGS PYTHON:"
+    echo "   --disc \"UC\"      Unidade curricular (tags no .md)"
+    echo "   --no-md          Não criar ficheiro .md"
+    echo ""
     echo "FLAGS TYPST:"
     echo "   --academico      Template relatório académico (ISPGAYA)"
     echo "   --tecnico        Template documentação técnica"
     echo ""
     echo "AJUDA DETALHADA POR LINGUAGEM:"
     echo "   novo java --help"
+    echo "   novo cs --help"
+    echo "   novo py --help"
     echo "   novo typst --help"
     echo ""
 end
