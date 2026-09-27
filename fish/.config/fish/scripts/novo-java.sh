@@ -42,6 +42,8 @@ BRICKS_JAVAFX_VERSION="21.0.5"
 MAVEN_JUNIT_VERSION="5.10.2"
 EXEC_PLUGIN_VERSION="3.3.0"
 SUREFIRE_PLUGIN_VERSION="3.2.5"
+MAVEN_PACKAGE="pt.project"   # groupId + package da App (evita o aviso de default package)
+MAVEN_PACKAGE_PATH="${MAVEN_PACKAGE//.//}"
 
 # ── Flags globais ─────────────────────────────────────────────────────────────
 NOME_PROJETO=""
@@ -135,7 +137,7 @@ EXEMPLOS:
 
 CONFIGURAÇÕES:
     • Java ${JAVA_VERSION} (Bricks usa Java ${BRICKS_JAVA_VERSION})
-    • Estrutura flat (sem subprojetos, sem packages)
+    • Estrutura flat (sem subprojetos; Gradle sem packages, Maven em ${MAVEN_PACKAGE})
     • Classe principal: App.java
     • Checkstyle ${CHECKSTYLE_VERSION} (Sun/Oracle conventions)
     • Spotless ${SPOTLESS_VERSION} (formatação automática)
@@ -1164,15 +1166,31 @@ validate_maven_environment() {
     fi
 }
 
+# Versão major do JDK realmente instalado. O pom tem de coincidir, senão o
+# javac falha com "invalid target release". Fallback: JAVA_VERSION.
+detect_java_version() {
+    local V
+    V=$(javac -version 2>&1 | sed -n 's/^javac \([0-9]*\).*/\1/p')
+    echo "${V:-$JAVA_VERSION}"
+}
+
 create_maven_structure() {
     print_header "Criando Estrutura Maven"
 
+    MAVEN_JAVA_VERSION=$(detect_java_version)
+    if [ "$MAVEN_JAVA_VERSION" != "$JAVA_VERSION" ]; then
+        print_warning "JDK instalado é ${MAVEN_JAVA_VERSION} (esperado ${JAVA_VERSION}) — pom usa ${MAVEN_JAVA_VERSION}"
+    fi
+
+
     mkdir -p "$NOME_PROJETO"
     cd "$NOME_PROJETO"
-    mkdir -p src/main/java
-    [ "$FLAG_JUNIT" = true ] && mkdir -p src/test/java
+    mkdir -p "src/main/java/${MAVEN_PACKAGE_PATH}"
+    [ "$FLAG_JUNIT" = true ] && mkdir -p "src/test/java/${MAVEN_PACKAGE_PATH}"
 
-    cat > src/main/java/App.java << 'EOF'
+    cat > "src/main/java/${MAVEN_PACKAGE_PATH}/App.java" << EOF
+package ${MAVEN_PACKAGE};
+
 /**
  * Classe principal da aplicação.
  */
@@ -1188,7 +1206,7 @@ public class App {
     }
 }
 EOF
-    print_info "App.java criado"
+    print_info "App.java criado (package ${MAVEN_PACKAGE})"
 }
 
 configure_pom_xml() {
@@ -1201,13 +1219,12 @@ configure_pom_xml() {
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>pt.project</groupId>
+    <groupId>${MAVEN_PACKAGE}</groupId>
     <artifactId>${NOME_PROJETO}</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>${JAVA_VERSION}</maven.compiler.source>
-        <maven.compiler.target>${JAVA_VERSION}</maven.compiler.target>
+        <maven.compiler.release>${MAVEN_JAVA_VERSION}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 EOF
@@ -1236,7 +1253,7 @@ EOF
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>${EXEC_PLUGIN_VERSION}</version>
                 <configuration>
-                    <mainClass>App</mainClass>
+                    <mainClass>${MAVEN_PACKAGE}.App</mainClass>
                 </configuration>
             </plugin>
 EOF
@@ -1297,7 +1314,7 @@ ${TITULO}
 
 ## Estrutura do Projeto
 
-- \`src/main/java/App.java\` - Classe principal
+- \`src/main/java/${MAVEN_PACKAGE_PATH}/App.java\` - Classe principal
 EOF
 
     [ "$FLAG_JUNIT" = true ] && echo "- \`src/test/java/\` - Testes unitários (JUnit ${MAVEN_JUNIT_VERSION})" >> "${NOME_PROJETO}.md"
@@ -1322,7 +1339,7 @@ mvn clean
 
 ## Dependências
 
-- **Java ${JAVA_VERSION}** - Versão do JDK
+- **Java ${MAVEN_JAVA_VERSION}** - Versão do JDK
 EOF
 
     [ "$FLAG_JUNIT" = true ] && echo "- **JUnit ${MAVEN_JUNIT_VERSION}** - Testes unitários" >> "${NOME_PROJETO}.md"
@@ -1353,7 +1370,7 @@ show_maven_success_message() {
     [ "$FLAG_NO_MD" = false ] && echo -e "${GREEN}📄 Docs:${NC}        ${NOME_PROJETO}.md"
     echo ""
     echo -e "${CYAN}🔧 Configurações:${NC}"
-    echo "   • Java ${JAVA_VERSION} | Maven | Classe principal: App.java"
+    echo "   • Java ${MAVEN_JAVA_VERSION} | Maven | Classe principal: ${MAVEN_PACKAGE}.App"
     [ "$FLAG_JUNIT" = true ] && echo -e "   ${GREEN}✓${NC} JUnit ${MAVEN_JUNIT_VERSION}"
     echo ""
     echo -e "${YELLOW}📝 Próximos passos:${NC}"
