@@ -269,7 +269,119 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
   (typst-preview-invert-colors "never")	; invert colors depending on system theme
   (typst-preview-executable "tinymist") ; path to tinymist binary (relative or absolute)
   (typst-preview-partial-rendering t)   ; enable partial rendering
+  (typst-preview-cmd-options '("--verbose"))
+  (typst-preview-host "")
   :config
+  (defconst fabio/typst-preview-data-host "127.0.0.1:23625")
+  (defconst fabio/typst-preview-control-host "127.0.0.1:23626")
+
+  (defun fabio/typst-preview--replace-option (args option value)
+    "Return ARGS with OPTION's following value replaced by VALUE."
+    (cond
+     ((null args) nil)
+     ((and (string= (car args) option) (cdr args))
+      (cons option (cons value (cddr args))))
+     (t
+      (cons (car args)
+            (fabio/typst-preview--replace-option (cdr args) option value)))))
+
+  (defun fabio/typst-preview--fixed-host-args (args)
+    "Rewrite tinymist preview ARGS to use stable localhost ports."
+    (setq args (fabio/typst-preview--replace-option args "--host" ""))
+    (setq args (fabio/typst-preview--replace-option
+                args "--data-plane-host" fabio/typst-preview-data-host))
+    (setq args (fabio/typst-preview--replace-option
+                args "--control-plane-host" fabio/typst-preview-control-host))
+    args)
+
+  (defun fabio/typst-preview-start-process-a (orig name buffer program &rest args)
+    "Force stable tinymist preview ports for the typst-preview process."
+    (when (string= name "typst-preview-proc")
+      (setq args (fabio/typst-preview--fixed-host-args args)))
+    (apply orig name buffer program args))
+
+  (advice-remove 'start-process #'fabio/typst-preview-start-process-a)
+  (advice-add 'start-process :around #'fabio/typst-preview-start-process-a)
+
+  (defun fabio/typst-preview-find-server-filter-a (_proc input)
+    "Handle tinymist 0.14 preview host log lines in INPUT."
+    (when (bound-and-true-p typst-preview--local-master)
+      (when (string-match
+             "\\(?:Data plane\\|Static file\\) server listening on: \\([^[:space:]\n]+\\)"
+             input)
+        (setf (typst-preview--master-static-host typst-preview--local-master)
+              (match-string 1 input)))
+      (when (string-match
+             "Control panel server listening on: \\([^[:space:]\n]+\\)"
+             input)
+        (setf (typst-preview--master-control-host typst-preview--local-master)
+              (match-string 1 input)))))
+
+  (advice-remove 'typst-preview--find-server-filter
+                 #'fabio/typst-preview-find-server-filter-a)
+  (advice-add 'typst-preview--find-server-filter
+              :after
+              #'fabio/typst-preview-find-server-filter-a)
+
+  (defun fabio/typst-preview-clear-bad-masters-a (&rest _)
+    "Clear stale typst-preview masters that were started without a preview host."
+    (setq typst-preview--active-masters
+          (cl-remove-if
+           (lambda (master)
+             (unless (typst-preview--master-static-host master)
+               (when (process-live-p (typst-preview--master-process master))
+                 (delete-process (typst-preview--master-process master)))
+               t))
+           typst-preview--active-masters))
+    (when (and (boundp 'typst-preview--local-master)
+               typst-preview--local-master
+               (not (typst-preview--master-static-host typst-preview--local-master)))
+      (kill-local-variable 'typst-preview--local-master)))
+
+  (advice-remove 'typst-preview-start #'fabio/typst-preview-clear-bad-masters-a)
+  (advice-add 'typst-preview-start
+              :before
+              #'fabio/typst-preview-clear-bad-masters-a)
+
+  (defun fabio/typst-preview--url-from-hostname (hostname)
+    "Return a preview URL from HOSTNAME, or nil if HOSTNAME is blank."
+    (when (and (stringp hostname)
+               (not (string-empty-p (string-trim hostname))))
+      (let ((host (string-trim hostname)))
+        (if (string-match-p "\\`https?://" host)
+            host
+          (concat "http://" host)))))
+
+  (defun fabio/typst-preview--system-open-url (url)
+    "Open URL with the OS browser, bypassing Emacs `browse-url' dispatch."
+    (let ((program (cond
+                    ((eq system-type 'darwin) "open")
+                    ((executable-find "xdg-open") "xdg-open")
+                    (t nil))))
+      (if program
+          (start-process "typst-preview-browser" nil program url)
+        (browse-url url))))
+
+  (defun fabio/typst-preview-open-url (browser hostname)
+    "Open Typst preview BROWSER at HOSTNAME using the real tinymist port."
+    (if-let ((url (fabio/typst-preview--url-from-hostname hostname)))
+        (progn
+          (message "Typst preview: %s" url)
+          (pcase browser
+            ("xwidget"
+             (if (fboundp 'xwidget-webkit-browse-url)
+                 (xwidget-webkit-browse-url url)
+               (fabio/typst-preview--system-open-url url)))
+            ("eaf-browser"
+             (if (fboundp 'eaf-open-browser-other-window)
+                 (eaf-open-browser-other-window url)
+               (fabio/typst-preview--system-open-url url)))
+            ("default"
+             (fabio/typst-preview--system-open-url url))
+            (_
+             (fabio/typst-preview--system-open-url url))))
+      (user-error "Typst preview ainda não devolveu uma porta; faz typst-preview-restart")))
+
   (defun fabio/typst-preview-xwidget-split-right (orig browser hostname)
     "Abre o typst-preview xwidget à direita em macOS, mantendo o Typst à esquerda."
     (if (and (eq system-type 'darwin)
@@ -279,13 +391,15 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
                 (or (window-in-direction 'right source-window)
                     (split-window source-window nil 'right))))
           (select-window preview-window)
-          (funcall orig browser hostname)
+          (fabio/typst-preview-open-url browser hostname)
           (when (and (window-live-p source-window)
                      (window-live-p preview-window))
             (balance-windows-area)
             (select-window source-window)))
-      (funcall orig browser hostname)))
+      (fabio/typst-preview-open-url browser hostname)))
 
+  (advice-remove 'typst-preview--connect-browser
+                 #'fabio/typst-preview-xwidget-split-right)
   (advice-add 'typst-preview--connect-browser
               :around
               #'fabio/typst-preview-xwidget-split-right)
