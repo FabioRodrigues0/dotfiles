@@ -1,13 +1,16 @@
 [opener]
-helix = [
-  { run = 'hx "$@"', desc = "Helix", block = true },
+emacs = [
+  { run = 'emacsclient -c -a "emacs-pgtk --init-directory ~/.config/emacs" "$@"', desc = "Emacs", orphan = true },
+]
+system = [
+  { run = 'for path in "$@"; do xdg-open "$path"; done', desc = "Open with default app", orphan = true },
 ]
 
 [open]
 rules = [
-  { mime = "*/", use = "helix" },
-  { mime = "text/*", use = "helix" },
-  { mime = "application/json", use = "helix" },
-  { mime = "application/toml", use = "helix" },
-  { mime = "application/xml", use = "helix" },
+  { mime = "text/*", use = "emacs" },
+  { mime = "application/json", use = "emacs" },
+  { mime = "application/toml", use = "emacs" },
+  { mime = "application/xml", use = "emacs" },
+  { mime = "application/pdf", use = "system" },
 ]
