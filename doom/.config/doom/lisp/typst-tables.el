@@ -1,5 +1,7 @@
 ;;; typst-tables.el --- Tabelas Typst legíveis no código -*- lexical-binding: t; -*-
 
+;; Títulos (`=', `==', ...) com uma cor por nível.
+;;
 ;; Em `#table(...)' e `#grid(...)':
 ;; - `fabio/typst-table-colors-mode' pinta cada célula com a cor da sua coluna
 ;;   (o cabeçalho fica a negrito), para se perceber onde acaba cada coluna.
@@ -9,11 +11,11 @@
 (require 'treesit)
 (require 'subr-x)
 
-(defface fabio/typst-table-col-1 '((t (:foreground "#a0c7cf"))) "Coluna 1 de uma tabela Typst.")
-(defface fabio/typst-table-col-2 '((t (:foreground "#b8a6f0"))) "Coluna 2 de uma tabela Typst.")
-(defface fabio/typst-table-col-3 '((t (:foreground "#e0b27a"))) "Coluna 3 de uma tabela Typst.")
-(defface fabio/typst-table-col-4 '((t (:foreground "#8fd4a4"))) "Coluna 4 de uma tabela Typst.")
-(defface fabio/typst-table-col-5 '((t (:foreground "#e89ab8"))) "Coluna 5 de uma tabela Typst.")
+(defface fabio/typst-table-col-1 '((t (:foreground "#b4c7cf"))) "Coluna 1 de uma tabela Typst.")
+(defface fabio/typst-table-col-2 '((t (:foreground "#c0b7e0"))) "Coluna 2 de uma tabela Typst.")
+(defface fabio/typst-table-col-3 '((t (:foreground "#d4bda5"))) "Coluna 3 de uma tabela Typst.")
+(defface fabio/typst-table-col-4 '((t (:foreground "#abceba"))) "Coluna 4 de uma tabela Typst.")
+(defface fabio/typst-table-col-5 '((t (:foreground "#d8b1c4"))) "Coluna 5 de uma tabela Typst.")
 
 (defvar fabio/typst-table-col-faces
   '(fabio/typst-table-col-1 fabio/typst-table-col-2 fabio/typst-table-col-3
@@ -193,6 +195,22 @@ Cada linha da tabela fica numa linha do ficheiro, com as colunas alinhadas."
             (insert "(\n"
                     (mapconcat (lambda (l) (concat indent (string-trim-right l))) lines "\n")
                     "\n" (make-string base ?\s) ")")))))))
+
+;; ── Cores nos títulos ───────────────────────────────────────────────────────
+
+;; Uma face por nível em vez de uma só para todos; tem de ficar definido antes
+;; de o typst-ts-mode carregar. Tamanho igual em todos, só muda a cor.
+(setq typst-ts-markup-header-same-height nil
+      typst-ts-markup-header-scale '(1.0 1.0 1.0 1.0 1.0 1.0))
+
+(custom-set-faces!
+  '((typst-ts-markup-header-face-1 typst-ts-markup-header-indicator-face-1) :foreground "#c3a6ff")
+  '((typst-ts-markup-header-face-2 typst-ts-markup-header-indicator-face-2) :foreground "#8fc7e8")
+  '((typst-ts-markup-header-face-3 typst-ts-markup-header-indicator-face-3) :foreground "#8fd4a4")
+  '((typst-ts-markup-header-face-4 typst-ts-markup-header-indicator-face-4) :foreground "#e0b27a")
+  '((typst-ts-markup-header-face-5 typst-ts-markup-header-indicator-face-5
+     typst-ts-markup-header-face-6 typst-ts-markup-header-indicator-face-6)
+    :foreground "#e89ab8"))
 
 (add-hook 'typst-ts-mode-hook #'fabio/typst-table-colors-mode)
 
