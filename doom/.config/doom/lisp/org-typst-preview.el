@@ -17,9 +17,6 @@
 (defvar meu/org-typst-preview-dir
   (expand-file-name "org-typst-preview/" temporary-file-directory))
 
-(defvar-local meu/org-typst-preview-silent-errors nil
-  "Se non-nil, ignora erros individuais de preview Typst neste buffer.")
-
 (defun meu/org-typst--buffer-output ()
   "Retorna e limpa o output do buffer de compilação Typst."
   (with-current-buffer (get-buffer-create "*org-typst-preview*")
@@ -130,8 +127,7 @@ DISPLAY indica se é fórmula display."
           (condition-case err
               (meu/org-typst--overlay beg end body display)
             (error
-             (unless meu/org-typst-preview-silent-errors
-               (message "Typst preview erro ignorado: %s" err)))))))
+             (message "Typst preview erro ignorado: %s" err))))))
   (meu/org-typst-preview-src-blocks)))
 
 
@@ -185,9 +181,8 @@ DISPLAY indica se é fórmula display."
          ;; source visible and avoid dropping into the debugger on each key.
          (overlay-put ov 'display nil)
          (overlay-put ov 'meu/org-typst-open t)
-         (unless meu/org-typst-preview-silent-errors
-           (message "Typst preview mantém fonte por erro: %s"
-                    (error-message-string err))))))))
+         (message "Typst preview mantém fonte por erro: %s"
+                  (error-message-string err)))))))
 
 (defun meu/org-typst-preview-post-command ()
   "Abrir preview no cursor e fechar previews fora do cursor."
@@ -196,8 +191,7 @@ DISPLAY indica se é fórmula display."
         (meu/org-typst-close-open-previews)
         (meu/org-typst-open-preview-at-point))
     (error
-     (unless meu/org-typst-preview-silent-errors
-       (message "Typst preview post-command ignorado: %s" err)))))
+     (message "Typst preview post-command ignorado: %s" err))))
 
 
 (add-hook 'org-mode-hook
@@ -273,8 +267,7 @@ DISPLAY indica se é fórmula display."
                   (overlay-put ov 'after-string "\n")
                   (overlay-put ov 'evaporate t))
               (error
-               (unless meu/org-typst-preview-silent-errors
-                 (message "Typst src preview erro ignorado: %s" err))))))))))
+               (message "Typst src preview erro ignorado: %s" err)))))))))
 
 (defun meu/org-typst--compile-src-block-to-svg (body)
   "Compila BODY de um bloco src typst para SVG."
