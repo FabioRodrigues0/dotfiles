@@ -1,7 +1,6 @@
 ;;; ~/.config/doom/config.el -*- lexical-binding: t; -*-
 
 (load! "lisp/org-config")
-(load! "lisp/org-typst-preview")
 (load! "lisp/typst-tables")
 (load! "lisp/python-web")
 (load! "lisp/java-csharp")
