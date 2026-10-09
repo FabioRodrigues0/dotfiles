@@ -105,29 +105,7 @@ DISPLAY indica se é fórmula display."
   "Retorna non-nil se BODY parece ser um fragmento Typst isolado."
   (and body
        (> (length body) 0)
-       (not (string-match-p ":PROPERTIES:" body))
-       ;; No Cardflow sidebar o Org parser pode apanhar texto truncado entre
-       ;; dólares soltos e tentar compilá-lo como matemática.
-       (not (and (string= (buffer-name) "*org-sidebar*")
-                 (or (string-match-p "●" body)
-                     (string-match-p "\n" body))))))
-
-(defun meu/org-typst--line-in-table-p (pos)
-  "Retorna non-nil se POS estiver numa linha de tabela Org."
-  (save-excursion
-    (goto-char pos)
-    (beginning-of-line)
-    (looking-at-p "[ \t]*|")))
-
-(defun meu/org-typst--fallback-overlay (beg end label)
-  "Esconde região BEG END com um fallback discreto LABEL."
-  (let ((ov (make-overlay beg end)))
-    (overlay-put ov 'meu/org-typst-preview t)
-    (overlay-put ov 'display
-                 (propertize label
-                             'face
-                             'font-lock-comment-face))
-    (overlay-put ov 'evaporate t)))
+       (not (string-match-p ":PROPERTIES:" body))))
 
 (defun meu/org-typst-preview-buffer ()
   "Renderiza fragments Typst em fragments matemáticos Org."
@@ -149,16 +127,11 @@ DISPLAY indica se é fórmula display."
              (body (car parsed))
              (display (cdr parsed)))
         (when (meu/org-typst--previewable-fragment-p body)
-          (unless (and (string= (buffer-name) "*org-sidebar*")
-                       (meu/org-typst--line-in-table-p beg))
-            (condition-case err
-                (meu/org-typst--overlay beg end body display)
-              (error
-               (if (and meu/org-typst-preview-silent-errors
-                        (string= (buffer-name) "*org-sidebar*"))
-                   (meu/org-typst--fallback-overlay beg end "[Typst]")
-                 (unless meu/org-typst-preview-silent-errors
-                   (message "Typst preview erro ignorado: %s" err)))))))))
+          (condition-case err
+              (meu/org-typst--overlay beg end body display)
+            (error
+             (unless meu/org-typst-preview-silent-errors
+               (message "Typst preview erro ignorado: %s" err)))))))
   (meu/org-typst-preview-src-blocks)))
 
 
@@ -300,11 +273,8 @@ DISPLAY indica se é fórmula display."
                   (overlay-put ov 'after-string "\n")
                   (overlay-put ov 'evaporate t))
               (error
-               (if (and meu/org-typst-preview-silent-errors
-                        (string= (buffer-name) "*org-sidebar*"))
-                   (meu/org-typst--fallback-overlay beg end "[bloco Typst]")
-                 (unless meu/org-typst-preview-silent-errors
-                   (message "Typst src preview erro ignorado: %s" err)))))))))))
+               (unless meu/org-typst-preview-silent-errors
+                 (message "Typst src preview erro ignorado: %s" err))))))))))
 
 (defun meu/org-typst--compile-src-block-to-svg (body)
   "Compila BODY de um bloco src typst para SVG."
