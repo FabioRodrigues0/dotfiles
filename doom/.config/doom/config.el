@@ -13,6 +13,10 @@
 ;;
 (setq doom-font (font-spec :family "JetBrains Mono" :size 16)
       doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 16))
+;; Fonte de recurso para simbolos. O Symbola nao existe no brew; o Apple Symbols
+;; vem com o macOS. O `doom doctor' continua a avisar porque so procura o Symbola.
+(when (eq system-type 'darwin)
+  (setq doom-symbol-font (font-spec :family "Apple Symbols")))
 
 ;; ~/.doom.d/config.el
 (after! company
