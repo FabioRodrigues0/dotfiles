@@ -4,6 +4,7 @@
 (load! "lisp/typst-tables")
 (load! "lisp/python-web")
 (load! "lisp/java-csharp")
+(load! "lisp/java-gerar")
 (load! "lisp/novo-ficheiro")
 (load! "lisp/projetos")
 ;;
@@ -83,9 +84,11 @@
 (after! eglot
   (setq eglot-connect-timeout 120
         eglot-max-file-watches 50000)
+  ;; As opcoes ativam os Generate com escolha de campos (lisp/java-gerar.el).
   (add-to-list 'eglot-server-programs
-               '((java-mode java-ts-mode) .
-                 ("jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"))))
+               `((java-mode java-ts-mode) .
+                 ("jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"
+                  :initializationOptions ,fabio/jdtls-init-options))))
 
 (add-hook 'java-mode-local-vars-hook #'lsp! 'append)
 (add-hook 'java-ts-mode-local-vars-hook #'lsp! 'append)
