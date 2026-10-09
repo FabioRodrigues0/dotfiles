@@ -5,6 +5,7 @@
 (load! "lisp/python-web")
 (load! "lisp/java-csharp")
 (load! "lisp/novo-ficheiro")
+(load! "lisp/projetos")
 ;;
 (setq user-full-name "Fabio Rodrigues"
       user-mail-address "fabio.rod@outlook.pt")
