@@ -18,6 +18,15 @@
 (when (eq system-type 'darwin)
   (setq doom-symbol-font (font-spec :family "Apple Symbols")))
 
+;; Ortografia em portugues e ingles ao mesmo tempo, com hunspell. O pt_PT do
+;; aspell nao tem plurais nem conjugacoes; o do LibreOffice (pt_PT.dic/.aff)
+;; fica em ~/.local/share/hunspell. Ver MANUTENCAO.md.
+(setenv "DICPATH" (expand-file-name "~/.local/share/hunspell"))
+(after! ispell
+  (setq ispell-dictionary "pt_PT,en_US")
+  (ispell-set-spellchecker-params)
+  (ispell-hunspell-add-multi-dic "pt_PT,en_US"))
+
 ;; ~/.doom.d/config.el
 (after! company
   (setq company-idle-delay 0.0          ; sem delay (default 0.2)

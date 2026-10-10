@@ -42,9 +42,26 @@ typst-preview (`config.el`).
 - **ktlint, glslang, stylelint, js-beautify, shfmt, shellcheck**: linguagens
   que não uso no Emacs (shfmt/shellcheck só se mexer muito nos `novo-*.sh`).
 
-Instalados para o doctor: `coreutils` (gls para o dired/dirvish), `aspell`.
+Instalados para o doctor: `coreutils` (gls para o dired/dirvish).
 
-No Linux (brew): `aspell` (tem `pt_PT` e `en`) e `fd`.
+No Linux (brew): `fd`.
+
+## Ortografia (português + inglês)
+
+`(spell +flyspell +hunspell)` no `init.el`, dicionário `"pt_PT,en_US"` no
+`config.el`. Não uso o aspell: o `pt_PT` dele não tem plurais nem conjugações
+("ficheiros", "codificação" dão erro), e o spell-fu (sem `+flyspell`) só
+funciona com aspell.
+
+Os dicionários (`pt_PT` e `en_US` do LibreOffice) estão nas dotfiles, no pacote
+`hunspell/` → `~/.local/share/hunspell`; o `config.el` aponta o `DICPATH` para
+lá. Numa máquina nova:
+
+- macOS: `brew install hunspell` e `stow hunspell`
+- Linux: o `hunspell` já vem com o Fedora; só `stow hunspell`
+
+Atualizar os dicionários:
+<https://github.com/LibreOffice/dictionaries> (pastas `pt_PT/` e `en/`).
 
 ## Pendente
 
