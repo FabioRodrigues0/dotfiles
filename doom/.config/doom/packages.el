@@ -65,7 +65,6 @@
 (package! typst-preview
   :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! org-modern)
-(package! org-super-agenda)
 (package! pdf-tools)
 (package! colorful-mode)
 
