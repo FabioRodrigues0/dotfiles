@@ -7,6 +7,7 @@
 (load! "lisp/java-gerar")
 (load! "lisp/novo-ficheiro")
 (load! "lisp/projetos")
+(load! "lisp/navegar-indentacao")
 ;;
 (setq user-full-name "Fabio Rodrigues"
       user-mail-address "fabio.rod@outlook.pt")
