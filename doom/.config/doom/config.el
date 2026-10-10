@@ -76,8 +76,7 @@
 (setq shell-file-name fabio/fish-shell
       shell-command-switch "-c")
 (setq-default shell-file-name fabio/fish-shell
-              explicit-shell-file-name fabio/fish-shell
-              vterm-shell fabio/fish-shell)
+              explicit-shell-file-name fabio/fish-shell)
 (setenv "SHELL" fabio/fish-shell)
 
 (after! compile

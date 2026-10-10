@@ -35,7 +35,8 @@ typst-preview (`config.el`).
   procura o nome "Symbola". No Linux: pacote `fonts-symbola`.
 - **Shell fish**: `shell-file-name` é o fish porque o `correr` (`SPC m r`) é
   uma função do fish. Trocar para bash parte isso.
-- **cmake**: só para compilar o vterm; uso o Ghostty.
+- **cmake**: só para compilar o vterm; uso o Ghostty (o módulo `vterm` está
+  desativado no `init.el`, por isso este aviso já não deve aparecer).
 - **black, pipenv, nose, pytest**: uso ruff e uv; o pytest vai por projeto.
 - **clang-format (Java)**: uso Spotless / google-java-format.
 - **ktlint, glslang, stylelint, js-beautify, shfmt, shellcheck**: linguagens
@@ -43,7 +44,13 @@ typst-preview (`config.el`).
 
 Instalados para o doctor: `coreutils` (gls para o dired/dirvish), `aspell`.
 
+No Linux (brew): `aspell` (tem `pt_PT` e `en`) e `fd`.
+
 ## Pendente
+
+**llvm (C/C++).** O módulo `cc` está ativo mas não há `clangd` nem
+`clang-format`: os `.c` abrem sem LSP nem formatação. Quando precisar de
+programar C no Emacs: `brew install llvm` (traz os dois).
 
 **Emacs 31.** Tenho o 30.2 (build 104, maio); o cask estável já vai no 31.1.
 O tap `d12frosted/emacs-plus` está ativo (builds quase diários). Esperar uns
