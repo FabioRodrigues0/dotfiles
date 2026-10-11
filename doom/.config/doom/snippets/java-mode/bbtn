@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: Button
+# key: bbtn
+# --
+`(fabio/bricks-import "components.Button")`new Button("${1:Guardar}").onClick(() -> ${2:acao()})$0

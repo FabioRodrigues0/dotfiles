@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: Row
+# key: brow
+# --
+`(fabio/bricks-import "components.Row")`new Row()
+    .gap(${1:8})
+    .children(
+        $0
+    )

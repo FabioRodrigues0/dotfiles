@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: bricks: TextField
+# key: bfield
+# --
+`(fabio/bricks-import "components.TextField")`new TextField()
+    .label("${1:Nome}:")
+    .placeholder("${2:...}")
+    .bindTo(${3:estado})$0

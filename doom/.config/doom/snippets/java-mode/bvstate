@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: bricks: ValidatedState
+# key: bvstate
+# --
+`(fabio/bricks-import "core.ValidatedState")`public final ValidatedState<${1:String}> ${2:nome} = validatedState(${3:""})
+    .required("${4:Campo obrigatorio}")$0;

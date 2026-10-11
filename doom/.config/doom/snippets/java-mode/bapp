@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: bricks: classe BricksApplication
+# key: bapp
+# --
+`(fabio/bricks-import "core.BricksApplication" "core.Component" "components.Column")`public class `(file-name-base (or buffer-file-name "App"))` extends BricksApplication {
+
+    {
+        setTitle("${1:Titulo}");
+    }
+
+    @Override
+    public Component root() {
+        return new Column()
+            .padding(${2:20})
+            .gap(${3:12})
+            .children(
+                $0
+            );
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

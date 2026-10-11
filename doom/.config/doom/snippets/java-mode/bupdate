@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: DB update
+# key: bupdate
+# --
+`(fabio/bricks-import "data.DB" "java.util.Map")`DB.query()
+    .update("${1:tabela}")
+    .set(Map.of(${2:"nome", nome}))
+    .where("${3:id}", "=", ${4:id})
+    .execute();$0

@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: bricks: DB select
+# key: bquery
+# --
+`(fabio/bricks-import "data.DB" "java.util.List")`List<${1:Item}> ${2:lista} = DB.query()
+    .select(${3:"id", "nome"})
+    .from("${4:tabela}")
+    .where("${5:id}", "${6:=}", ${7:valor})
+    .orderBy("${8:nome}", "ASC")
+    .execute($1.class);$0

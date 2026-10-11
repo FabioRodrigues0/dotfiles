@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bricks: Effect
+# key: beffect
+# --
+`(fabio/bricks-import "core.Effect")`private final Effect ${1:init} = effect(() -> {
+    $0
+}${2:, ${3:dependencia}});

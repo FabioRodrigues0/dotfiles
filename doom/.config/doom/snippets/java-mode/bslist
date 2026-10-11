@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: StateList
+# key: bslist
+# --
+`(fabio/bricks-import "core.StateList" "java.util.List")`private final StateList<${1:Item}> ${2:itens} = stateList(List.of());$0

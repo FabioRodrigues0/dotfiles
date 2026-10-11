@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bricks: When
+# key: bwhen
+# --
+`(fabio/bricks-import "components.When")`new When(${1:condicao}).then(
+    $0
+)

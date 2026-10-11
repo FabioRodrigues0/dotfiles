@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: bricks: classe BricksViewModel
+# key: bvm
+# --
+`(fabio/bricks-import "core.BricksViewModel" "core.StateList" "data.DB" "java.util.List")`public class `(file-name-base (or buffer-file-name "App"))` extends BricksViewModel {
+
+    public final StateList<${1:Item}> ${2:itens} = stateList(List.of());
+
+    public void carregar() {
+        List<$1> lista = DB.query()
+            .from("${3:tabela}")
+            .execute($1.class);
+        $2.clear();
+        $2.addAll(lista);
+    }$0
+}

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: bricks: DB delete
+# key: bdelete
+# --
+`(fabio/bricks-import "data.DB")`DB.query()
+    .deleteFrom("${1:tabela}")
+    .where("${2:id}", "=", ${3:id})
+    .execute();$0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: State
+# key: bstate
+# --
+`(fabio/bricks-import "core.State")`private final State<${1:String}> ${2:valor} = state(${3:""});$0

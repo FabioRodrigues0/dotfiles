@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: Column
+# key: bcol
+# --
+`(fabio/bricks-import "components.Column")`new Column()
+    .gap(${1:12})
+    .children(
+        $0
+    )

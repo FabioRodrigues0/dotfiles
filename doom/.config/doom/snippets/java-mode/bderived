@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: bricks: DerivedState
+# key: bderived
+# --
+`(fabio/bricks-import "core.DerivedState")`private final DerivedState<${1:Boolean}> ${2:nome} = derived(
+    () -> ${3:expr},
+    ${4:dependencia}
+);$0

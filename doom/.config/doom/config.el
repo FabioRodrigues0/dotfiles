@@ -5,6 +5,7 @@
 (load! "lisp/python-web")
 (load! "lisp/java-csharp")
 (load! "lisp/java-gerar")
+(load! "lisp/java-bricks")
 (load! "lisp/novo-ficheiro")
 (load! "lisp/projetos")
 (load! "lisp/navegar-indentacao")
@@ -231,9 +232,14 @@
 (after! eglot
   (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
-                 '((typst-ts-mode) . ("tinymist")))
-    (setq-default eglot-workspace-configuration
-                  '(:tinymist (:exportPdf "onType")))))
+                 '((typst-ts-mode) . ("tinymist"))))
+  (setq-default eglot-workspace-configuration
+                #'fabio/eglot-workspace-configuration))
+
+(defun fabio/eglot-workspace-configuration (server)
+  "Settings para os servidores do eglot (Tinymist e jdtls)."
+  (append '(:tinymist (:exportPdf "onType"))
+          (fabio/bricks-jdtls-config server)))
 
 (after! typst-ts-mode
   (unless (treesit-language-available-p 'typst)

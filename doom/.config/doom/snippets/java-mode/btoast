@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: Notification.toast
+# key: btoast
+# --
+`(fabio/bricks-import "components.Notification" "components.NotificationType")`Notification.toast(${1:app}, "${2:Guardado!}", NotificationType.${3:$$(yas-choose-value '("SUCCESS" "INFO" "WARNING" "ERROR"))});$0

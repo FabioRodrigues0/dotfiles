@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: coluna de tabela (createTable)
+# key: bc
+# --
+`(fabio/bricks-import "data.dialect.ColumnType")`.column("${1:nome}", ColumnType.${2:$$(yas-choose-value '("STRING" "TEXT" "INTEGER" "LONG" "DOUBLE" "DECIMAL" "BOOLEAN" "DATE" "DATETIME"))}${3:, "NOT NULL"})$0

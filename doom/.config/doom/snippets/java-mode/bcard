@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: Card
+# key: bcard
+# --
+`(fabio/bricks-import "components.Card")`new Card()
+    .padding(${1:16})
+    .children(
+        $0
+    )

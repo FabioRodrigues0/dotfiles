@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: bricks: DataTable
+# key: btable
+# --
+`(fabio/bricks-import "components.DataTable" "components.TableAction")`new DataTable<${1:Item}>()
+    .items(${2:itens})
+    .searchable()
+    .column("${3:Nome}", $1::${4:nome})
+    $0
+    .actionColumn(new TableAction<$1>()
+        .icon("fas-pencil").tooltip("Editar").onClick(${5:x} -> ${6:editar}($5)))
+    .actionColumn(new TableAction<$1>()
+        .icon("fas-trash").tooltip("Apagar").danger().onClick($5 -> ${7:apagar}($5)))

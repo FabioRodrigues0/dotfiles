@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: bricks: Dropdown
+# key: bdrop
+# --
+`(fabio/bricks-import "components.Dropdown")`new Dropdown<${1:String}>(${2:List.of("A", "B")})
+    .label("${3:Escolher}:")
+    .bindTo(${4:estado})$0

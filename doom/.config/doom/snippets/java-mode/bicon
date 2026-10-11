@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: Icon
+# key: bicon
+# --
+`(fabio/bricks-import "components.Icon")`new Icon("${1:fas-star}").size(${2:16})$0

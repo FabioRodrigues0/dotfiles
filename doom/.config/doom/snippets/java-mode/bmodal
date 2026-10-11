@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: bricks: Modal.show
+# key: bmodal
+# --
+`(fabio/bricks-import "components.Modal" "components.Column" "components.Button")`Modal.show(${1:app}, "${2:Titulo}", modal ->
+    new Column().gap(12).padding(16).children(
+        $0,
+        new Button("Fechar").onClick(() -> modal.close())
+    )
+);

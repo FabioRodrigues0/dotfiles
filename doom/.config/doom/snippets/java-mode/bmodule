@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: bricks: module-info
+# key: bmodule
+# --
+module ${1:com.exemplo} {
+    requires fabiorodrigues.bricks;
+    requires javafx.controls;
+    requires javafx.graphics;
+
+    opens ${2:$1} to javafx.graphics;
+    exports $2;$0
+}

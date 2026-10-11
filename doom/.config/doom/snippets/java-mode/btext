@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: Text
+# key: btext
+# --
+`(fabio/bricks-import "components.Text")`new Text(${1:"texto"})${2:.fontSize(${3:16})}$0

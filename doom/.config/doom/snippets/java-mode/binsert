@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: bricks: DB insert
+# key: binsert
+# --
+`(fabio/bricks-import "data.DB" "java.util.Map")`int ${1:id} = DB.query()
+    .insertInto("${2:tabela}")
+    .values(Map.of(${3:"nome", nome}))
+    .execute();$0

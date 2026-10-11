@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: bricks: TableAction
+# key: baction
+# --
+`(fabio/bricks-import "components.TableAction")`.actionColumn(new TableAction<${1:Item}>()
+    .icon("${2:fas-pencil}").tooltip("${3:Editar}").onClick(${4:x} -> ${5:editar}($4)))$0

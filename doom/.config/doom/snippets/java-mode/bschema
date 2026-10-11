@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: criar tabela
+# key: bschema
+# --
+`(fabio/bricks-import "data.DB" "data.dialect.ColumnType")`DB.query()
+    .createTableIfNotExists("${1:tabela}")
+    .column("id", ColumnType.ID)
+    .column("${2:nome}", ColumnType.${3:STRING}, "${4:NOT NULL}")$0
+    .execute();

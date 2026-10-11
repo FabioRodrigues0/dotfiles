@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: bricks: Form
+# key: bform
+# --
+`(fabio/bricks-import "components.Form" "components.TextField")`new Form()
+    .gap(${1:12})
+    .field(new TextField().label("${2:Nome}:").bindTo(${3:vm.nome}), $3)
+    $0
+    .submitLabel("${4:Guardar}")
+    .onSubmit(() -> ${5:guardar()})

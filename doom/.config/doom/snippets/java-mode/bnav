@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: navegar para scene
+# key: bnav
+# --
+app.navigateTo(new ${1:Outra}Scene(app));$0

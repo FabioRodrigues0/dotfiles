@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bricks: ItemsColumn
+# key: bitems
+# --
+`(fabio/bricks-import "components.ItemsColumn" "components.Text")`new ItemsColumn<${1:Item}>()
+    .items(${2:itens})
+    .gap(${3:8})
+    .item(${4:i} -> ${5:new Text($4.toString())})
+    .emptyState(new Text("${6:Sem resultados}"))$0

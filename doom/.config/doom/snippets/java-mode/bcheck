@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bricks: Checkbox
+# key: bcheck
+# --
+`(fabio/bricks-import "components.Checkbox")`new Checkbox("${1:Ativo}").bindTo(${2:estado})$0
