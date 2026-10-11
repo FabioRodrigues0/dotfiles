@@ -31,3 +31,16 @@
     (let ((inhibit-message t))
       (projectile-cleanup-known-projects)
       (projectile-discover-projects-in-search-path))))
+
+;; O botao "Open project" do dashboard chama a acao via `cmd!!', que passa o
+;; proprio botao como prefix arg. O projectile ve isso como C-u e abre o menu
+;; `projectile-dispatch' em vez de `projectile-find-file'. Sem prefix arg aqui.
+(defun fabio/abrir-projeto ()
+  "Escolhe um projeto e abre um ficheiro dele (sem `projectile-dispatch')."
+  (interactive)
+  (let ((current-prefix-arg nil))
+    (projectile-switch-project)))
+
+(when (boundp '+dashboard-menu-sections)
+  (when-let ((s (assoc "Open project" +dashboard-menu-sections)))
+    (setcdr s (plist-put (cdr s) :action 'fabio/abrir-projeto))))
