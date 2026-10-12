@@ -43,7 +43,8 @@ let mapleader = " "
 """ Ações do IntelliJ via <Action>
 " Ficheiros e projeto
 map <leader><leader> <Action>(GotoFile)
-map <leader>ff <Action>(SearchEverywhere)
+map <leader>fs <Action>(ActivateProjectToolWindow)
+map <leader>ff <Action>(SelectInProjectView)
 map <leader>fr <Action>(RecentFiles)
 map <leader>fp <Action>(FindInPath)
 
