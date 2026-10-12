@@ -1,0 +1,20 @@
+# Defaults do stow (este ficheiro substitui-os)
+RCS
+.+,v
+CVS
+\.\#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+# Template de projeto (mvn install), nao vai para a home
+^/bricks-archetype
