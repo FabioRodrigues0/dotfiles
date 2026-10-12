@@ -1,0 +1,266 @@
+<templateSet group="Bricks">
+  <template name="baction" value='.actionColumn(new fabiorodrigues.bricks.components.TableAction&lt;$T$&gt;()&#10;    .icon("$ICON$").tooltip("$TIP$").onClick($X$ -&gt; $METHOD$($X$)))$END$' description="bricks: TableAction" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="ICON" expression="" defaultValue='"fas-pencil"' alwaysStopAt="true" />
+    <variable name="TIP" expression="" defaultValue='"Editar"' alwaysStopAt="true" />
+    <variable name="X" expression="" defaultValue='"x"' alwaysStopAt="true" />
+    <variable name="METHOD" expression="" defaultValue='"editar"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bapp" value='public class $CLASS$ extends fabiorodrigues.bricks.core.BricksApplication {&#10;&#10;    {&#10;        setTitle("$TITLE$");&#10;    }&#10;&#10;    @Override&#10;    public fabiorodrigues.bricks.core.Component root() {&#10;        return new fabiorodrigues.bricks.components.Column()&#10;            .padding($PAD$)&#10;            .gap($GAP$)&#10;            .children(&#10;                $END$&#10;            );&#10;    }&#10;&#10;    public static void main(String[] args) {&#10;        launch(args);&#10;    }&#10;}' description="bricks: classe BricksApplication" toReformat="true" toShortenFQNames="true">
+    <variable name="CLASS" expression="fileNameWithoutExtension()" defaultValue="" alwaysStopAt="true" />
+    <variable name="TITLE" expression="" defaultValue='"Titulo"' alwaysStopAt="true" />
+    <variable name="PAD" expression="" defaultValue='"20"' alwaysStopAt="true" />
+    <variable name="GAP" expression="" defaultValue='"12"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bbtn" value='new fabiorodrigues.bricks.components.Button("$LABEL$").onClick(() -&gt; $ACTION$)$END$' description="bricks: Button" toReformat="true" toShortenFQNames="true">
+    <variable name="LABEL" expression="" defaultValue='"Guardar"' alwaysStopAt="true" />
+    <variable name="ACTION" expression="" defaultValue='"acao()"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bc" value='.column("$NAME$", fabiorodrigues.bricks.data.dialect.ColumnType.$TYPE$, "$CONSTRAINT$")$END$' description="bricks: coluna de tabela (createTable)" toReformat="true" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="TYPE" expression='enum("STRING","TEXT","INTEGER","LONG","DOUBLE","DECIMAL","BOOLEAN","DATE","DATETIME")' defaultValue="" alwaysStopAt="true" />
+    <variable name="CONSTRAINT" expression="" defaultValue='"NOT NULL"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bcard" value="new fabiorodrigues.bricks.components.Card()&#10;    .padding($PAD$)&#10;    .children(&#10;        $END$&#10;    )" description="bricks: Card" toReformat="true" toShortenFQNames="true">
+    <variable name="PAD" expression="" defaultValue='"16"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bcheck" value='new fabiorodrigues.bricks.components.Checkbox("$LABEL$").bindTo($STATE$)$END$' description="bricks: Checkbox" toReformat="true" toShortenFQNames="true">
+    <variable name="LABEL" expression="" defaultValue='"Ativo"' alwaysStopAt="true" />
+    <variable name="STATE" expression="" defaultValue='"estado"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bcol" value="new fabiorodrigues.bricks.components.Column()&#10;    .gap($GAP$)&#10;    .children(&#10;        $END$&#10;    )" description="bricks: Column" toReformat="true" toShortenFQNames="true">
+    <variable name="GAP" expression="" defaultValue='"12"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bdelete" value='fabiorodrigues.bricks.data.DB.query()&#10;    .deleteFrom("$TABLE$")&#10;    .where("$COL$", "=", $VALUE$)&#10;    .execute();$END$' description="bricks: DB delete" toReformat="true" toShortenFQNames="true">
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <variable name="COL" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bderived" value="private final fabiorodrigues.bricks.core.DerivedState&lt;$T$&gt; $NAME$ = derived(&#10;    () -&gt; $EXPR$,&#10;    $DEP$&#10;);$END$" description="bricks: DerivedState" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Boolean"' alwaysStopAt="true" />
+    <variable name="NAME" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="EXPR" expression="" defaultValue='"expr"' alwaysStopAt="true" />
+    <variable name="DEP" expression="" defaultValue='"dependencia"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bdrop" value='new fabiorodrigues.bricks.components.Dropdown&lt;$T$&gt;(java.util.List.of("$A$", "$B$"))&#10;    .label("$LABEL$:")&#10;    .bindTo($STATE$)$END$' description="bricks: Dropdown" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"String"' alwaysStopAt="true" />
+    <variable name="A" expression="" defaultValue='"A"' alwaysStopAt="true" />
+    <variable name="B" expression="" defaultValue='"B"' alwaysStopAt="true" />
+    <variable name="LABEL" expression="" defaultValue='"Escolher"' alwaysStopAt="true" />
+    <variable name="STATE" expression="" defaultValue='"estado"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="beffect" value="private final fabiorodrigues.bricks.core.Effect $NAME$ = effect(() -&gt; {&#10;    $END$&#10;}, $DEP$);" description="bricks: Effect" toReformat="true" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue='"init"' alwaysStopAt="true" />
+    <variable name="DEP" expression="" defaultValue='"dependencia"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bfield" value='new fabiorodrigues.bricks.components.TextField()&#10;    .label("$LABEL$:")&#10;    .placeholder("$PH$")&#10;    .bindTo($STATE$)$END$' description="bricks: TextField" toReformat="true" toShortenFQNames="true">
+    <variable name="LABEL" expression="" defaultValue='"Nome"' alwaysStopAt="true" />
+    <variable name="PH" expression="" defaultValue='"..."' alwaysStopAt="true" />
+    <variable name="STATE" expression="" defaultValue='"estado"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bform" value='new fabiorodrigues.bricks.components.Form()&#10;    .gap($GAP$)&#10;    .field(new fabiorodrigues.bricks.components.TextField().label("$LABEL$:").bindTo($STATE$), $STATE$)&#10;    $END$&#10;    .submitLabel("$SUBMIT$")&#10;    .onSubmit(() -&gt; $ACTION$)' description="bricks: Form" toReformat="true" toShortenFQNames="true">
+    <variable name="GAP" expression="" defaultValue='"12"' alwaysStopAt="true" />
+    <variable name="LABEL" expression="" defaultValue='"Nome"' alwaysStopAt="true" />
+    <variable name="STATE" expression="" defaultValue='"vm.nome"' alwaysStopAt="true" />
+    <variable name="SUBMIT" expression="" defaultValue='"Guardar"' alwaysStopAt="true" />
+    <variable name="ACTION" expression="" defaultValue='"guardar()"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bicon" value='new fabiorodrigues.bricks.components.Icon("$ICON$").size($SIZE$)$END$' description="bricks: Icon" toReformat="true" toShortenFQNames="true">
+    <variable name="ICON" expression="" defaultValue='"fas-star"' alwaysStopAt="true" />
+    <variable name="SIZE" expression="" defaultValue='"16"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="binsert" value='int $ID$ = fabiorodrigues.bricks.data.DB.query()&#10;    .insertInto("$TABLE$")&#10;    .values(java.util.Map.of("$KEY$", $VALUE$))&#10;    .execute();$END$' description="bricks: DB insert" toReformat="true" toShortenFQNames="true">
+    <variable name="ID" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <variable name="KEY" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bitems" value='new fabiorodrigues.bricks.components.ItemsColumn&lt;$T$&gt;()&#10;    .items($ITEMS$)&#10;    .gap($GAP$)&#10;    .item($I$ -&gt; new fabiorodrigues.bricks.components.Text($I$.toString()))&#10;    .emptyState(new fabiorodrigues.bricks.components.Text("$EMPTY$"))$END$' description="bricks: ItemsColumn" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="ITEMS" expression="" defaultValue='"itens"' alwaysStopAt="true" />
+    <variable name="GAP" expression="" defaultValue='"8"' alwaysStopAt="true" />
+    <variable name="I" expression="" defaultValue='"i"' alwaysStopAt="true" />
+    <variable name="EMPTY" expression="" defaultValue='"Sem resultados"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bmodal" value='fabiorodrigues.bricks.components.Modal.show($APP$, "$TITLE$", modal -&gt;&#10;    new fabiorodrigues.bricks.components.Column().gap(12).padding(16).children(&#10;        $END$,&#10;        new fabiorodrigues.bricks.components.Button("Fechar").onClick(() -&gt; modal.close())&#10;    )&#10;);' description="bricks: Modal.show" toReformat="true" toShortenFQNames="true">
+    <variable name="APP" expression="" defaultValue='"app"' alwaysStopAt="true" />
+    <variable name="TITLE" expression="" defaultValue='"Titulo"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bmodule" value="module $MODULE$ {&#10;    requires fabiorodrigues.bricks;&#10;    requires javafx.controls;&#10;    requires javafx.graphics;&#10;&#10;    opens $PKG$ to javafx.graphics;&#10;    exports $PKG$;$END$&#10;}" description="bricks: module-info" toReformat="true" toShortenFQNames="true">
+    <variable name="MODULE" expression="" defaultValue='"com.exemplo"' alwaysStopAt="true" />
+    <variable name="PKG" expression="MODULE" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bnav" value="app.navigateTo(new $NAME$Scene(app));$END$" description="bricks: navegar para scene" toReformat="true" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue='"Outra"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bquery" value='java.util.List&lt;$T$&gt; $LIST$ = fabiorodrigues.bricks.data.DB.query()&#10;    .select("$COL1$", "$COL2$")&#10;    .from("$TABLE$")&#10;    .where("$WCOL$", "$OP$", $VALUE$)&#10;    .orderBy("$ORDER$", "ASC")&#10;    .execute($T$.class);$END$' description="bricks: DB select" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="LIST" expression="" defaultValue='"lista"' alwaysStopAt="true" />
+    <variable name="COL1" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <variable name="COL2" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <variable name="WCOL" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <variable name="OP" expression="" defaultValue='"="' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"valor"' alwaysStopAt="true" />
+    <variable name="ORDER" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="brow" value="new fabiorodrigues.bricks.components.Row()&#10;    .gap($GAP$)&#10;    .children(&#10;        $END$&#10;    )" description="bricks: Row" toReformat="true" toShortenFQNames="true">
+    <variable name="GAP" expression="" defaultValue='"8"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bscene" value="public class $CLASS$ extends fabiorodrigues.bricks.core.BricksScene {&#10;&#10;    public $CLASS$(fabiorodrigues.bricks.core.BricksApplication app) {&#10;        super(app);&#10;    }&#10;&#10;    @Override&#10;    public fabiorodrigues.bricks.core.Component render() {&#10;        return new fabiorodrigues.bricks.components.Column()&#10;            .padding($PAD$)&#10;            .gap($GAP$)&#10;            .children(&#10;                $END$&#10;            );&#10;    }&#10;}" description="bricks: classe BricksScene" toReformat="true" toShortenFQNames="true">
+    <variable name="CLASS" expression="fileNameWithoutExtension()" defaultValue="" alwaysStopAt="true" />
+    <variable name="PAD" expression="" defaultValue='"20"' alwaysStopAt="true" />
+    <variable name="GAP" expression="" defaultValue='"12"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bschema" value='fabiorodrigues.bricks.data.DB.query()&#10;    .createTableIfNotExists("$TABLE$")&#10;    .column("id", fabiorodrigues.bricks.data.dialect.ColumnType.ID)&#10;    .column("$COL$", fabiorodrigues.bricks.data.dialect.ColumnType.$TYPE$, "$CONSTRAINT$")$END$&#10;    .execute();' description="bricks: criar tabela" toReformat="true" toShortenFQNames="true">
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <variable name="COL" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="TYPE" expression="" defaultValue='"STRING"' alwaysStopAt="true" />
+    <variable name="CONSTRAINT" expression="" defaultValue='"NOT NULL"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bslist" value="private final fabiorodrigues.bricks.core.StateList&lt;$T$&gt; $NAME$ = stateList(java.util.List.of());$END$" description="bricks: StateList" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="NAME" expression="" defaultValue='"itens"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bstate" value="private final fabiorodrigues.bricks.core.State&lt;$T$&gt; $NAME$ = state($VALUE$);$END$" description="bricks: State" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"String"' alwaysStopAt="true" />
+    <variable name="NAME" expression="" defaultValue='"valor"' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"\"\""' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="btable" value='new fabiorodrigues.bricks.components.DataTable&lt;$T$&gt;()&#10;    .items($ITEMS$)&#10;    .searchable()&#10;    .column("$COLNAME$", $T$::$GETTER$)&#10;    $END$&#10;    .actionColumn(new fabiorodrigues.bricks.components.TableAction&lt;$T$&gt;()&#10;        .icon("fas-pencil").tooltip("Editar").onClick($X$ -&gt; $EDIT$($X$)))&#10;    .actionColumn(new fabiorodrigues.bricks.components.TableAction&lt;$T$&gt;()&#10;        .icon("fas-trash").tooltip("Apagar").danger().onClick($X$ -&gt; $DELETE$($X$)))' description="bricks: DataTable" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="ITEMS" expression="" defaultValue='"itens"' alwaysStopAt="true" />
+    <variable name="COLNAME" expression="" defaultValue='"Nome"' alwaysStopAt="true" />
+    <variable name="GETTER" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="X" expression="" defaultValue='"x"' alwaysStopAt="true" />
+    <variable name="EDIT" expression="" defaultValue='"editar"' alwaysStopAt="true" />
+    <variable name="DELETE" expression="" defaultValue='"apagar"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="btext" value='new fabiorodrigues.bricks.components.Text("$TEXT$").fontSize($SIZE$)$END$' description="bricks: Text" toReformat="true" toShortenFQNames="true">
+    <variable name="TEXT" expression="" defaultValue='"texto"' alwaysStopAt="true" />
+    <variable name="SIZE" expression="" defaultValue='"16"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="btoast" value='fabiorodrigues.bricks.components.Notification.toast($APP$, "$MSG$", fabiorodrigues.bricks.components.NotificationType.$TYPE$);$END$' description="bricks: Notification.toast" toReformat="true" toShortenFQNames="true">
+    <variable name="APP" expression="" defaultValue='"app"' alwaysStopAt="true" />
+    <variable name="MSG" expression="" defaultValue='"Guardado!"' alwaysStopAt="true" />
+    <variable name="TYPE" expression='enum("SUCCESS","INFO","WARNING","ERROR")' defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bupdate" value='fabiorodrigues.bricks.data.DB.query()&#10;    .update("$TABLE$")&#10;    .set(java.util.Map.of("$KEY$", $VALUE$))&#10;    .where("$COL$", "=", $ID$)&#10;    .execute();$END$' description="bricks: DB update" toReformat="true" toShortenFQNames="true">
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <variable name="KEY" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="COL" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <variable name="ID" expression="" defaultValue='"id"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bvm" value='public class $CLASS$ extends fabiorodrigues.bricks.core.BricksViewModel {&#10;&#10;    public final fabiorodrigues.bricks.core.StateList&lt;$T$&gt; $ITEMS$ = stateList(java.util.List.of());&#10;&#10;    public void carregar() {&#10;        java.util.List&lt;$T$&gt; lista = fabiorodrigues.bricks.data.DB.query()&#10;            .from("$TABLE$")&#10;            .execute($T$.class);&#10;        $ITEMS$.clear();&#10;        $ITEMS$.addAll(lista);&#10;    }$END$&#10;}' description="bricks: classe BricksViewModel" toReformat="true" toShortenFQNames="true">
+    <variable name="CLASS" expression="fileNameWithoutExtension()" defaultValue="" alwaysStopAt="true" />
+    <variable name="T" expression="" defaultValue='"Item"' alwaysStopAt="true" />
+    <variable name="ITEMS" expression="" defaultValue='"itens"' alwaysStopAt="true" />
+    <variable name="TABLE" expression="" defaultValue='"tabela"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bvstate" value='public final fabiorodrigues.bricks.core.ValidatedState&lt;$T$&gt; $NAME$ = validatedState($VALUE$)&#10;    .required("$MSG$")$END$;' description="bricks: ValidatedState" toReformat="true" toShortenFQNames="true">
+    <variable name="T" expression="" defaultValue='"String"' alwaysStopAt="true" />
+    <variable name="NAME" expression="" defaultValue='"nome"' alwaysStopAt="true" />
+    <variable name="VALUE" expression="" defaultValue='"\"\""' alwaysStopAt="true" />
+    <variable name="MSG" expression="" defaultValue='"Campo obrigatorio"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+  <template name="bwhen" value="new fabiorodrigues.bricks.components.When($COND$).then(&#10;    $END$&#10;)" description="bricks: When" toReformat="true" toShortenFQNames="true">
+    <variable name="COND" expression="" defaultValue='"condicao"' alwaysStopAt="true" />
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+</templateSet>
