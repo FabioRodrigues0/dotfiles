@@ -1,0 +1,12 @@
+<application>
+  <component name="MavenCatalogManager">
+    <option name="local">
+      <list>
+        <Local>
+          <option name="name" value="Bricks" />
+          <option name="path" value="/Users/fabio/.m2/repository/archetype-catalog.xml" />
+        </Local>
+      </list>
+    </option>
+  </component>
+</application>
