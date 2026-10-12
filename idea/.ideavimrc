@@ -38,10 +38,11 @@ nnoremap h o
 nnoremap j O
 
 """ Leader key
-let mapleader = <space>
+let mapleader = " "
 
 """ Ações do IntelliJ via <Action>
 " Ficheiros e projeto
+map <leader><leader> <Action>(GotoFile)
 map <leader>ff <Action>(SearchEverywhere)
 map <leader>fr <Action>(RecentFiles)
 map <leader>fp <Action>(FindInPath)
@@ -88,6 +89,7 @@ map Q gq
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 Plug 'machakann/vim-highlightedyank'
 Plug 'vim-scripts/argtextobj.vim'
+" Requer o plugin "Which-Key" instalado no IntelliJ
 set which-key
 
 " Commentary plugin
