@@ -1,0 +1,145 @@
+{
+    "window.autoDetectColorScheme": false,
+    "workbench.preferredDarkColorTheme": "Tokyo Night",
+    "jdk.telemetry.enabled": false,
+    "editor.fontFamily": "'Jetbrains Mono', 'Droid Sans Mono', 'monospace', monospace",
+    "editor.minimap.autohide": true,
+    "workbench.colorTheme": "Tokyo Night",
+    "workbench.preferredHighContrastLightColorTheme": "Solarized Light",
+    "workbench.preferredLightColorTheme": "Solarized Light",
+    "workbench.iconTheme": "bearded-icons",
+    "workbench.editor.autoLockGroups": {
+        "terminalEditor": false
+    },
+    "workbench.editor.showTabs": "single",
+    "zenMode.fullScreen": false,
+    "zenMode.hideLineNumbers": false,
+    "zenMode.showTabs": "single",
+    "cursor.composer.editorConversationDensity": "compact-all-grouped",
+    "vim.leader": "<space>",
+    "todohighlight.defaultStyle": {
+        "backgroundColor": "transparent",
+        "fontWeight": "bold"
+    },
+    "todohighlight.keywords": [
+        {
+            "text": "TODO:",
+            "color": "#eed49f",
+            "backgroundColor": "transparent",
+            "overviewRulerColor": "rgba(238,212,159,0.8)",
+            "fontWeight": "bold"
+        },
+        {
+            "text": "FIXME:",
+            "color": "#ed8796",
+            "backgroundColor": "transparent",
+            "overviewRulerColor": "rgba(237,135,150,0.8)",
+            "fontWeight": "bold"
+        },
+        {
+            "text": "NOTE:",
+            "color": "#a6da95",
+            "backgroundColor": "transparent",
+            "overviewRulerColor": "rgba(166,218,149,0.8)",
+            "fontWeight": "bold"
+        },
+        {
+            "text": "REVIEW:",
+            "color": "#c6a0f6",
+            "backgroundColor": "transparent",
+            "overviewRulerColor": "rgba(198,160,246,0.8)",
+            "fontWeight": "bold"
+        },
+        {
+            "text": "HACK:",
+            "color": "#f5a97f",
+            "backgroundColor": "transparent",
+            "overviewRulerColor": "rgba(245,169,127,0.8)",
+            "fontWeight": "bold"
+        }
+    ],
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "doom.whichKeyShow"
+            ]
+        },
+        {
+            "before": [
+                "<C-j>"
+            ],
+            "after": [
+                "i",
+                "<CR>",
+                "<Esc>",
+                "^"
+            ]
+        },
+        {
+            "before": [
+                "<C-k>"
+            ],
+            "commands": [
+                "editor.action.deleteLines"
+            ]
+        }
+    ],
+    "vim.visualModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "doom.whichKeyShow"
+            ]
+        }
+    ],
+    // Como no Doom Emacs: SPC m r corre o projeto (fish `correr`); SPC c f grava
+    // (formatOnSave) e passa o Spotless no ficheiro quando o projeto Gradle o usa.
+    "whichkey.bindingOverrides": [
+        {
+            "keys": "m",
+            "name": "+localleader",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "r",
+                    "name": "Correr projeto",
+                    "type": "command",
+                    "command": "workbench.action.tasks.runTask",
+                    "args": "Correr projeto"
+                }
+            ]
+        },
+        {
+            "keys": "c.f",
+            "name": "Format buffer/region",
+            "type": "conditional",
+            "bindings": [
+                {
+                    "key": "editorHasSelection",
+                    "name": "Format selection",
+                    "type": "command",
+                    "command": "editor.action.formatSelection"
+                },
+                {
+                    "key": "",
+                    "name": "Format document",
+                    "type": "commands",
+                    "commands": ["workbench.action.files.save", "workbench.action.tasks.runTask"],
+                    "args": [null, "Spotless"]
+                }
+            ]
+        }
+    ],
+    "window.restoreWindows": "none",
+    "window.menuBarVisibility": "compact",
+    "[java]": {
+        "editor.defaultFormatter": "Oracle.oracle-java"
+    },
+    "jdk.format.options": {},
+    "doom.dashboard.openOnActivation": false
+}

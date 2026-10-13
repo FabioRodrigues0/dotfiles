@@ -1,0 +1,23 @@
+{
+    // Tasks globais usadas pelos atalhos do Doom Code (SPC m r, SPC c f).
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Correr projeto",
+            "type": "process",
+            "command": "fish",
+            "args": ["-c", "correr"],
+            "options": { "cwd": "${fileDirname}" },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": true }
+        },
+        {
+            "label": "Spotless",
+            "type": "process",
+            "command": "fish",
+            "args": ["-c", "formatar \"$argv[1]\"", "${file}"],
+            "problemMatcher": [],
+            "presentation": { "reveal": "silent", "panel": "dedicated", "clear": true }
+        }
+    ]
+}
