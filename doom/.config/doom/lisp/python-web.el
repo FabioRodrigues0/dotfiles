@@ -74,3 +74,12 @@
       :map web-mode-map
       :localleader
       :desc "Preview ao vivo" "v" #'fabio/html-live-preview)
+
+;;; Templates Flask (Jinja2)
+
+;; O web-mode trata Jinja com o engine "django" (jinja/jinja2 sao aliases).
+;; Os .html dentro de templates/ sao do Flask, o resto continua HTML normal.
+(add-to-list 'auto-mode-alist '("\\.\\(jinja2?\\|j2\\)\\'" . web-mode))
+(after! web-mode
+  (add-to-list 'web-mode-engines-alist '("django" . "/templates/.*\\.html\\'"))
+  (add-to-list 'web-mode-engines-alist '("django" . "\\.\\(jinja2?\\|j2\\)\\'")))

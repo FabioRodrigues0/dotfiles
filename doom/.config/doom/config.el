@@ -59,7 +59,8 @@
 ;; refresh your font settings. If Emacs still can't find your font, it likely
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 (add-to-list 'custom-theme-load-path (expand-file-name "themes/" doom-user-dir))
-(setq doom-theme 'hex-lavender-dark)
+;; Tokyo Night: existe tambem no IntelliJ. Tema antigo: 'hex-lavender-dark
+(setq doom-theme 'doom-tokyo-night)
 
 ;; Mostra cores (hex, rgb, nomes) como quadradinho colorido ao lado do código.
 ;; Fica fora de org/text-mode porque pode quebrar fontification em previews Org.
