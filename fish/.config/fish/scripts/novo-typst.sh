@@ -511,21 +511,7 @@ EOF
 main = "main.typ"
 EOF
 
-    # ── .zed/settings.json (Zed: tinymist sempre compila main.typ) ───────────
-    mkdir -p .zed
-    cat > .zed/settings.json << 'EOF'
-{
-  "lsp": {
-    "tinymist": {
-      "settings": {
-        "exportPdf": "onType",
-        "rootPath": "."
-      }
-    }
-  }
-}
-EOF
-    print_info "typst.toml + .zed/settings.json criados"
+    print_info "typst.toml criado"
 
     # ── conteudo/introducao.typ ───────────────────────────────────────────────
     # Importa secao_sem_numero do @local para funcionar em scope isolado
@@ -676,25 +662,12 @@ Conteúdo.
 EOF
     print_info "main.typ criado (tudo junto)"
 
-    # ── typst.toml de projeto + .zed/settings.json ────────────────────────────
+    # ── typst.toml de projeto ─────────────────────────────────────────────────
     cat > typst.toml << 'EOF'
 [project]
 main = "main.typ"
 EOF
-    mkdir -p .zed
-    cat > .zed/settings.json << 'EOF'
-{
-  "lsp": {
-    "tinymist": {
-      "settings": {
-        "exportPdf": "onType",
-        "rootPath": "."
-      }
-    }
-  }
-}
-EOF
-    print_info "typst.toml + .zed/settings.json criados"
+    print_info "typst.toml criado"
 
     _biblio_bib > biblio.bib
     print_info "biblio.bib criado"

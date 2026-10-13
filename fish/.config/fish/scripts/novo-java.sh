@@ -1019,7 +1019,6 @@ adjust_gitignore() {
         ".vscode/"
         "*.class"
         "*.log"
-        ".zed/"
     )
 
     for entry in "${ENTRIES[@]}"; do
@@ -1122,7 +1121,7 @@ show_success_message() {
     echo -e "${YELLOW}📝 Próximos passos:${NC}"
     echo ""
     echo "   1. cd ${NOME_PROJETO}"
-    echo "   2. zed .               # Abrir no Zed"
+    echo "   2. emacs .             # Abrir no Emacs"
     echo "   3. ./gradlew run       # Executar"
     echo ""
     echo -e "${BLUE}💡 Comandos úteis:${NC}"
@@ -1277,7 +1276,7 @@ EOF
 }
 
 create_maven_gitignore() {
-    local ENTRIES=("target/" ".idea/" ".vscode/" "*.class" "*.log" ".zed/")
+    local ENTRIES=("target/" ".idea/" ".vscode/" "*.class" "*.log")
     for entry in "${ENTRIES[@]}"; do
         if ! grep -q "^${entry}$" .gitignore 2>/dev/null; then
             echo "$entry" >> .gitignore
@@ -1376,7 +1375,7 @@ show_maven_success_message() {
     echo -e "${YELLOW}📝 Próximos passos:${NC}"
     echo ""
     echo "   1. cd ${NOME_PROJETO}"
-    echo "   2. zed .                   # Abrir no Zed"
+    echo "   2. emacs .                 # Abrir no Emacs"
     echo "   3. mvn compile exec:java   # Executar"
     echo "      (ou: correr)"
     echo ""

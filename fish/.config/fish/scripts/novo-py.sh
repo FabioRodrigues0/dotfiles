@@ -160,7 +160,7 @@ if __name__ == "__main__":
 EOF
     print_success "main.py criado"
 
-    local ENTRIES=("__pycache__/" "*.pyc" ".venv/" ".idea/" ".vscode/" ".zed/" ".DS_Store")
+    local ENTRIES=("__pycache__/" "*.pyc" ".venv/" ".idea/" ".vscode/" ".DS_Store")
     for entry in "${ENTRIES[@]}"; do
         echo "$entry" >> .gitignore
     done
@@ -242,7 +242,7 @@ show_success_message() {
     echo -e "${YELLOW}📝 Próximos passos:${NC}"
     echo ""
     echo "   1. cd ${NOME_PROJETO}"
-    echo "   2. zed .              # Abrir no Zed"
+    echo "   2. emacs .            # Abrir no Emacs"
     echo "   3. python main.py     # Executar"
     echo "      (ou: correr)"
     echo ""

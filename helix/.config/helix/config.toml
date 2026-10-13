@@ -41,7 +41,7 @@ C-t = ":lsp-workspace-command tinymist.startDefaultPreview"
 
 
 [keys.normal.space]
-z = ":sh zed %val{filename} &"
+z = ":sh emacs %val{filename} &"
 
 [keys.select]
 k = "move_char_left"

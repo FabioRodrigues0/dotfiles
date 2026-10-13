@@ -242,7 +242,7 @@ show_success_message() {
     echo -e "${YELLOW}📝 Próximos passos:${NC}"
     echo ""
     echo "   1. cd ${NOME_PROJETO}"
-    echo "   2. zed .        # Abrir no Zed"
+    echo "   2. emacs .      # Abrir no Emacs"
     echo "   3. dotnet run   # Executar"
     echo "      (ou: correr)"
     echo ""
