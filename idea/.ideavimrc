@@ -45,6 +45,8 @@ let mapleader = " "
 map <leader><leader> <Action>(GotoFile)
 map <leader>fs <Action>(ActivateProjectToolWindow)
 map <leader>ff <Action>(SelectInProjectView)
+" ESC no editor esconde tool windows laterais (o ESC no Project view so devolve o foco)
+nnoremap <Esc> :nohlsearch<CR>:action HideSideWindows<CR>
 map <leader>fr <Action>(RecentFiles)
 map <leader>fp <Action>(FindInPath)
 
