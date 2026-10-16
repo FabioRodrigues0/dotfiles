@@ -17,47 +17,6 @@
     "zenMode.showTabs": "single",
     "cursor.composer.editorConversationDensity": "compact-all-grouped",
     "vim.leader": "<space>",
-    "todohighlight.defaultStyle": {
-        "backgroundColor": "transparent",
-        "fontWeight": "bold"
-    },
-    "todohighlight.keywords": [
-        {
-            "text": "TODO:",
-            "color": "#eed49f",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(238,212,159,0.8)",
-            "fontWeight": "bold"
-        },
-        {
-            "text": "FIXME:",
-            "color": "#ed8796",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(237,135,150,0.8)",
-            "fontWeight": "bold"
-        },
-        {
-            "text": "NOTE:",
-            "color": "#a6da95",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(166,218,149,0.8)",
-            "fontWeight": "bold"
-        },
-        {
-            "text": "REVIEW:",
-            "color": "#c6a0f6",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(198,160,246,0.8)",
-            "fontWeight": "bold"
-        },
-        {
-            "text": "HACK:",
-            "color": "#f5a97f",
-            "backgroundColor": "transparent",
-            "overviewRulerColor": "rgba(245,169,127,0.8)",
-            "fontWeight": "bold"
-        }
-    ],
     "vim.normalModeKeyBindingsNonRecursive": [
         {
             "before": [
@@ -141,5 +100,41 @@
         "editor.defaultFormatter": "Oracle.oracle-java"
     },
     "jdk.format.options": {},
-    "doom.dashboard.openOnActivation": false
+    "doom.dashboard.openOnActivation": false,
+    // Python: so o pyrefly como LSP (cursorpyright desinstalado)
+    "python.languageServer": "None",
+    // Poupar recursos
+    "editor.minimap.enabled": false,
+    "telemetry.telemetryLevel": "off",
+    "workbench.enableExperiments": false,
+    "workbench.settings.enableNaturalLanguageSearch": false,
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    "search.followSymlinks": false,
+    "npm.autoDetect": "off",
+    "typescript.tsc.autoDetect": "off",
+    "grunt.autoDetect": "off",
+    "gulp.autoDetect": "off",
+    "jake.autoDetect": "off",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/.venv/**": true,
+        "**/venv/**": true,
+        "**/__pycache__/**": true,
+        "**/.mypy_cache/**": true,
+        "**/.pytest_cache/**": true,
+        "**/node_modules/**": true,
+        "**/build/**": true,
+        "**/target/**": true,
+        "**/.gradle/**": true
+    },
+    "search.exclude": {
+        "**/.venv": true,
+        "**/venv": true,
+        "**/__pycache__": true,
+        "**/build": true,
+        "**/target": true,
+        "**/.gradle": true
+    }
 }
