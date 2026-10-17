@@ -71,3 +71,4 @@
 ;; Python/HTML (ver lisp/python-web.el)
 (package! eldoc-box)
 (package! impatient-mode)
+(package! flyover)

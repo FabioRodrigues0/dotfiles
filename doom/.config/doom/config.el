@@ -9,6 +9,7 @@
 (load! "lisp/novo-ficheiro")
 (load! "lisp/projetos")
 (load! "lisp/navegar-indentacao")
+(load! "lisp/diagnosticos")
 ;;
 (setq user-full-name "Fabio Rodrigues"
       user-mail-address "fabio.rod@outlook.pt")
