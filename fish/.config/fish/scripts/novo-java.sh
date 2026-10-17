@@ -1120,7 +1120,7 @@ EOF
 		<setting id="org.eclipse.jdt.core.formatter.lineSplit" value="100"/>
 		<setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="1"/>
 		<setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer" value="1"/>
-		<setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="true"/>
+		<setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="false"/>
 		<setting id="org.eclipse.jdt.core.formatter.wrap_outer_expressions_when_nested" value="false"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_type_declaration" value="0"/>
