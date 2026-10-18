@@ -101,9 +101,12 @@
   (setq eglot-connect-timeout 120
         eglot-max-file-watches 50000)
   ;; As opcoes ativam os Generate com escolha de campos (lisp/java-gerar.el).
+  ;; O jdtls precisa de Java >= 25; o JAVA_HOME do mise (21) fica so para os
+  ;; projetos, o servidor corre com o openjdk do brew.
   (add-to-list 'eglot-server-programs
                `((java-mode java-ts-mode) .
-                 ("jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"
+                 ("env" "JAVA_HOME=/home/linuxbrew/.linuxbrew/opt/openjdk/libexec"
+                  "jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"
                   :initializationOptions ,fabio/jdtls-init-options))))
 
 (add-hook 'java-mode-local-vars-hook #'lsp! 'append)
