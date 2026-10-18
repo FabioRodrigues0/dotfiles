@@ -38,6 +38,15 @@
   (global-company-mode 1)
   (set-company-backend! '(org-mode markdown-mode typst-ts-mode)
     '(:separate company-capf company-dabbrev company-yasnippet company-files)))
+
+;; Com eglot o Doom deixa so o company-capf (o +lsp-company-backends so vale
+;; para lsp-mode), e os snippets (Bricks `b...') deixavam de aparecer.
+(add-hook! 'eglot-managed-mode-hook
+  (defun fabio/eglot-company-snippets-h ()
+    (when (bound-and-true-p company-mode)
+      (setq-local company-backends
+                  (cons '(:separate company-capf company-yasnippet)
+                        (remq 'company-capf company-backends))))))
 (custom-set-faces!
   '(company-tooltip :family "JetBrains Mono" :height 110)
   '(company-tooltip-selection :background "#44475a")
