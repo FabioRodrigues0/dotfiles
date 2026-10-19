@@ -103,9 +103,10 @@
     "window.restoreWindows": "none",
     "window.menuBarVisibility": "compact",
     "[java]": {
-        "editor.defaultFormatter": "Oracle.oracle-java"
+        "editor.defaultFormatter": "redhat.java"
     },
-    "jdk.format.options": {},
+    // Mesmo perfil que o Spotless dos projetos (relativo a pasta aberta)
+    "java.format.settings.url": "config/formatter/eclipse-formatter.xml",
     "doom.dashboard.openOnActivation": false,
     // Python: so o pyrefly como LSP (cursorpyright desinstalado)
     "python.languageServer": "None",
@@ -143,7 +144,7 @@
         "**/target": true,
         "**/.gradle": true
     },
-    "redhat.telemetry.enabled": true,
+    "redhat.telemetry.enabled": false,
     "editor.fontSize": 16,
     // Tokyo Night pinta classes e metodos de azul; classes ficam na cor do
     // texto como no doom-tokyo-night do Emacs, metodos continuam azuis.

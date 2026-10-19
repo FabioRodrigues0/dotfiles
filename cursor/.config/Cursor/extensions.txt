@@ -4,7 +4,7 @@ bearylabs.doom
 bearylabs.doom-workspace
 enkia.tokyo-night
 kahole.magit
-oracle.oracle-java
+redhat.java
 vscjava.vscode-gradle
 vscjava.vscode-maven
 vscodevim.vim
