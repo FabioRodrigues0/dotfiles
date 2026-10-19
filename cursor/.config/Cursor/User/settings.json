@@ -1,8 +1,8 @@
 {
     "window.autoDetectColorScheme": false,
     "workbench.preferredDarkColorTheme": "Tokyo Night",
-    "jdk.telemetry.enabled": false,
-    "editor.fontFamily": "'Jetbrains Mono', 'Droid Sans Mono', 'monospace', monospace",
+    "editor.fontFamily": "'JetBrains Mono', monospace",
+    "editor.fontLigatures": true,
     "editor.minimap.autohide": true,
     "workbench.colorTheme": "Tokyo Night",
     "workbench.preferredHighContrastLightColorTheme": "Solarized Light",
@@ -88,8 +88,14 @@
                     "key": "",
                     "name": "Format document",
                     "type": "commands",
-                    "commands": ["workbench.action.files.save", "workbench.action.tasks.runTask"],
-                    "args": [null, "Spotless"]
+                    "commands": [
+                        "workbench.action.files.save",
+                        "workbench.action.tasks.runTask"
+                    ],
+                    "args": [
+                        null,
+                        "Spotless"
+                    ]
                 }
             ]
         }
@@ -136,5 +142,7 @@
         "**/build": true,
         "**/target": true,
         "**/.gradle": true
-    }
+    },
+    "redhat.telemetry.enabled": true,
+    "editor.fontSize": 16
 }
