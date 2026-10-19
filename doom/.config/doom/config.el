@@ -111,10 +111,14 @@
         eglot-max-file-watches 50000)
   ;; As opcoes ativam os Generate com escolha de campos (lisp/java-gerar.el).
   ;; O jdtls precisa de Java >= 25; o JAVA_HOME do mise (21) fica so para os
-  ;; projetos, o servidor corre com o openjdk do brew.
+  ;; projetos, o servidor corre com o openjdk do brew (macOS ou Linux).
+  (defvar fabio/jdtls-java-home
+    (seq-find #'file-directory-p
+              '("/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+                "/home/linuxbrew/.linuxbrew/opt/openjdk/libexec")))
   (add-to-list 'eglot-server-programs
                `((java-mode java-ts-mode) .
-                 ("env" "JAVA_HOME=/home/linuxbrew/.linuxbrew/opt/openjdk/libexec"
+                 ("env" ,(concat "JAVA_HOME=" fabio/jdtls-java-home)
                   "jdtls" "--jvm-arg=-Xmx4G" "--jvm-arg=-Xms512m"
                   :initializationOptions ,fabio/jdtls-init-options))))
 
