@@ -868,7 +868,7 @@ EOF
 		<setting id="org.eclipse.jdt.core.formatter.brace_position_for_array_initializer" value="end_of_line"/>
 		<setting id="org.eclipse.jdt.core.formatter.keep_empty_array_initializer_on_one_line" value="true"/>
 		<setting id="org.eclipse.jdt.core.formatter.brace_position_for_lambda_body" value="end_of_line"/>
-		<setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_method_delcaration" value="preserve_positions"/>
+		<setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_method_delcaration" value="separate_lines_if_wrapped"/>
 		<setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_method_invocation" value="separate_lines_if_wrapped"/>
 		<setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_enum_constant_declaration" value="separate_lines_if_wrapped"/>
 		<setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_record_declaration" value="preserve_positions"/>
@@ -1125,11 +1125,11 @@ EOF
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_type_declaration" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_multiple_fields" value="16"/>
-		<setting id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration" value="2"/>
+		<setting id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration" value="80"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_throws_clause_in_constructor_declaration" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_method_declaration" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_throws_clause_in_method_declaration" value="0"/>
-		<setting id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration" value="2"/>
+		<setting id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration" value="80"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_enum_constants" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant" value="0"/>
 		<setting id="org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_enum_declaration" value="0"/>
