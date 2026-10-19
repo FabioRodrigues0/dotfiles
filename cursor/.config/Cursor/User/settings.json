@@ -103,7 +103,10 @@
     "window.restoreWindows": "none",
     "window.menuBarVisibility": "compact",
     "[java]": {
-        "editor.defaultFormatter": "redhat.java"
+        "editor.defaultFormatter": "redhat.java",
+        // O Tokyo Night nao liga o semantic highlighting; sem ele o new Row()
+        // e so uma chamada de funcao (azul) para o TextMate.
+        "editor.semanticHighlighting.enabled": true
     },
     // Mesmo perfil que o Spotless dos projetos (relativo a pasta aberta)
     "java.format.settings.url": "config/formatter/eclipse-formatter.xml",
