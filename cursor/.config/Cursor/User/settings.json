@@ -144,5 +144,38 @@
         "**/.gradle": true
     },
     "redhat.telemetry.enabled": true,
-    "editor.fontSize": 16
+    "editor.fontSize": 16,
+    // Tokyo Night pinta classes e metodos de azul; classes ficam na cor do
+    // texto como no doom-tokyo-night do Emacs, metodos continuam azuis.
+    "editor.semanticTokenColorCustomizations": {
+        "[Tokyo Night]": {
+            "rules": {
+                "class": "#c0caf5",
+                "interface": "#c0caf5",
+                "enum": "#c0caf5",
+                "record": "#c0caf5",
+                "type": "#c0caf5",
+                "typeParameter": "#c0caf5"
+            }
+        }
+    },
+    "editor.tokenColorCustomizations": {
+        "[Tokyo Night]": {
+            "textMateRules": [
+                {
+                    "scope": [
+                        "entity.name.type",
+                        "entity.name.type.class",
+                        "entity.name.type.interface",
+                        "entity.name.type.enum",
+                        "support.class",
+                        "storage.type.java",
+                        "storage.type.generic.java",
+                        "storage.type.object.array.java"
+                    ],
+                    "settings": { "foreground": "#c0caf5" }
+                }
+            ]
+        }
+    }
 }
