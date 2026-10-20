@@ -192,5 +192,7 @@
             ]
         }
     },
-    "git.openRepositoryInParentFolders": "always"
+    "git.openRepositoryInParentFolders": "always",
+    "claudeCode.preferredLocation": "panel",
+    "claudeCode.hideOnboarding": true
 }
