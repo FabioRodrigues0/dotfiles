@@ -1,0 +1,37 @@
+onboarding = false
+
+[ui]
+sidebar_width = 18
+sidebar_min_width = 14
+sidebar_max_width = 22
+
+[ui.sound]
+enabled = false
+
+[theme]
+name = "vesper"
+auto_switch = false
+
+# Atalhos diretos sem prefix: alt+... no Linux, cmd+... no Mac.
+# Prefix nao pode ser desligado; ctrl+f12 para nunca ser usado (prefix+? mostra tudo).
+[keys]
+prefix = "ctrl+f12"
+new_tab = ["alt+t", "cmd+t"]
+close_pane = ["alt+w", "cmd+w"]
+close_tab = ["alt+shift+w", "cmd+shift+w"]
+next_tab = ["alt+n", "cmd+shift+]", "cmd+}"]
+previous_tab = ["alt+p", "cmd+shift+[", "cmd+{"]
+switch_tab = ["alt+1..9", "cmd+1..9"]
+
+focus_pane_left = ["alt+h", "cmd+alt+left"]
+focus_pane_down = ["alt+j", "cmd+alt+down"]
+focus_pane_up = ["alt+k", "cmd+alt+up"]
+focus_pane_right = ["alt+l", "cmd+alt+right"]
+
+split_vertical = ["alt+v", "cmd+d"]
+split_horizontal = ["alt+minus", "cmd+shift+d"]
+zoom = ["alt+z", "cmd+shift+enter"]
+resize_mode = ["alt+r", "cmd+r"]
+
+goto = ["alt+g", "cmd+g"]
+toggle_sidebar = ["alt+b", "cmd+b"]
