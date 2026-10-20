@@ -1412,6 +1412,17 @@ cleanup_tests() {
     fi
 }
 
+# Cursor: esconde do jdtls os tipos JavaFX/AWT que colidem com o Bricks
+# (a lista vive em functions/cursor-bricks.fish)
+configure_cursor_bricks() {
+    [ "$FLAG_BRICKS" = true ] || return 0
+    if command -v fish >/dev/null 2>&1 && fish -c 'cursor-bricks' >/dev/null; then
+        print_info ".vscode/settings.json criado (filtro de tipos do Bricks)"
+    else
+        print_warning "Não consegui configurar o Cursor (corre cursor-bricks no projeto)"
+    fi
+}
+
 ################################################################################
 # Build inicial
 ################################################################################
@@ -1774,6 +1785,7 @@ main() {
         create_markdown_file
         adjust_gitignore
         cleanup_tests
+        configure_cursor_bricks
         validate_build
         show_success_message
     fi
