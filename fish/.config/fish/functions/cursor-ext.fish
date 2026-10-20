@@ -4,6 +4,9 @@ function cursor-ext --description 'Sincroniza as extensoes do Cursor com o exten
         echo ""
         echo "Instala as extensoes do extensions.txt que faltam."
         echo "Com --limpar desinstala tambem as que nao estao na lista."
+        echo ""
+        echo "Extensoes so desta maquina vao no extensions.local.txt ao lado"
+        echo "(fora dos dotfiles); contam como estando na lista."
         return 0
     end
 
@@ -13,17 +16,19 @@ function cursor-ext --description 'Sincroniza as extensoes do Cursor com o exten
     end
 
     if test (uname) = Darwin
-        set lista "$HOME/Library/Application Support/Cursor/extensions.txt"
+        set pasta "$HOME/Library/Application Support/Cursor"
     else
-        set lista $HOME/.config/Cursor/extensions.txt
+        set pasta $HOME/.config/Cursor
     end
+    set lista $pasta/extensions.txt
+    set local $pasta/extensions.local.txt
 
     if not test -f $lista
         echo "Nao encontrei $lista (falta fazer stow do cursor?)"
         return 1
     end
 
-    set querer (string match -rv '^\s*(#|$)' < $lista | string trim | string lower)
+    set querer (cat $lista (test -f $local; and echo $local) | string match -rv '^\s*(#|$)' | string trim | string lower)
     set instaladas (cursor --list-extensions 2>/dev/null | string lower)
 
     set faltam
