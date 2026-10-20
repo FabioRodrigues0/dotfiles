@@ -7,3 +7,47 @@ font-feature = "dlig"
 
 background = 131410
 foreground = bcb6ba
+
+# Libertar teclas usadas pelo herdr (alt+... no Linux, cmd+... no Mac)
+keybind = alt+digit_1=unbind
+keybind = alt+digit_2=unbind
+keybind = alt+digit_3=unbind
+keybind = alt+digit_4=unbind
+keybind = alt+digit_5=unbind
+keybind = alt+digit_6=unbind
+keybind = alt+digit_7=unbind
+keybind = alt+digit_8=unbind
+keybind = alt+digit_9=unbind
+keybind = alt+1=unbind
+keybind = alt+2=unbind
+keybind = alt+3=unbind
+keybind = alt+4=unbind
+keybind = alt+5=unbind
+keybind = alt+6=unbind
+keybind = alt+7=unbind
+keybind = alt+8=unbind
+keybind = alt+9=unbind
+keybind = super+t=unbind
+keybind = super+w=unbind
+keybind = super+shift+w=unbind
+keybind = super+shift+bracket_left=unbind
+keybind = super+shift+bracket_right=unbind
+keybind = super+digit_1=unbind
+keybind = super+digit_2=unbind
+keybind = super+digit_3=unbind
+keybind = super+digit_4=unbind
+keybind = super+digit_5=unbind
+keybind = super+digit_6=unbind
+keybind = super+digit_7=unbind
+keybind = super+digit_8=unbind
+keybind = super+digit_9=unbind
+keybind = super+alt+arrow_left=unbind
+keybind = super+alt+arrow_right=unbind
+keybind = super+alt+arrow_up=unbind
+keybind = super+alt+arrow_down=unbind
+keybind = super+d=unbind
+keybind = super+shift+d=unbind
+keybind = super+shift+enter=unbind
+keybind = super+r=unbind
+keybind = super+g=unbind
+keybind = super+b=unbind
