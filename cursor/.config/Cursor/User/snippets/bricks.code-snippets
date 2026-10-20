@@ -1,0 +1,377 @@
+{
+    "bricks: TableAction": {
+        "prefix": "baction",
+        "scope": "java",
+        "description": "bricks: TableAction",
+        "body": [
+            ".actionColumn(new TableAction<${1:Item}>()",
+            "    .icon(\"${2:fas-pencil}\").tooltip(\"${3:Editar}\").onClick(${4:x} -> ${5:editar}($4)))$0"
+        ]
+    },
+    "bricks: classe BricksApplication": {
+        "prefix": "bapp",
+        "scope": "java",
+        "description": "bricks: classe BricksApplication",
+        "body": [
+            "public class ${TM_FILENAME_BASE} extends BricksApplication {",
+            "",
+            "    {",
+            "        setTitle(\"${1:Titulo}\");",
+            "    }",
+            "",
+            "    @Override",
+            "    public Component root() {",
+            "        return new Column()",
+            "            .padding(${2:20})",
+            "            .gap(${3:12})",
+            "            .children(",
+            "                $0",
+            "            );",
+            "    }",
+            "",
+            "    public static void main(String[] args) {",
+            "        launch(args);",
+            "    }",
+            "}"
+        ]
+    },
+    "bricks: Button": {
+        "prefix": "bbtn",
+        "scope": "java",
+        "description": "bricks: Button",
+        "body": [
+            "new Button(\"${1:Guardar}\").onClick(() -> ${2:acao()})$0"
+        ]
+    },
+    "bricks: coluna de tabela (createTable)": {
+        "prefix": "bc",
+        "scope": "java",
+        "description": "bricks: coluna de tabela (createTable)",
+        "body": [
+            ".column(\"${1:nome}\", ColumnType.${2|STRING,TEXT,INTEGER,LONG,DOUBLE,DECIMAL,BOOLEAN,DATE,DATETIME|}${3:, \"NOT NULL\"})$0"
+        ]
+    },
+    "bricks: Card": {
+        "prefix": "bcard",
+        "scope": "java",
+        "description": "bricks: Card",
+        "body": [
+            "new Card()",
+            "    .padding(${1:16})",
+            "    .children(",
+            "        $0",
+            "    )"
+        ]
+    },
+    "bricks: Checkbox": {
+        "prefix": "bcheck",
+        "scope": "java",
+        "description": "bricks: Checkbox",
+        "body": [
+            "new Checkbox(\"${1:Ativo}\").bindTo(${2:estado})$0"
+        ]
+    },
+    "bricks: Column": {
+        "prefix": "bcol",
+        "scope": "java",
+        "description": "bricks: Column",
+        "body": [
+            "new Column()",
+            "    .gap(${1:12})",
+            "    .children(",
+            "        $0",
+            "    )"
+        ]
+    },
+    "bricks: DB delete": {
+        "prefix": "bdelete",
+        "scope": "java",
+        "description": "bricks: DB delete",
+        "body": [
+            "DB.query()",
+            "    .deleteFrom(\"${1:tabela}\")",
+            "    .where(\"${2:id}\", \"=\", ${3:id})",
+            "    .execute();$0"
+        ]
+    },
+    "bricks: DerivedState": {
+        "prefix": "bderived",
+        "scope": "java",
+        "description": "bricks: DerivedState",
+        "body": [
+            "private final DerivedState<${1:Boolean}> ${2:nome} = derived(",
+            "    () -> ${3:expr},",
+            "    ${4:dependencia}",
+            ");$0"
+        ]
+    },
+    "bricks: Dropdown": {
+        "prefix": "bdrop",
+        "scope": "java",
+        "description": "bricks: Dropdown",
+        "body": [
+            "new Dropdown<${1:String}>(${2:List.of(\"A\", \"B\")})",
+            "    .label(\"${3:Escolher}:\")",
+            "    .bindTo(${4:estado})$0"
+        ]
+    },
+    "bricks: Effect": {
+        "prefix": "beffect",
+        "scope": "java",
+        "description": "bricks: Effect",
+        "body": [
+            "private final Effect ${1:init} = effect(() -> {",
+            "    $0",
+            "}${2:, ${3:dependencia}});"
+        ]
+    },
+    "bricks: TextField": {
+        "prefix": "bfield",
+        "scope": "java",
+        "description": "bricks: TextField",
+        "body": [
+            "new TextField()",
+            "    .label(\"${1:Nome}:\")",
+            "    .placeholder(\"${2:...}\")",
+            "    .bindTo(${3:estado})$0"
+        ]
+    },
+    "bricks: Form": {
+        "prefix": "bform",
+        "scope": "java",
+        "description": "bricks: Form",
+        "body": [
+            "new Form()",
+            "    .gap(${1:12})",
+            "    .field(new TextField().label(\"${2:Nome}:\").bindTo(${3:vm.nome}), $3)",
+            "    $0",
+            "    .submitLabel(\"${4:Guardar}\")",
+            "    .onSubmit(() -> ${5:guardar()})"
+        ]
+    },
+    "bricks: Icon": {
+        "prefix": "bicon",
+        "scope": "java",
+        "description": "bricks: Icon",
+        "body": [
+            "new Icon(\"${1:fas-star}\").size(${2:16})$0"
+        ]
+    },
+    "bricks: DB insert": {
+        "prefix": "binsert",
+        "scope": "java",
+        "description": "bricks: DB insert",
+        "body": [
+            "int ${1:id} = DB.query()",
+            "    .insertInto(\"${2:tabela}\")",
+            "    .values(Map.of(${3:\"nome\", nome}))",
+            "    .execute();$0"
+        ]
+    },
+    "bricks: ItemsColumn": {
+        "prefix": "bitems",
+        "scope": "java",
+        "description": "bricks: ItemsColumn",
+        "body": [
+            "new ItemsColumn<${1:Item}>()",
+            "    .items(${2:itens})",
+            "    .gap(${3:8})",
+            "    .item(${4:i} -> ${5:new Text($4.toString())})",
+            "    .emptyState(new Text(\"${6:Sem resultados}\"))$0"
+        ]
+    },
+    "bricks: Modal.show": {
+        "prefix": "bmodal",
+        "scope": "java",
+        "description": "bricks: Modal.show",
+        "body": [
+            "Modal.show(${1:app}, \"${2:Titulo}\", modal ->",
+            "    new Column().gap(12).padding(16).children(",
+            "        $0,",
+            "        new Button(\"Fechar\").onClick(() -> modal.close())",
+            "    )",
+            ");"
+        ]
+    },
+    "bricks: module-info": {
+        "prefix": "bmodule",
+        "scope": "java",
+        "description": "bricks: module-info",
+        "body": [
+            "module ${1:com.exemplo} {",
+            "    requires fabiorodrigues.bricks;",
+            "    requires javafx.controls;",
+            "    requires javafx.graphics;",
+            "",
+            "    opens ${2:$1} to javafx.graphics;",
+            "    exports $2;$0",
+            "}"
+        ]
+    },
+    "bricks: navegar para scene": {
+        "prefix": "bnav",
+        "scope": "java",
+        "description": "bricks: navegar para scene",
+        "body": [
+            "app.navigateTo(new ${1:Outra}Scene(app));$0"
+        ]
+    },
+    "bricks: DB select": {
+        "prefix": "bquery",
+        "scope": "java",
+        "description": "bricks: DB select",
+        "body": [
+            "List<${1:Item}> ${2:lista} = DB.query()",
+            "    .select(${3:\"id\", \"nome\"})",
+            "    .from(\"${4:tabela}\")",
+            "    .where(\"${5:id}\", \"${6:=}\", ${7:valor})",
+            "    .orderBy(\"${8:nome}\", \"ASC\")",
+            "    .execute($1.class);$0"
+        ]
+    },
+    "bricks: Row": {
+        "prefix": "brow",
+        "scope": "java",
+        "description": "bricks: Row",
+        "body": [
+            "new Row()",
+            "    .gap(${1:8})",
+            "    .children(",
+            "        $0",
+            "    )"
+        ]
+    },
+    "bricks: classe BricksScene": {
+        "prefix": "bscene",
+        "scope": "java",
+        "description": "bricks: classe BricksScene",
+        "body": [
+            "public class ${TM_FILENAME_BASE} extends BricksScene {",
+            "",
+            "    public ${TM_FILENAME_BASE}(BricksApplication app) {",
+            "        super(app);",
+            "    }",
+            "",
+            "    @Override",
+            "    public Component render() {",
+            "        return new Column()",
+            "            .padding(${1:20})",
+            "            .gap(${2:12})",
+            "            .children(",
+            "                $0",
+            "            );",
+            "    }",
+            "}"
+        ]
+    },
+    "bricks: criar tabela": {
+        "prefix": "bschema",
+        "scope": "java",
+        "description": "bricks: criar tabela",
+        "body": [
+            "DB.query()",
+            "    .createTableIfNotExists(\"${1:tabela}\")",
+            "    .column(\"id\", ColumnType.ID)",
+            "    .column(\"${2:nome}\", ColumnType.${3:STRING}, \"${4:NOT NULL}\")$0",
+            "    .execute();"
+        ]
+    },
+    "bricks: StateList": {
+        "prefix": "bslist",
+        "scope": "java",
+        "description": "bricks: StateList",
+        "body": [
+            "private final StateList<${1:Item}> ${2:itens} = stateList(List.of());$0"
+        ]
+    },
+    "bricks: State": {
+        "prefix": "bstate",
+        "scope": "java",
+        "description": "bricks: State",
+        "body": [
+            "private final State<${1:String}> ${2:valor} = state(${3:\"\"});$0"
+        ]
+    },
+    "bricks: DataTable": {
+        "prefix": "btable",
+        "scope": "java",
+        "description": "bricks: DataTable",
+        "body": [
+            "new DataTable<${1:Item}>()",
+            "    .items(${2:itens})",
+            "    .searchable()",
+            "    .column(\"${3:Nome}\", $1::${4:nome})",
+            "    $0",
+            "    .actionColumn(new TableAction<$1>()",
+            "        .icon(\"fas-pencil\").tooltip(\"Editar\").onClick(${5:x} -> ${6:editar}($5)))",
+            "    .actionColumn(new TableAction<$1>()",
+            "        .icon(\"fas-trash\").tooltip(\"Apagar\").danger().onClick($5 -> ${7:apagar}($5)))"
+        ]
+    },
+    "bricks: Text": {
+        "prefix": "btext",
+        "scope": "java",
+        "description": "bricks: Text",
+        "body": [
+            "new Text(${1:\"texto\"})${2:.fontSize(${3:16})}$0"
+        ]
+    },
+    "bricks: Notification.toast": {
+        "prefix": "btoast",
+        "scope": "java",
+        "description": "bricks: Notification.toast",
+        "body": [
+            "Notification.toast(${1:app}, \"${2:Guardado!}\", NotificationType.${3|SUCCESS,INFO,WARNING,ERROR|});$0"
+        ]
+    },
+    "bricks: DB update": {
+        "prefix": "bupdate",
+        "scope": "java",
+        "description": "bricks: DB update",
+        "body": [
+            "DB.query()",
+            "    .update(\"${1:tabela}\")",
+            "    .set(Map.of(${2:\"nome\", nome}))",
+            "    .where(\"${3:id}\", \"=\", ${4:id})",
+            "    .execute();$0"
+        ]
+    },
+    "bricks: classe BricksViewModel": {
+        "prefix": "bvm",
+        "scope": "java",
+        "description": "bricks: classe BricksViewModel",
+        "body": [
+            "public class ${TM_FILENAME_BASE} extends BricksViewModel {",
+            "",
+            "    public final StateList<${1:Item}> ${2:itens} = stateList(List.of());",
+            "",
+            "    public void carregar() {",
+            "        List<$1> lista = DB.query()",
+            "            .from(\"${3:tabela}\")",
+            "            .execute($1.class);",
+            "        $2.clear();",
+            "        $2.addAll(lista);",
+            "    }$0",
+            "}"
+        ]
+    },
+    "bricks: ValidatedState": {
+        "prefix": "bvstate",
+        "scope": "java",
+        "description": "bricks: ValidatedState",
+        "body": [
+            "public final ValidatedState<${1:String}> ${2:nome} = validatedState(${3:\"\"})",
+            "    .required(\"${4:Campo obrigatorio}\")$0;"
+        ]
+    },
+    "bricks: When": {
+        "prefix": "bwhen",
+        "scope": "java",
+        "description": "bricks: When",
+        "body": [
+            "new When(${1:condicao}).then(",
+            "    $0",
+            ")"
+        ]
+    }
+}
