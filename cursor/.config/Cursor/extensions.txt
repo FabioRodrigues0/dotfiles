@@ -1,12 +1,14 @@
+anthropic.claude-code
 anysphere.remote-ssh
 beardedbear.beardedicons
 bearylabs.doom
 bearylabs.doom-workspace
 enkia.tokyo-night
 kahole.magit
+meta.pyrefly
+ms-python.python
 redhat.java
 vscjava.vscode-gradle
 vscjava.vscode-maven
 vscodevim.vim
 vspacecode.whichkey
-wayou.vscode-todo-highlight
