@@ -1,6 +1,7 @@
 onboarding = false
 
 [ui]
+status_indicators = "symbols"
 sidebar_width = 18
 sidebar_min_width = 14
 sidebar_max_width = 22
