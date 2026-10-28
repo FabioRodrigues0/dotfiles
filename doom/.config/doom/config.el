@@ -252,13 +252,16 @@
     (add-to-list 'eglot-server-programs
                  '((typst-ts-mode) . ("tinymist")))))
 
-;; So se troca para funcao quando um servidor arranca: no macOS o modulo cc faz
-;; add-to-list nesta variavel ao carregar o eglot e rebentava se ja fosse funcao.
-(defun fabio/eglot-use-workspace-configuration-h (_server)
-  (setq-default eglot-workspace-configuration
-                #'fabio/eglot-workspace-configuration))
-(add-hook 'eglot-server-initialized-hook
-          #'fabio/eglot-use-workspace-configuration-h)
+;; eglot-workspace-configuration fica sempre lista: no macOS o modulo cc faz
+;; add-to-list nela ao carregar o eglot e rebentava se fosse funcao (tambem
+;; no SPC h r r). A funcao so e usada enquanto o eglot le a configuracao.
+(defun fabio/eglot-workspace-configuration-a (fn server &rest args)
+  ;; E defvar-local e o eglot le-a num buffer temporario: mudar o default-value.
+  (cl-letf (((default-value 'eglot-workspace-configuration)
+             #'fabio/eglot-workspace-configuration))
+    (apply fn server args)))
+(advice-add 'eglot--workspace-configuration-plist
+            :around #'fabio/eglot-workspace-configuration-a)
 
 (defun fabio/eglot-workspace-configuration (server)
   "Settings para os servidores do eglot (Tinymist e jdtls)."
