@@ -250,9 +250,15 @@
 (after! eglot
   (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
-                 '((typst-ts-mode) . ("tinymist"))))
+                 '((typst-ts-mode) . ("tinymist")))))
+
+;; So se troca para funcao quando um servidor arranca: no macOS o modulo cc faz
+;; add-to-list nesta variavel ao carregar o eglot e rebentava se ja fosse funcao.
+(defun fabio/eglot-use-workspace-configuration-h (_server)
   (setq-default eglot-workspace-configuration
                 #'fabio/eglot-workspace-configuration))
+(add-hook 'eglot-server-initialized-hook
+          #'fabio/eglot-use-workspace-configuration-h)
 
 (defun fabio/eglot-workspace-configuration (server)
   "Settings para os servidores do eglot (Tinymist e jdtls)."
