@@ -467,7 +467,19 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
 
 ;; Listar cada ficheiro untracked em vez de so a pasta nova (como no lazygit).
 (after! magit
-  (setq magit-status-show-untracked-files 'all))
+  (setq magit-status-show-untracked-files 'all
+        ;; Realca as palavras que mudaram dentro de cada linha alterada.
+        magit-diff-refine-hunk 'all))
+
+;; O tokyo-night pinta o texto do diff da mesma cor do fundo e fica ilegivel.
+;; Texto na cor normal, so o fundo indica adicionado/removido (cores do tokyonight.nvim).
+(custom-set-faces!
+  '(magit-diff-added             :foreground "#a9b1d6" :background "#1d2b33" :weight normal :extend t)
+  '(magit-diff-added-highlight   :foreground "#c0caf5" :background "#20303b" :weight normal :extend t)
+  '(magit-diff-removed           :foreground "#a9b1d6" :background "#2e1f27" :weight normal :extend t)
+  '(magit-diff-removed-highlight :foreground "#c0caf5" :background "#37222c" :weight normal :extend t)
+  '(diff-refine-added            :foreground "#c0caf5" :background "#2c5a66" :inverse-video nil)
+  '(diff-refine-removed          :foreground "#c0caf5" :background "#713137" :inverse-video nil))
 
 ;; Fix x11 issues
 (setq x-no-window-manager t)
