@@ -478,7 +478,11 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
 (after! magit
   (setq magit-status-show-untracked-files 'all
         ;; Realca as palavras que mudaram dentro de cada linha alterada.
-        magit-diff-refine-hunk 'all))
+        magit-diff-refine-hunk 'all)
+  ;; Diff com o ficheiro todo como contexto, nao so 3 linhas a volta (- e 0 reduzem).
+  (dolist (mode '(magit-status-mode magit-diff-mode magit-revision-mode))
+    (put mode 'magit-diff-default-arguments
+         (append (get mode 'magit-diff-default-arguments) '("-U99999")))))
 
 ;; Cores de sintaxe no diff com o delta (brew install git-delta). Os fundos
 ;; +/- sao os do tokyonight.nvim; o delta nao tem tema tokyo-night, o Catppuccin
