@@ -480,8 +480,23 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
         ;; Realca as palavras que mudaram dentro de cada linha alterada.
         magit-diff-refine-hunk 'all))
 
-;; O tokyo-night pinta o texto do diff da mesma cor do fundo e fica ilegivel.
-;; Texto na cor normal, so o fundo indica adicionado/removido (cores do tokyonight.nvim).
+;; Cores de sintaxe no diff com o delta (brew install git-delta). Os fundos
+;; +/- sao os do tokyonight.nvim; o delta nao tem tema tokyo-night, o Catppuccin
+;; Mocha e o mais parecido.
+(use-package! magit-delta
+  :when (executable-find "delta")
+  :hook (magit-mode . magit-delta-mode)
+  :config
+  (setq magit-delta-default-dark-theme "Catppuccin Mocha"
+        magit-delta-delta-args
+        (append magit-delta-delta-args
+                '("--plus-style" "syntax #20303b"
+                  "--minus-style" "syntax #37222c"
+                  "--plus-emph-style" "syntax #2c5a66"
+                  "--minus-emph-style" "syntax #713137"))))
+
+;; Sem delta: texto na cor normal e so o fundo indica adicionado/removido
+;; (o tokyo-night pinta o texto da mesma cor do fundo e fica ilegivel).
 (custom-set-faces!
   '(magit-diff-added             :foreground "#a9b1d6" :background "#1d2b33" :weight normal :extend t)
   '(magit-diff-added-highlight   :foreground "#c0caf5" :background "#20303b" :weight normal :extend t)

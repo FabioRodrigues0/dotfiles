@@ -72,3 +72,4 @@
 (package! eldoc-box)
 (package! impatient-mode)
 (package! flyover)
+(package! magit-delta)
