@@ -465,6 +465,10 @@ Keep `typst-ts-mode' smart list behavior at end of list items, but use
 ;; Version control optimization
 (setq vc-handled-backends '(Git))
 
+;; Listar cada ficheiro untracked em vez de so a pasta nova (como no lazygit).
+(after! magit
+  (setq magit-status-show-untracked-files 'all))
+
 ;; Fix x11 issues
 (setq x-no-window-manager t)
 (setq frame-inhibit-implied-resize t)
