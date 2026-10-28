@@ -44,6 +44,9 @@ typst-preview (`config.el`).
 
 Instalados para o doctor: `coreutils` (gls para o dired/dirvish).
 
+Para o magit: `git-delta` (cores de sintaxe nos diffs, via `magit-delta`; sem
+ele o `config.el` não ativa o modo e o diff fica só com fundos +/-).
+
 No Linux (brew): `fd`.
 
 ## Ortografia (português + inglês)
