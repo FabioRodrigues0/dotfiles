@@ -1,11 +1,10 @@
-function abrir --description "Abre uma pasta numa sessão própria do herdr (3 tabs, a 3ª já com o lazygit)"
+function abrir --description "Abre uma pasta numa sessão própria do herdr (emacs, shell, lazygit)"
     if contains -- --help $argv; or contains -- -h $argv
         echo "Uso: abrir [pasta]"
         echo ""
         echo "Cada pasta tem a sua sessão no herdr, por isso só vês esse projeto."
         echo "Se a sessão já existir, entra nela (se estava parada, o herdr repõe"
-        echo "as tabs). Se não existir, cria-a com 3 tabs: as duas primeiras só"
-        echo "com a shell na pasta e a terceira já com o lazygit aberto."
+        echo "as tabs). Se não existir, cria-a com 3 tabs: Emacs, shell e lazygit."
         echo "Para escolher entre as sessões que já tens: sessoes"
         return 0
     end
@@ -27,6 +26,12 @@ function abrir --description "Abre uma pasta numa sessão própria do herdr (3 t
         end
     end
 
+    # emacs / Emacs.app (macOS) — o binário no PATH costuma chamar-se igual nos dois
+    set -l emacs_bin emacs
+    if not command -q emacs; and test -x /Applications/Emacs.app/Contents/MacOS/Emacs
+        set emacs_bin /Applications/Emacs.app/Contents/MacOS/Emacs
+    end
+
     if not herdr session list --json | jq -e --arg s $sessao '.sessions[] | select(.name == $s)' >/dev/null
         command herdr --session $sessao server >/dev/null 2>&1 &
         disown
@@ -40,8 +45,12 @@ function abrir --description "Abre uma pasta numa sessão própria do herdr (3 t
             end
         end
 
-        set -l ws (herdr --session $sessao workspace create --cwd $pasta --label $nome --focus | jq -r .result.workspace.workspace_id)
+        set -l created (herdr --session $sessao workspace create --cwd $pasta --label $nome --focus)
         or return 1
+        set -l ws (echo $created | jq -r .result.workspace.workspace_id)
+        set -l emacs_pane (echo $created | jq -r .result.root_pane.pane_id)
+        herdr --session $sessao pane run $emacs_pane $emacs_bin -nw . >/dev/null
+
         herdr --session $sessao tab create --workspace $ws --cwd $pasta --no-focus >/dev/null
         set -l git (herdr --session $sessao tab create --workspace $ws --cwd $pasta --label git --no-focus | jq -r .result.root_pane.pane_id)
         herdr --session $sessao pane run $git lazygit >/dev/null
