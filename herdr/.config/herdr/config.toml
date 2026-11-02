@@ -6,11 +6,12 @@ sidebar_width = 18
 sidebar_min_width = 14
 sidebar_max_width = 22
 
+status_indicators = "symbols"
 [ui.sound]
 enabled = false
 
 [theme]
-name = "vesper"
+name = "tokyo-night"
 auto_switch = false
 
 # Atalhos diretos sem prefix: alt+... no Linux, cmd+... no Mac.
