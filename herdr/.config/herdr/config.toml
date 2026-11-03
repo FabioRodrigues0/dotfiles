@@ -2,11 +2,10 @@ onboarding = false
 
 [ui]
 status_indicators = "symbols"
-sidebar_width = 18
-sidebar_min_width = 14
-sidebar_max_width = 22
+sidebar_width = 16
+sidebar_min_width = 12
+sidebar_max_width = 20
 
-status_indicators = "symbols"
 [ui.sound]
 enabled = false
 
