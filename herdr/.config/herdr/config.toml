@@ -13,10 +13,14 @@ enabled = false
 name = "tokyo-night"
 auto_switch = false
 
+[experimental]
+allow_nested = true
+
 # Atalhos diretos sem prefix: alt+... no Linux, cmd+... no Mac.
 # Prefix nao pode ser desligado; ctrl+f12 para nunca ser usado (prefix+? mostra tudo).
 [keys]
 prefix = "ctrl+f12"
+detach = ["alt+shift+q", "cmd+shift+q"]
 new_tab = ["alt+t", "cmd+t"]
 close_pane = ["alt+w", "cmd+w"]
 close_tab = ["alt+shift+w", "cmd+shift+w"]
@@ -36,3 +40,19 @@ resize_mode = ["alt+r", "cmd+r"]
 
 goto = ["alt+g", "cmd+g"]
 toggle_sidebar = ["alt+b", "cmd+b"]
+
+# Janela flutuante (popup) para abrir sessões existentes
+[[keys.command]]
+key = ["alt+s", "cmd+s"]
+type = "popup"
+command = "fish -c sessoes"
+width = "90%"
+height = "85%"
+
+# Janela flutuante (popup) para abrir sessão num caminho à escolha
+[[keys.command]]
+key = ["alt+o", "cmd+o", "alt+a", "cmd+a"]
+type = "popup"
+command = "fish -c abrir-escolher"
+width = "90%"
+height = "85%"

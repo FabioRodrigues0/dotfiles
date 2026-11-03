@@ -8,6 +8,7 @@ function sessoes --description "Escolhe com o fzf uma sessão do herdr para abri
         return 0
     end
 
+    set -l home_real (path resolve "$HOME")
     set -l linhas
     for s in (herdr session list --json | jq -r '.sessions[] | "\(.name)\t\(.running)\t\(.session_dir)\t\(.default)"')
         set -l campos (string split \t -- $s)
@@ -20,20 +21,16 @@ function sessoes --description "Escolhe com o fzf uma sessão do herdr para abri
             continue
         end
         set -l cwd (jq -r '.workspaces[0].identity_cwd // "?"' $campos[3]/session.json 2>/dev/null; or echo "?")
-        set -a linhas (printf '%s\t%s\t%s' $campos[1] $estado (string replace -r "^$HOME" '~' -- $cwd))
+        set -a linhas (printf '%s\t%s\t%s' $campos[1] $estado (string replace -r "^($HOME|$home_real)" '~' -- $cwd))
     end
     if test (count $linhas) -eq 0
         echo "Ainda não tens sessões. Cria uma com: abrir [pasta]"
         return 1
     end
 
-    set -l escolha (printf '%s\n' $linhas | column -t -s \t | fzf --prompt "sessão> " --height 40% --reverse)
+    set -l escolha (printf '%s\n' $linhas | column -t -s \t | fzf --prompt "sessão > " --height 100% --reverse)
     or return 0
     set -l sessao (string split -f1 ' ' -- $escolha)
 
-    if test "$HERDR_ENV" = 1
-        echo "Sai desta sessão (detach) e corre: herdr --session $sessao"
-        return 0
-    end
-    herdr --session $sessao
+    env -u HERDR_ENV herdr session attach $sessao
 end

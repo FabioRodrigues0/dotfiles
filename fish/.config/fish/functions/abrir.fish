@@ -56,9 +56,5 @@ function abrir --description "Abre uma pasta numa sessão própria do herdr (ema
         herdr --session $sessao pane run $git lazygit >/dev/null
     end
 
-    if test "$HERDR_ENV" = 1
-        echo "Sessão $sessao pronta. Sai desta (detach) e corre: herdr --session $sessao"
-        return 0
-    end
-    herdr --session $sessao
+    env -u HERDR_ENV herdr session attach $sessao
 end

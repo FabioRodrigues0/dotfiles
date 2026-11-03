@@ -61,3 +61,7 @@ keybind = super+shift+enter=unbind
 keybind = super+r=unbind
 keybind = super+g=unbind
 keybind = super+b=unbind
+keybind = super+s=unbind
+keybind = super+o=unbind
+keybind = super+a=unbind
+keybind = super+shift+q=unbind
