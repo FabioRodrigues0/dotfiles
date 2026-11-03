@@ -5,8 +5,7 @@ font-feature = "calt"
 font-feature = "liga"
 font-feature = "dlig"
 
-background = 131410
-foreground = bcb6ba
+theme = TokyoNight
 
 # Libertar teclas usadas pelo herdr (alt+... no Linux, cmd+... no Mac)
 keybind = alt+digit_1=unbind
