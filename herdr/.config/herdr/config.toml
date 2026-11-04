@@ -21,7 +21,9 @@ allow_nested = true
 [keys]
 prefix = "ctrl+f12"
 detach = ["alt+shift+q", "cmd+shift+q"]
-new_tab = ["alt+t", "cmd+t"]
+# Tabs são do Ghostty (super+t = nova sessão). No herdr não há atalho p/ nova tab:
+# se precisares de uma tab dentro da sessão, crias à mão (rato).
+new_tab = []
 close_pane = ["alt+w", "cmd+w"]
 close_tab = ["alt+shift+w", "cmd+shift+w"]
 next_tab = ["alt+n", "cmd+shift+]", "cmd+}"]
@@ -41,18 +43,6 @@ resize_mode = ["alt+r", "cmd+r"]
 goto = ["alt+g", "cmd+g"]
 toggle_sidebar = ["alt+b", "cmd+b"]
 
-# Janela flutuante (popup) para abrir sessões existentes
-[[keys.command]]
-key = ["alt+s", "cmd+s"]
-type = "popup"
-command = "fish -c sessoes"
-width = "90%"
-height = "85%"
-
-# Janela flutuante (popup) para abrir sessão num caminho à escolha
-[[keys.command]]
-key = ["alt+o", "cmd+o", "alt+a", "cmd+a"]
-type = "popup"
-command = "fish -c abrir-escolher"
-width = "90%"
-height = "85%"
+# Sessões = tabs do Ghostty (uma sessão por tab), não atalhos do herdr: o herdr não
+# troca de servidor sem aninhar. Trocar/criar sessões faz-se pelo Ghostty (alt+t nova,
+# alt+o overview, alt+shift+setas) + fish `abrir`/`sessoes`. alt+s/alt+a livres aqui.
