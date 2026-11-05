@@ -8,6 +8,7 @@
 (load! "lisp/java-bricks")
 (load! "lisp/novo-ficheiro")
 (load! "lisp/projetos")
+(load! "lisp/sessoes")
 (load! "lisp/navegar-indentacao")
 (load! "lisp/diagnosticos")
 ;;

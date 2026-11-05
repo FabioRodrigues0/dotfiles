@@ -7,6 +7,7 @@
 | New > Java Class… | `SPC f n`: tipo de ficheiro conforme o projeto, nome, pasta sugerida | `lisp/novo-ficheiro.el` |
 | Open project (lista automática) | `SPC p p` e o dashboard descobrem os projetos sozinhos | `lisp/projetos.el` |
 | Generate (Alt+Insert) | `SPC c g` em Java: getters/setters, toString, equals/hashCode, construtores, override/implementar métodos | `lisp/java-gerar.el` |
+| Sessões à herdr (projeto + tabs de AI) | `SPC a s` sessões, `M-1..9` tabs, `SPC a t` nova tab (terminal/claude/codex), `SPC a k` parar; dashboard lista-as | `lisp/sessoes.el` |
 | Optimize imports | Ao gravar um `.java` (e `SPC c o` à mão) | `lisp/java-gerar.el` |
 
 ## Já existe no Doom (só saber a tecla)
