@@ -41,7 +41,13 @@ Funções fish: `fish/.config/fish/functions/{abrir,sessoes,abrir-escolher}.fish
 
 ## Para testar depois
 
-- (a definir — vamos experimentar outra abordagem numa próxima sessão)
+- **Alternativa no Emacs** (`doom/.config/doom/lisp/sessoes.el`): cada projeto é um
+  workspace do Doom (sessão) com tabs próprias (tab-bar): 1 = código, 2 = terminal
+  para arrancar a AI; `M-1..M-9` trocam de tab, `SPC a t` abre mais (terminal/claude/
+  codex, várias AIs ao mesmo tempo). Sessões gravadas e restauradas com as tabs; cada
+  claude retoma a sua conversa (`--session-id`/`--resume`), um claude arrancado à mão
+  volta com `--continue`. Listadas no dashboard; `SPC a k` para a sessão e liberta a
+  RAM. Testar no dia-a-dia e comparar.
 
 ## Notas / limitações
 
