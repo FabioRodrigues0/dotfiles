@@ -220,6 +220,16 @@
 (add-hook 'kotlin-mode-hook #'fabio/use-spotless-formatting-h)
 (add-hook 'kotlin-ts-mode-hook #'fabio/use-spotless-formatting-h)
 
+;; JetBrains Kotlin LSP (K2, IntelliJ-based) em vez do kotlin-language-server
+;; da comunidade. Server extraído da extensão "Kotlin by JetBrains" do Cursor
+;; para ~/.local/share/kotlin-lsp; wrapper em ~/.local/bin/kotlin-lsp trata do
+;; --stdio e do --eula. add-to-list prepende => tem prioridade sobre o default
+;; do módulo (kotlin +lsp). Precisa de projeto JVM Gradle/Maven (alpha).
+(after! eglot
+  (add-to-list 'eglot-server-programs
+               `((kotlin-ts-mode kotlin-mode)
+                 . (,(expand-file-name "~/.local/bin/kotlin-lsp")))))
+
 ;; Remapeamento KLÇO em vez de HJKL
 (map! :n "k" #'evil-backward-char
       :n "l" #'evil-next-line
