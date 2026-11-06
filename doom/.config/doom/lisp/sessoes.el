@@ -268,9 +268,10 @@ Ve os processos filhos da shell, para apanhar tambem uma AI arrancada a mao."
       (format "Vai para a tab %d." n))))
 
 (defun fabio/tab--ao-entrar-h (&rest _)
-  "Ao entrar numa tab de terminal, fica logo pronto a escrever."
+  "Ao entrar numa tab de terminal, fica logo pronto a escrever e limpa o ponto."
   (let ((buf (window-buffer)))
     (when (buffer-local-value 'fabio/term-sessao buf)
+      (fabio/term-estado-definir nil buf)
       (fabio/term--insert-quando-pronto buf))))
 
 ;;; Gravar/restaurar as tabs
@@ -471,13 +472,73 @@ Ve os processos filhos da shell, para apanhar tambem uma AI arrancada a mao."
          (nome (fabio/sessao--ler-nome "Sessao: ")))
     (fabio/sessao-abrir (plist-get (cdr (assoc nome sessoes)) :root))))
 
+;;; Estado do agente na tab (como o herdr)
+
+;; Um ponto colorido ao lado da tab mostra o estado da AI dessa tab sem ter de la
+;; entrar: amarelo a correr, vermelho precisa de permissao/input, verde terminou.
+;; Como o ghostel nao ve a campainha, e a propria AI que anuncia o estado: os hooks
+;; do Claude Code (~/.claude/settings.json, guardados por GHOSTEL=1) escrevem um
+;; `OSC 9 ghostel-status:ESTADO' para o /dev/tty, que o ghostel entrega aqui via
+;; `ghostel-notification-function'. O ponto limpa-se ao entrar na tab.
+
+;; A shell do terminal fica com GHOSTEL=1, para os hooks so dispararem aqui dentro
+;; (no Ghostty normal a variavel nao existe e nao se emite nada).
+(with-eval-after-load 'ghostel
+  (add-to-list 'ghostel-environment "GHOSTEL=1"))
+
+(defvar-local fabio/term-estado nil
+  "Estado da AI no terminal: `correr', `atencao', `feito' ou nil.")
+(put 'fabio/term-estado 'permanent-local t)
+
+(defconst fabio/term-estado-cores
+  '((correr  . "#e0af68")               ; amarelo
+    (atencao . "#f7768e")               ; vermelho
+    (feito   . "#9ece6a"))              ; verde (TokyoNight)
+  "Cor do ponto por estado.")
+
+(defun fabio/term--redesenhar-tabs ()
+  (when (fboundp 'tab-bar--update-tab-bar-lines)
+    (tab-bar--update-tab-bar-lines t))
+  (force-mode-line-update t))
+
+(defun fabio/term-estado-definir (estado &optional buf)
+  "Marca ESTADO no terminal BUF (por defeito o atual) e redesenha a tab-bar.
+Nao faz nada se o estado ja for esse."
+  (with-current-buffer (or buf (current-buffer))
+    (unless (eq fabio/term-estado estado)
+      (setq fabio/term-estado estado)
+      (fabio/term--redesenhar-tabs))))
+
+(defun fabio/term-notificacao (title body)
+  "Handler de OSC 9. BODY \"ghostel-status:ESTADO\" pinta a tab; o resto segue
+para a notificacao normal do ghostel."
+  (if (and (stringp body) (string-prefix-p "ghostel-status:" body))
+      (let ((e (intern (substring body (length "ghostel-status:")))))
+        (fabio/term-estado-definir (and (assq e fabio/term-estado-cores) e)))
+    (ghostel-default-notify title body)))
+
+(with-eval-after-load 'ghostel
+  (setq ghostel-notification-function #'fabio/term-notificacao))
+
+(defun fabio/tab--formato (tab i)
+  "Formato da tab com um ponto colorido se o terminal dela tiver estado.
+Nao mostra na tab selecionada (ja se esta a ve-la)."
+  (let ((base (tab-bar-tab-name-format-default tab i)))
+    (if-let* (((not (eq (car tab) 'current-tab)))
+              (buf (fabio/term--da-tab (fabio/sessao-atual) (alist-get 'name tab)))
+              (estado (buffer-local-value 'fabio/term-estado buf))
+              (cor (alist-get estado fabio/term-estado-cores)))
+        (concat base (propertize " ●" 'face (list :foreground cor)))
+      base)))
+
 ;;; Ligacoes ao Doom
 
 (setq tab-bar-show 1                    ; so com 2+ tabs
       tab-bar-tab-hints t               ; numero antes do nome (M-N)
       tab-bar-close-button-show nil
       tab-bar-new-button-show nil
-      tab-bar-new-tab-choice t)
+      tab-bar-new-tab-choice t
+      tab-bar-tab-name-format-function #'fabio/tab--formato)
 
 (after! persp-mode
   ;; Depois do persp-mode: a ligacao do Doom (tabs por workspace) e feita
@@ -505,7 +566,14 @@ Ve os processos filhos da shell, para apanhar tambem uma AI arrancada a mao."
                              fabio/tab-teclas)))
     (when novas
       (customize-set-variable 'ghostel-keymap-exceptions
-                              (append novas ghostel-keymap-exceptions)))))
+                              (append novas ghostel-keymap-exceptions))))
+  ;; Cmd+C / Cmd+V no terminal, como no Ghostty. O s-v tem de ir pelo
+  ;; `ghostel-paste' (bracketed paste para o processo); o `yank' normal so
+  ;; escreveria no buffer do render, sem chegar ao programa. O `ghostel-paste'
+  ;; le de `current-kill', por isso apanha o clipboard do sistema na mesma.
+  (map! :map ghostel-mode-map
+        "s-v" #'ghostel-paste
+        "s-c" #'kill-ring-save))
 
 ;; Descarregar o modulo nativo do ghostel sem perguntar (nao ha zig).
 (setq ghostel-module-auto-install 'download)
