@@ -531,6 +531,44 @@ Nao mostra na tab selecionada (ja se esta a ve-la)."
         (concat base (propertize " ●" 'face (list :foreground cor)))
       base)))
 
+;;; Indicador do modo evil no terminal
+
+;; O modulo ghostel do Doom esconde o modeline (`mode-line-invisible-mode'). Num
+;; terminal modal isso tira a unica pista do estado do evil, por isso tiramos
+;; esse hook e metemos um modeline minimo (em baixo) so com o modo e o nome da
+;; tab: verde = insert (a escrever, teclas vao p/ o programa), laranja = normal
+;; (teclas = Emacs, SPC = leader). Redesenha-se a cada tecla, por isso segue o
+;; estado.
+
+(defface fabio/term-modo-insert
+  '((t :foreground "#1a1b26" :background "#9ece6a" :weight bold))
+  "Indicador do terminal em insert (a escrever).")
+
+(defface fabio/term-modo-normal
+  '((t :foreground "#1a1b26" :background "#e0af68" :weight bold))
+  "Indicador do terminal em normal (SPC = leader).")
+
+(defun fabio/term--indicador ()
+  "Chip colorido com o modo evil atual, para o modeline do terminal."
+  (if (not (bound-and-true-p evil-local-mode))
+      ""
+    (pcase evil-state
+      ('insert (propertize " INSERT " 'face 'fabio/term-modo-insert))
+      ('normal (propertize " NORMAL " 'face 'fabio/term-modo-normal))
+      (s (propertize (format " %s " (upcase (symbol-name (or s 'emacs))))
+                     'face 'fabio/term-modo-normal)))))
+
+(defun fabio/term--modeline-h ()
+  "Modeline minimo com o modo evil e o nome da tab no terminal."
+  (setq-local mode-line-format
+              '((:eval (fabio/term--indicador))
+                "  " (:eval (or fabio/term-tab "")))))
+
+;; O Doom esconde o modeline pelo ghostel-mode-hook; tiramos esse hook e metemos
+;; o nosso (APPEND, para correr depois de tudo o resto do arranque do buffer).
+(remove-hook 'ghostel-mode-hook #'mode-line-invisible-mode)
+(add-hook 'ghostel-mode-hook #'fabio/term--modeline-h t)
+
 ;;; Ligacoes ao Doom
 
 (setq tab-bar-show 1                    ; so com 2+ tabs
@@ -577,6 +615,13 @@ Nao mostra na tab selecionada (ja se esta a ve-la)."
 
 ;; Descarregar o modulo nativo do ghostel sem perguntar (nao ha zig).
 (setq ghostel-module-auto-install 'download)
+
+;; Sair para normal (SPC = leader) com UMA tecla, mesmo dentro de uma app
+;; alt-screen como o Claude, onde o ESC fica reservado para a app. O
+;; evil-ghostel-mode-map e um keymap de minor-mode, por isso ganha ao terminal
+;; em qualquer estado/modo. (C-c <escape> faz o mesmo, mas em dois passos.)
+(after! evil-ghostel
+  (define-key evil-ghostel-mode-map (kbd "C-<escape>") #'evil-force-normal-state))
 
 ;; M-N = tab N (no lugar dos workspaces do Doom, que ficam em SPC TAB).
 ;; No terminal chegam ao Emacs pelas excecoes do ghostel acima.
