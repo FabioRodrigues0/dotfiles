@@ -560,6 +560,7 @@ Nao mostra na tab selecionada (ja se esta a ve-la)."
 
 (defun fabio/term--modeline-h ()
   "Modeline minimo com o modo evil e o nome da tab no terminal."
+  (setq-local header-line-format nil)   ; limpa a versao antiga (era em cima)
   (setq-local mode-line-format
               '((:eval (fabio/term--indicador))
                 "  " (:eval (or fabio/term-tab "")))))
@@ -567,6 +568,9 @@ Nao mostra na tab selecionada (ja se esta a ve-la)."
 ;; O Doom esconde o modeline pelo ghostel-mode-hook; tiramos esse hook e metemos
 ;; o nosso (APPEND, para correr depois de tudo o resto do arranque do buffer).
 (remove-hook 'ghostel-mode-hook #'mode-line-invisible-mode)
+;; Versao antiga punha o indicador num header-line (em cima); num `doom/reload'
+;; esse hook fica registado na mesma, por isso removemo-lo explicitamente.
+(remove-hook 'ghostel-mode-hook #'fabio/term--por-indicador-h)
 (add-hook 'ghostel-mode-hook #'fabio/term--modeline-h t)
 
 ;;; Ligacoes ao Doom
