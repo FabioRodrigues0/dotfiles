@@ -23,18 +23,40 @@
     (and (file-directory-p d)
          (directory-files d nil fabio/projeto-marcador-re t 1)))
 
+  ;; Projeto adicionado a mao (SPC p a): o projectile guarda o caminho em
+  ;; `projectile-known-projects', mas a RAIZ e recalculada a cada abertura a
+  ;; partir do ficheiro (bottom-up), e a lista nao conta para esse calculo. Por
+  ;; isso dentro da Faculdade caia sempre no .git de topo e nao na pasta que
+  ;; adicionei. Isto reconhece a pasta adicionada (ou uma com .projectile) como
+  ;; raiz tambem, nao so as que tem marcador de build.
+  (defun fabio/projeto-conhecido-p (d)
+    "Pasta D esta na lista `projectile-known-projects'?"
+    (and (bound-and-true-p projectile-known-projects)
+         (let ((dt (file-truename (file-name-as-directory (expand-file-name d)))))
+           (seq-some (lambda (p)
+                       (string= dt (file-truename
+                                    (file-name-as-directory (expand-file-name p)))))
+                     projectile-known-projects))))
+
+  (defun fabio/projeto-raiz-p (d)
+    "D e raiz de projeto: marcador de build, .projectile, ou projeto conhecido."
+    (and (file-directory-p d)
+         (or (fabio/projeto-marcado-p d)
+             (file-exists-p (expand-file-name ".projectile" d))
+             (fabio/projeto-conhecido-p d))))
+
   ;; A Faculdade toda e UM repo git (~/Documents/Faculdade/.git). O projectile
   ;; resolve a raiz por VCS (bottom-up) ANTES dos root-files, por isso qualquer
   ;; projeto la dentro (ex.: PDI/PdI_GrupoX) resolvia para a Faculdade e o pom.xml
   ;; nunca contava. Aqui, dentro da Faculdade, a raiz e a pasta do proprio projeto
-  ;; (pom.xml / build.gradle / main.py / *.csproj / *.sln), nao o git de topo.
+  ;; (marcador de build, .projectile, ou pasta adicionada a mao), nao o git de topo.
   ;; file-truename nos dois lados: /home e /var/home (symlink) tem de bater certo.
   ;; Prepende (corre primeiro); fora da Faculdade devolve nil e segue o normal.
   (defun fabio/projectile-root-faculdade (dir)
     (let ((fac (file-truename (expand-file-name "~/Documents/Faculdade/")))
           (d   (file-name-as-directory (file-truename (expand-file-name dir)))))
       (when (string-prefix-p fac d)
-        (locate-dominating-file dir #'fabio/projeto-marcado-p))))
+        (locate-dominating-file dir #'fabio/projeto-raiz-p))))
   (add-to-list 'projectile-project-root-functions #'fabio/projectile-root-faculdade)
 
   ;; (pasta . profundidade): o projectile so olha exatamente a essa profundidade,
