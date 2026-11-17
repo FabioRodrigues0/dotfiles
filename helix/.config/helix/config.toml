@@ -1,4 +1,4 @@
-theme = "hex_lavender_dark"
+theme = "base16_transparent"
 
 [editor]
 line-number = "absolute"
@@ -39,9 +39,6 @@ C-f = [":new", ":insert-output fish -c 'yazi --chooser-file /tmp/hx-yazi-chosen'
 C-r = [":sh ghostty -e fish -c \"cd '$(pwd)'; correr; echo ''; echo 'Pressiona Enter para fechar...'; read\" &"]
 C-t = ":lsp-workspace-command tinymist.startDefaultPreview"
 
-
-[keys.normal.space]
-z = ":sh emacs %val{filename} &"
 
 [keys.select]
 k = "move_char_left"

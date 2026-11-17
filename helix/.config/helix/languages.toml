@@ -33,3 +33,26 @@ roots = ["pom.xml", "build.gradle", "build.gradle.kts", ".git"]
 indent = { tab-width = 4, unit = "    " }
 language-servers = ["jdtls"]
 auto-format = true
+
+# ---------- Python (ty + ruff) ----------
+# ty (Astral) para type-checking/navegação; ruff como LSP para lint e formatação.
+[language-server.ruff]
+command = "ruff"
+args = ["server"]
+
+[[language]]
+name = "python"
+language-servers = ["ty", "ruff"]
+auto-format = true
+
+# ---------- SQL (sql-language-server) ----------
+[language-server.sql-language-server]
+command = "sql-language-server"
+args = ["up", "--method", "stdio"]
+
+[[language]]
+name = "sql"
+language-servers = ["sql-language-server"]
+
+# php, javascript e html usam os defaults do Helix (intelephense,
+# typescript-language-server, vscode-html-language-server) — basta o binário no PATH.
