@@ -34,6 +34,19 @@ indent = { tab-width = 4, unit = "    " }
 language-servers = ["jdtls"]
 auto-format = true
 
+# ---------- Kotlin (JetBrains Kotlin LSP) ----------
+# Server oficial da JetBrains (bundle da extensão "Kotlin by JetBrains" do Cursor),
+# melhor que o kotlin-language-server (fwcd) default. Instalado em
+# ~/.local/share/kotlin-lsp/current, lançado pelo wrapper ~/.local/bin/kotlin-lsp.
+[language-server.kotlin-lsp]
+command = "kotlin-lsp"
+args = ["--stdio"]
+
+[[language]]
+name = "kotlin"
+language-servers = ["kotlin-lsp"]
+auto-format = true
+
 # ---------- Python (ty + ruff) ----------
 # ty (Astral) para type-checking/navegação; ruff como LSP para lint e formatação.
 [language-server.ruff]
