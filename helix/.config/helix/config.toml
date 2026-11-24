@@ -38,6 +38,7 @@ C-g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
 C-f = [":new", ":insert-output fish -c 'yazi --chooser-file /tmp/hx-yazi-chosen'", ":buffer-close!", ":redraw", ":open %sh{cat /tmp/hx-yazi-chosen 2>/dev/null}"]
 C-r = [":sh ghostty -e fish -c \"cd '$(pwd)'; correr; echo ''; echo 'Pressiona Enter para fechar...'; read\" &"]
 C-t = ":lsp-workspace-command tinymist.startDefaultPreview"
+C-a = [":sh fish -c 'herdr-enviar ref %{buffer_name} %{cursor_line}'"]
 
 
 [keys.select]
@@ -45,6 +46,7 @@ k = "move_char_left"
 l = "move_line_down"
 "ç" = "move_char_right"
 o = "move_line_up"
+C-a = [":pipe-to fish -c 'herdr-enviar comment %{buffer_name} %{cursor_line}'"]
 
 [editor.lsp]
 display-inlay-hints = true

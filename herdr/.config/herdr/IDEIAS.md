@@ -31,7 +31,15 @@ Em `alt` (não super, que o Fabio não ajeita) e só em combinações que o herd
 em `alt+t` → desligado (`new_tab = []`), senão criava uma tab do herdr em vez da do Ghostty.
 
 Nova sessão: `alt+t` → `abrir <pasta>` (cria) ou `sessoes` (fzf escolhe existente).
-Funções fish: `fish/.config/fish/functions/{abrir,sessoes,abrir-escolher}.fish`.
+Funções fish: `fish/.config/fish/functions/{abrir,sessoes,abrir-escolher,abrir-hx,agente-ficheiros}.fish`.
+
+### Integração Helix + Herdr (alternativa ao herdr-nvim)
+
+- `abrir-hx [ficheiro]`: abre uma nova tab no Herdr no caminho atual a correr `hx`.
+- `agente-ficheiros`: picker fzf dos ficheiros tocados pelo agente/git; abre no `hx` em nova tab.
+- Dentro do Helix (`Ctrl+a`):
+  - No modo normal: envia `caminho:linha` para a consola do agente (`herdr-enviar ref`).
+  - No modo de seleção: envia o bloco de código selecionado para o agente responder (`herdr-enviar comment`).
 
 ### Plugins herdr-fold
 

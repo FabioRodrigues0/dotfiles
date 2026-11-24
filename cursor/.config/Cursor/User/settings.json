@@ -194,5 +194,7 @@
     },
     "git.openRepositoryInParentFolders": "always",
     "claudeCode.preferredLocation": "panel",
-    "claudeCode.hideOnboarding": true
+    "claudeCode.hideOnboarding": true,
+    "intellij.region": "europe",
+    "intellij.dataSharing": "full"
 }
